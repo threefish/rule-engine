@@ -1,4 +1,4 @@
-package com.myflow.model;
+package com.myflow.definition.model;
 
 import lombok.Data;
 
@@ -8,4 +8,10 @@ import lombok.Data;
  */
 @Data
 public class EndNode extends Node {
+
+    @Override
+    protected NodeType getType() {
+        return NodeType.EndNode;
+    }
+
 }
