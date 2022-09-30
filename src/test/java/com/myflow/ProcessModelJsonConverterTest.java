@@ -5,10 +5,13 @@ import com.myflow.definition.model.ProcessModel;
 import com.myflow.definition.model.SequenceConnNode;
 import com.myflow.definition.model.StartNode;
 import com.myflow.definition.model.activity.FunctionActivityNode;
-import com.myflow.definition.parse.ProcessModelJsonConverter;
+import com.myflow.definition.parse.ProcessModelParse;
+import com.myflow.definition.validator.ErrorNodeMsg;
+import com.myflow.definition.validator.ProcessModelValidator;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -16,7 +19,7 @@ import java.util.Arrays;
  */
 public class ProcessModelJsonConverterTest {
 
-    private static final ProcessModelJsonConverter PROCESS_MODEL_JSON_CONVERTER = new ProcessModelJsonConverter();
+    private static final ProcessModelParse PROCESS_MODEL_JSON_CONVERTER = new ProcessModelParse();
 
     @Test
     void convertToJson() {
@@ -53,7 +56,7 @@ public class ProcessModelJsonConverterTest {
         f1_to_end.setSourceNodeKey("f1");
         f1_to_end.setTargetNodeKey("end");
 
-        processModel.setChildNodes(Arrays.asList(startNode, endNode,fun1, f1_to_end, f1_to_end));
+        processModel.setChildNodes(Arrays.asList(startNode, endNode, fun1, f1_to_end, f1_to_end));
 
         String json = PROCESS_MODEL_JSON_CONVERTER.convertToJson(processModel);
 
@@ -63,11 +66,138 @@ public class ProcessModelJsonConverterTest {
 
     @Test
     void convertToModel() {
-        String json = "{\"childNodes\":[{\"outgoingNodes\":[],\"incomingNodes\":[],\"type\":\"StartNode\",\"executionListeners\":[],\"name\":\"流程开始\",\"key\":\"start\",\"order\":0},{\"outgoingNodes\":[],\"incomingNodes\":[],\"type\":\"EndNode\",\"executionListeners\":[],\"name\":\"流程结束\",\"key\":\"end\",\"order\":0},{\"ignoreFailure\":false,\"outgoingNodes\":[],\"incomingNodes\":[],\"code\":\"FUN001\",\"type\":\"FunctionActivityNode\",\"retryTimes\":0,\"executionListeners\":[],\"asynchronous\":false,\"name\":\"函数1节点\",\"retry\":false,\"key\":\"f1\",\"order\":0},{\"outgoingNodes\":[],\"incomingNodes\":[],\"sourceNodeKey\":\"f1\",\"type\":\"SequenceConnNode\",\"executionListeners\":[],\"targetNodeKey\":\"end\",\"key\":\"f1->>end\",\"order\":0},{\"outgoingNodes\":[],\"incomingNodes\":[],\"sourceNodeKey\":\"f1\",\"type\":\"SequenceConnNode\",\"executionListeners\":[],\"targetNodeKey\":\"end\",\"key\":\"f1->>end\",\"order\":0}],\"documentation\":\"测试流程\",\"executionListeners\":[],\"name\":\"测试流程\",\"key\":\"test\"}";
+        String json = "{\n" +
+                "    \"key\":\"test\",\n" +
+                "    \"name\":\"测试\",\n" +
+                "    \"documentation\":\"一个测试流程\",\n" +
+                "    \"executionListeners\":[],\n" +
+                "    \"nodes\": [\n" +
+                "        {\n" +
+                "            \"id\": \"start-00001\",\n" +
+                "            \"type\": \"StartNode\",\n" +
+                "            \"x\": 320,\n" +
+                "            \"y\": 140,\n" +
+                "            \"properties\": {\n" +
+                "                \"name\": \"开始\",\n" +
+                "                \"tag\": \"A1\"\n" +
+                "            },\n" +
+                "            \"text\": {\n" +
+                "                \"x\": 320,\n" +
+                "                \"y\": 140,\n" +
+                "                \"value\": \"开始\"\n" +
+                "            }\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"id\": \"end-00001\",\n" +
+                "            \"type\": \"EndNode\",\n" +
+                "            \"x\": 640,\n" +
+                "            \"y\": 160,\n" +
+                "            \"properties\": {\n" +
+                "                \"name\": \"结束\",\n" +
+                "                \"tag\": \"A2\"\n" +
+                "            },\n" +
+                "            \"text\": {\n" +
+                "                \"x\": 640,\n" +
+                "                \"y\": 160,\n" +
+                "                \"value\": \"结束\"\n" +
+                "            }\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"id\": \"00001\",\n" +
+                "            \"type\": \"FunctionActivityNode\",\n" +
+                "            \"x\": 460,\n" +
+                "            \"y\": 260,\n" +
+                "            \"properties\": {\n" +
+                "                \"name\": \"执行函数\",\n" +
+                "                \"tag\": \"A3\"\n" +
+                "            },\n" +
+                "            \"text\": {\n" +
+                "                \"x\": 460,\n" +
+                "                \"y\": 260,\n" +
+                "                \"value\": \"执行函数\"\n" +
+                "            }\n" +
+                "        }\n" +
+                "    ],\n" +
+                "    \"edges\": [\n" +
+                "        {\n" +
+                "            \"id\": \"e435db55-6279-4b4a-9b37-a724589ccc65\",\n" +
+                "            \"type\": \"SequenceConnNode\",\n" +
+                "            \"sourceNodeId\": \"start-00001\",\n" +
+                "            \"targetNodeId\": \"00001\",\n" +
+                "            \"startPoint\": {\n" +
+                "                \"x\": 342,\n" +
+                "                \"y\": 140\n" +
+                "            },\n" +
+                "            \"endPoint\": {\n" +
+                "                \"x\": 460,\n" +
+                "                \"y\": 220\n" +
+                "            },\n" +
+                "            \"properties\": {},\n" +
+                "            \"pointsList\": [\n" +
+                "                {\n" +
+                "                    \"x\": 342,\n" +
+                "                    \"y\": 140\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"x\": 442,\n" +
+                "                    \"y\": 140\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"x\": 460,\n" +
+                "                    \"y\": 120\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"x\": 460,\n" +
+                "                    \"y\": 220\n" +
+                "                }\n" +
+                "            ]\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"id\": \"5cf962a1-001d-45e4-b93f-853accb815b7\",\n" +
+                "            \"type\": \"SequenceConnNode\",\n" +
+                "            \"sourceNodeId\": \"00001\",\n" +
+                "            \"targetNodeId\": \"end-00001\",\n" +
+                "            \"startPoint\": {\n" +
+                "                \"x\": 460,\n" +
+                "                \"y\": 300\n" +
+                "            },\n" +
+                "            \"endPoint\": {\n" +
+                "                \"x\": 640,\n" +
+                "                \"y\": 182\n" +
+                "            },\n" +
+                "            \"properties\": {},\n" +
+                "            \"pointsList\": [\n" +
+                "                {\n" +
+                "                    \"x\": 460,\n" +
+                "                    \"y\": 300\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"x\": 460,\n" +
+                "                    \"y\": 400\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"x\": 640,\n" +
+                "                    \"y\": 282\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"x\": 640,\n" +
+                "                    \"y\": 182\n" +
+                "                }\n" +
+                "            ]\n" +
+                "        }\n" +
+                "    ]\n" +
+                "}";
 
         ProcessModel processModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(json);
 
+        ProcessModelValidator processModelValidator = new ProcessModelValidator();
+        List<ErrorNodeMsg> errorNodeMsgs = processModelValidator.check(processModel);
+
+        String json2 = PROCESS_MODEL_JSON_CONVERTER.convertToJson(processModel);
+
         System.out.println(processModel);
+        System.out.println(errorNodeMsgs);
+        System.out.println(json2);
     }
 
 }

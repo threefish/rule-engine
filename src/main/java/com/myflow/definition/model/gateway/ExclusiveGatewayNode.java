@@ -12,7 +12,7 @@ import lombok.Data;
 public class ExclusiveGatewayNode extends GatewayNode {
 
     @Override
-    protected NodeType getType() {
+    public NodeType getType() {
         return NodeType.ExclusiveGatewayNode;
     }
 }

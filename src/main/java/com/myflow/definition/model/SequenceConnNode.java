@@ -1,6 +1,5 @@
 package com.myflow.definition.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 /**
@@ -23,21 +22,18 @@ public class SequenceConnNode extends Node {
     /**
      * 源节点
      */
-    @JsonIgnore
     protected Node sourceNode;
 
     /**
      * 目标节点
      */
-    @JsonIgnore
     protected Node targetNode;
 
 
     @Override
-    protected NodeType getType() {
+    public NodeType getType() {
         return NodeType.SequenceConnNode;
     }
-
 
 
 }

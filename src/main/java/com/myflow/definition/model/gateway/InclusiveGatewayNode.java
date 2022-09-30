@@ -13,7 +13,7 @@ public class InclusiveGatewayNode extends GatewayNode {
 
 
     @Override
-    protected NodeType getType() {
+    public NodeType getType() {
         return NodeType.InclusiveGatewayNode;
     }
 }

@@ -32,7 +32,11 @@ public class ProcessModel {
     /**
      * 子节点
      */
-    private List<? extends Node> childNodes=new ArrayList<>();
+    private List<? extends Node> childNodes = new ArrayList<>();
+
+    private StartNode startNode;
+
+    private EndNode endNode;
 
 
 }

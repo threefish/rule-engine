@@ -1,0 +1,121 @@
+{
+  "key":"test",
+  "name":"测试",
+  "documentation":"一个测试流程",
+  "executionListeners":[],
+  "nodes": [
+    {
+      "id": "start-00001",
+      "type": "StartNode",
+      "x": 320,
+      "y": 140,
+      "properties": {
+        "name": "开始",
+        "tag": "A1"
+      },
+      "text": {
+        "x": 320,
+        "y": 140,
+        "value": "开始"
+      }
+    },
+    {
+      "id": "end-00001",
+      "type": "EndNode",
+      "x": 640,
+      "y": 160,
+      "properties": {
+        "name": "结束",
+        "tag": "A2"
+      },
+      "text": {
+        "x": 640,
+        "y": 160,
+        "value": "结束"
+      }
+    },
+    {
+      "id": "00001",
+      "type": "FunctionActivityNode",
+      "x": 460,
+      "y": 260,
+      "properties": {
+        "name": "执行函数",
+        "tag": "A3"
+      },
+      "text": {
+        "x": 460,
+        "y": 260,
+        "value": "执行函数"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e435db55-6279-4b4a-9b37-a724589ccc65",
+      "type": "SequenceConnNode",
+      "sourceNodeId": "start-00001",
+      "targetNodeId": "00001",
+      "startPoint": {
+        "x": 342,
+        "y": 140
+      },
+      "endPoint": {
+        "x": 460,
+        "y": 220
+      },
+      "properties": {},
+      "pointsList": [
+        {
+          "x": 342,
+          "y": 140
+        },
+        {
+          "x": 442,
+          "y": 140
+        },
+        {
+          "x": 460,
+          "y": 120
+        },
+        {
+          "x": 460,
+          "y": 220
+        }
+      ]
+    },
+    {
+      "id": "5cf962a1-001d-45e4-b93f-853accb815b7",
+      "type": "SequenceConnNode",
+      "sourceNodeId": "00001",
+      "targetNodeId": "end-00001",
+      "startPoint": {
+        "x": 460,
+        "y": 300
+      },
+      "endPoint": {
+        "x": 640,
+        "y": 182
+      },
+      "properties": {},
+      "pointsList": [
+        {
+          "x": 460,
+          "y": 300
+        },
+        {
+          "x": 460,
+          "y": 400
+        },
+        {
+          "x": 640,
+          "y": 282
+        },
+        {
+          "x": 640,
+          "y": 182
+        }
+      ]
+    }
+  ]
+}

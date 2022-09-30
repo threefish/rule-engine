@@ -1,6 +1,7 @@
 package com.myflow.definition.model;
 
 import com.myflow.definition.model.event.ExcutionListener;
+import com.myflow.runtime.behavior.NodeBehavior;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -55,17 +56,22 @@ public abstract class Node {
     /**
      * 行为处理方法
      */
-    protected Object behavior;
+    protected NodeBehavior behavior;
     /**
      * 执行侦听器
      */
     protected List<ExcutionListener> executionListeners = new ArrayList<>();
 
     /**
+     * 原始json 通过json转为model时存储，转换为json信息时还原
+     */
+    protected String originalJson;
+
+    /**
      * 获取类型
      *
      * @return
      */
-    protected abstract NodeType getType();
+    public abstract NodeType getType();
 
 }

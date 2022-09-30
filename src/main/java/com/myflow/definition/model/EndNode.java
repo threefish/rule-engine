@@ -10,7 +10,7 @@ import lombok.Data;
 public class EndNode extends Node {
 
     @Override
-    protected NodeType getType() {
+    public NodeType getType() {
         return NodeType.EndNode;
     }
 
