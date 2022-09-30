@@ -29,6 +29,10 @@ public class SequenceConnNode extends Node {
      */
     protected Node targetNode;
 
+    /**
+     * 条件
+     */
+    protected String conditionExpression;
 
     @Override
     public NodeType getType() {

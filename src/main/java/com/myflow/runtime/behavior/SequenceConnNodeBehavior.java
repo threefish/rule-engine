@@ -22,7 +22,7 @@ public class SequenceConnNodeBehavior implements NodeBehavior {
     @Override
     public void execution(ExecutionEntity executionEntity) {
         log.info("[{}]执行处理逻辑", node.getKey());
-        if (ConditionUtil.resolve(node.getCompletionExpression(), executionEntity)) {
+        if (ConditionUtil.resolve(node.getConditionExpression(), executionEntity)) {
             this.leave(executionEntity);
         } else {
             if (log.isDebugEnabled()) {
