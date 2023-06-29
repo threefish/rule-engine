@@ -19,26 +19,28 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
 
     @Override
     public void execution(ExecutionEntity executionEntity) {
-        log.info("执行[{}]节点", getNode().getKey());
-        if (StrUtil.isNotBlank(getNode().getSkipExpression())) {
+        ExecutionEntity currentExecutionEntity = executionEntity.createChild();
+        Node node = getNode();
+        log.info("执行 节点ID:{} TAG:{} 名称:{}", node.getKey(),node.getTag(),node.getName());
+        if (StrUtil.isNotBlank(node.getSkipExpression())) {
             // 跳过表达式不为空，表示需要进行判断
-            if (ConditionUtil.resolve(getNode().getSkipExpression(), executionEntity)) {
+            if (ConditionUtil.resolve(node.getSkipExpression(), currentExecutionEntity)) {
                 // 表示当前节点满足跳过规则，执行跳过
                 if (log.isDebugEnabled()) {
-                    log.debug("节点[{}]满足跳过条件", getNode().getKey());
+                    log.debug("节点[{}]满足跳过条件", node.getKey());
                 }
-                this.leave(executionEntity);
+                this.leave(currentExecutionEntity);
             } else {
-                this.doExecution(executionEntity);
+                this.doExecution(currentExecutionEntity);
             }
         } else {
             //执行
-            this.doExecution(executionEntity);
+            this.doExecution(currentExecutionEntity);
             // 执行后判断是否满足完成条件，为空表示则任务满足
-            if (ConditionUtil.resolve(getNode().getCompletionExpression(), executionEntity)) {
-                this.leave(executionEntity);
+            if (ConditionUtil.resolve(getNode().getCompletionExpression(), currentExecutionEntity)) {
+                this.leave(currentExecutionEntity);
             } else {
-                this.unableToComplete(executionEntity);
+                this.unableToComplete(currentExecutionEntity);
             }
         }
     }

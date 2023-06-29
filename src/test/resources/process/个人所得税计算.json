@@ -1,0 +1,421 @@
+{
+  "key": "grsdsjs",
+  "name": "个人所得税计算",
+  "documentation": "个人所得税计算",
+  "executionListeners": [],
+  "nodes": [
+    {
+      "id": "001",
+      "type": "RuleSetNode",
+      "x": 740,
+      "y": 160,
+      "properties": {
+        "name": "规则集",
+        "tag": "A6",
+        "ruleSet": [
+          {
+            "name": "计算个人所得税",
+            "type": "loop",
+            "ruleActions": [
+              {
+                "key": "22e509e0-84ed-4f73-a5b6-9020e46f7db7",
+                "whenRule": {
+                  "rules": [
+                    {
+                      "key": "rule_76ab988c-85ef-4bad-afb6-f348279e0730",
+                      "assignmentType": "fixed",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "循环对象.税前收入",
+                      "root": false,
+                      "field": "循环对象.税前收入",
+                      "value": 5000,
+                      "varType": "number",
+                      "operator": ">",
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "aa0c887f-79f7-4842-a023-ac6f960df80c",
+                  "assignmentType": "fixed"
+                },
+                "thenActions": [
+                  {
+                    "type": "assignment",
+                    "left": "循环对象.累计收入",
+                    "expressionValue": "循环对象.税前收入 + 业务对象.年累计.税前收入",
+                    "values": [],
+                    "assignmentType": "calc",
+                    "key": "194f3d76-45d2-4cbc-9e03-0def8e3fec6d"
+                  },
+                  {
+                    "type": "assignment",
+                    "left": "循环对象.累计减除费用",
+                    "expressionValue": "循环对象.专项附加扣除及其他扣除 + 循环对象.个税起征点 + 业务对象.年累计.减除费用",
+                    "values": [],
+                    "assignmentType": "calc",
+                    "key": "05c07d7a-9b19-49b8-a939-0e7c08a5b006"
+                  },
+                  {
+                    "type": "assignment",
+                    "left": "循环对象.累计社保公积金费用",
+                    "expressionValue": "循环对象.社保 + 循环对象.公积金 + 业务对象.年累计.社保公积金费用",
+                    "values": [],
+                    "assignmentType": "calc",
+                    "key": "f512acbc-bf04-4e9f-91aa-9fdcd34f1c86"
+                  }
+                ],
+                "otherwiseActions": []
+              },
+              {
+                "key": "89cd4385-7596-4025-98b4-40ca61cf6499",
+                "whenRule": {
+                  "rules": [
+                    {
+                      "key": "rule_0d938832-2cdc-4d2f-81df-9cd4d2a57369",
+                      "assignmentType": "fixed",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "循环对象.税前收入",
+                      "root": false,
+                      "field": "循环对象.税前收入",
+                      "value": 5000,
+                      "varType": "number",
+                      "operator": ">",
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "064a2bfa-734b-46b0-859e-c0b340fb58d8",
+                  "assignmentType": "fixed"
+                },
+                "thenActions": [
+                  {
+                    "type": "assignment",
+                    "left": "业务对象.年累计.税前收入",
+                    "fieldValue": "循环对象.累计收入",
+                    "values": [],
+                    "assignmentType": "var",
+                    "key": "61a5e20a-b768-44ad-bad8-5ba63f4cf76f"
+                  },
+                  {
+                    "type": "assignment",
+                    "left": "业务对象.年累计.减除费用",
+                    "fieldValue": "循环对象.累计减除费用",
+                    "values": [],
+                    "assignmentType": "var",
+                    "key": "f746e830-08bb-4530-8ebe-7b781def687f"
+                  },
+                  {
+                    "type": "assignment",
+                    "left": "业务对象.年累计.社保公积金费用",
+                    "fieldValue": "循环对象.累计社保公积金费用",
+                    "values": [],
+                    "assignmentType": "var",
+                    "key": "b88725b0-6dcb-4385-9f24-e0f2dba0ae87"
+                  },
+                  {
+                    "type": "assignment",
+                    "left": "循环对象.累计收入",
+                    "expressionValue": "循环对象.累计减除费用 - 循环对象.累计社保公积金费用",
+                    "values": [],
+                    "assignmentType": "calc",
+                    "key": "1d3a6db8-dc1d-413b-9e86-bfdf8bb36488"
+                  }
+                ],
+                "otherwiseActions": []
+              },
+              {
+                "key": "3b0ec178-93ac-40fe-b280-fabf3b30e3fa",
+                "whenRule": {
+                  "rules": [
+                    {
+                      "key": "rule_bfa39518-1df7-4109-aecd-837c3b34876a",
+                      "assignmentType": "fixed",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "循环对象.税前收入",
+                      "root": false,
+                      "field": "循环对象.税前收入",
+                      "value": 5000,
+                      "varType": "number",
+                      "operator": ">",
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "c040694e-e01f-4d02-bc8f-8f49c081f6a7",
+                  "assignmentType": "fixed"
+                },
+                "thenActions": [
+                  {
+                    "type": "assignment",
+                    "left": "循环对象.适用税率",
+                    "expressionValue": "GET_INCOME_TAX_RATE(循环对象.累计预扣预缴应纳税所得额)",
+                    "values": [],
+                    "assignmentType": "calc",
+                    "key": "f000a68e-4869-4a9f-b9c6-57f68c50ba7f"
+                  },
+                  {
+                    "type": "assignment",
+                    "left": "循环对象.适用速算扣除数",
+                    "expressionValue": "GET_FAST_DEDUCTION (循环对象.累计预扣预缴应纳税所得额)",
+                    "values": [],
+                    "assignmentType": "calc",
+                    "key": "283fdd45-8721-4836-8d5b-a32a9c1b3f8b"
+                  }
+                ],
+                "otherwiseActions": []
+              },
+              {
+                "key": "6ac0595d-23bd-4ec2-b129-dfaf300e6be0",
+                "whenRule": {
+                  "rules": [
+                    {
+                      "key": "rule_916bbc38-ba64-4685-92d0-7f103d7c7f34",
+                      "assignmentType": "fixed",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "循环对象.税前收入",
+                      "root": false,
+                      "field": "循环对象.税前收入",
+                      "value": 5000,
+                      "varType": "number",
+                      "operator": ">",
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "f1c37d60-a320-44a2-839d-f367aa12a79b",
+                  "assignmentType": "fixed"
+                },
+                "thenActions": [
+                  {
+                    "type": "assignment",
+                    "left": "循环对象.累计应纳税额",
+                    "expressionValue": "循环对象.累计预扣预缴应纳税所得额 * (循环对象.适用税率/100) - 循环对象.适用速算扣除数",
+                    "values": [],
+                    "assignmentType": "calc",
+                    "key": "fba36873-9769-4a9d-9442-e4a9c167f329"
+                  }
+                ],
+                "otherwiseActions": []
+              },
+              {
+                "key": "10d28d67-f158-4b9c-a064-f93e38212370",
+                "whenRule": {
+                  "rules": [],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "b74bde8b-985e-4da5-9c48-eb9f698b1d49",
+                  "assignmentType": "fixed"
+                },
+                "thenActions": [
+                  {
+                    "type": "assignment",
+                    "left": "循环对象.应付税款",
+                    "fieldValue": "业务对象.年累计.应付税款",
+                    "values": [],
+                    "assignmentType": "var",
+                    "key": "8b0b53ab-3c43-4c1f-a275-e642ac1f1915"
+                  }
+                ],
+                "otherwiseActions": []
+              },
+              {
+                "key": "15921302-a3d1-4f55-a03b-c775600492c6",
+                "whenRule": {
+                  "rules": [
+                    {
+                      "key": "rule_2ec5eca3-d78a-4ec7-a535-6f9c2242d32b",
+                      "assignmentType": "fixed",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "循环对象.税前收入",
+                      "root": false,
+                      "field": "循环对象.税前收入",
+                      "value": 5000,
+                      "varType": "number",
+                      "operator": ">",
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "c4dc95fe-4460-49b7-b5b4-4a81b1438275",
+                  "assignmentType": "fixed"
+                },
+                "thenActions": [
+                  {
+                    "type": "assignment",
+                    "left": "业务对象.年累计.应付税款",
+                    "fieldValue": "循环对象.累计应纳税额",
+                    "values": [],
+                    "assignmentType": "var",
+                    "key": "0935b145-2e91-44c3-89f6-ffebc2708351"
+                  },
+                  {
+                    "type": "assignment",
+                    "left": "循环对象.税后收入",
+                    "expressionValue": "循环对象.税前收入 - 循环对象.社保 - 循环对象.公积金 - 循环对象.应付税款",
+                    "values": [],
+                    "assignmentType": "calc",
+                    "key": "35b02ce6-92f6-4421-bc15-4fc9bd012ec8"
+                  }
+                ],
+                "otherwiseActions": []
+              },
+              {
+                "key": "cb607540-b652-49e9-b683-6f67e879aee2",
+                "whenRule": {
+                  "rules": [],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "b02189c5-a2b6-4afd-b861-72abbbdfd846",
+                  "assignmentType": "fixed"
+                },
+                "thenActions": [
+                  {
+                    "type": "assignment",
+                    "left": "业务对象.年累计.税后收入",
+                    "expressionValue": "循环对象.税后收入 + 业务对象.年累计.税后收入",
+                    "values": [],
+                    "assignmentType": "calc",
+                    "key": "c6887a05-f644-4320-ad49-ac06ee4e310e"
+                  }
+                ],
+                "otherwiseActions": []
+              }
+            ],
+            "loopVariableName": "业务对象.月薪",
+            "key": "5bd7ab2d-8e60-4afc-8b2d-6c0ea38154ad"
+          }
+        ]
+      },
+      "text": {
+        "x": 740,
+        "y": 160,
+        "value": "计算个人所得税"
+      }
+    },
+    {
+      "id": "002",
+      "type": "StartNode",
+      "x": 520,
+      "y": 160,
+      "properties": {
+        "name": "开始",
+        "tag": "A1"
+      },
+      "text": {
+        "x": 520,
+        "y": 160,
+        "value": "开始"
+      }
+    },
+    {
+      "id": "004",
+      "type": "EndNode",
+      "x": 1000,
+      "y": 160,
+      "properties": {
+        "name": "结束",
+        "tag": "A2"
+      },
+      "text": {
+        "x": 1000,
+        "y": 160,
+        "value": "结束"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "003",
+      "type": "SequenceConnNode",
+      "sourceNodeId": "002",
+      "targetNodeId": "001",
+      "startPoint": {
+        "x": 542,
+        "y": 160
+      },
+      "endPoint": {
+        "x": 675,
+        "y": 160
+      },
+      "properties": {},
+      "text": {
+        "x": 608.5,
+        "y": 160,
+        "value": "003"
+      },
+      "pointsList": [
+        {
+          "x": 542,
+          "y": 160
+        },
+        {
+          "x": 642,
+          "y": 160
+        },
+        {
+          "x": 575,
+          "y": 160
+        },
+        {
+          "x": 675,
+          "y": 160
+        }
+      ]
+    },
+    {
+      "id": "005",
+      "type": "SequenceConnNode",
+      "sourceNodeId": "001",
+      "targetNodeId": "004",
+      "startPoint": {
+        "x": 805,
+        "y": 160
+      },
+      "endPoint": {
+        "x": 978,
+        "y": 160
+      },
+      "properties": {},
+      "text": {
+        "x": 891.5,
+        "y": 160,
+        "value": "005"
+      },
+      "pointsList": [
+        {
+          "x": 805,
+          "y": 160
+        },
+        {
+          "x": 905,
+          "y": 160
+        },
+        {
+          "x": 878,
+          "y": 160
+        },
+        {
+          "x": 978,
+          "y": 160
+        }
+      ]
+    }
+  ]
+}

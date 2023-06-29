@@ -3,7 +3,7 @@ package com.myflow;
 import cn.hutool.core.io.IoUtil;
 import com.myflow.definition.model.ProcessModel;
 import com.myflow.definition.parse.ProcessModelParse;
-import com.myflow.runtime.DefaualtProcessRunService;
+import com.myflow.runtime.DefaultProcessRunService;
 import com.myflow.runtime.ProcessRunService;
 import com.myflow.runtime.context.ProcessRuntimeContext;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ public class ProcessRunServiceTest {
     private static final ProcessModelParse PROCESS_MODEL_JSON_CONVERTER = new ProcessModelParse();
 
     @Test
-    void start() {
+    void startTest() {
         InputStream resourceAsStream = ProcessRunServiceTest.class.getResourceAsStream("/process/test.json");
         ProcessModel processModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(IoUtil.readUtf8(resourceAsStream));
 
@@ -29,7 +29,25 @@ public class ProcessRunServiceTest {
 
         ProcessRuntimeContext processRuntimeContext = new ProcessRuntimeContext(processModel, variable);
 
-        ProcessRunService processRunService = new DefaualtProcessRunService();
+        ProcessRunService processRunService = new DefaultProcessRunService();
+
+        Long processId = processRunService.start(processRuntimeContext);
+
+        System.out.println("流程ID：" + processId);
+    }
+
+
+    @Test
+    void startTestGrsdsjs() {
+        InputStream resourceAsStream = ProcessRunServiceTest.class.getResourceAsStream("/process/个人所得税计算.json");
+        ProcessModel processModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(IoUtil.readUtf8(resourceAsStream));
+
+        Map<String, Object> variable = new HashMap<>();
+        variable.put("age", 18);
+
+        ProcessRuntimeContext processRuntimeContext = new ProcessRuntimeContext(processModel, variable);
+
+        ProcessRunService processRunService = new DefaultProcessRunService();
 
         Long processId = processRunService.start(processRuntimeContext);
 

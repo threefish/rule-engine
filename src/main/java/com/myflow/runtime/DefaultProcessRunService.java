@@ -11,7 +11,7 @@ import com.myflow.runtime.entity.ExecutionEntity;
  * @author 黄川 huchuc@vip.qq.com
  * date: 2022/9/30
  */
-public class DefaualtProcessRunService implements ProcessRunService {
+public class DefaultProcessRunService implements ProcessRunService {
 
     @Override
     public Long start(ProcessRuntimeContext processRuntimeContext) {

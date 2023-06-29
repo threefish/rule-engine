@@ -22,6 +22,10 @@ public abstract class Node {
      */
     protected String name;
     /**
+     * 标签
+     */
+    protected String tag;
+    /**
      * 类型
      */
     protected NodeType type;

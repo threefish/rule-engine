@@ -46,6 +46,7 @@ public class ProcessModelParse {
             node.setKey(jsonObject.getStr("id"));
             node.setName(text.getStr("value"));
             node.setDocumentation(properties.getStr("name"));
+            node.setTag(properties.getStr("tag"));
 
             if (type == NodeType.StartNode) {
                 processModel.setStartNode((StartNode) node);
