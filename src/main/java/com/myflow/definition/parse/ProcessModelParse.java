@@ -32,7 +32,10 @@ public class ProcessModelParse {
         ProcessModel processModel = parse.toBean(ProcessModel.class);
         JSONArray nodeJsonArray = parse.getJSONArray("nodes");
         JSONArray edgeJsonArray = parse.getJSONArray("edges");
-
+        JSONArray businessObjectModels = parse.getJSONArray("businessObjectModels");
+        if (businessObjectModels != null) {
+            processModel.setBusinessObjectModels(businessObjectModels.toList(ObjectModel.class));
+        }
         Map<String, Node> nodeMap = new HashMap<>(nodeJsonArray.size());
 
         for (Object object : nodeJsonArray) {
@@ -44,6 +47,7 @@ public class ProcessModelParse {
             node.setOriginalJson(jsonObject.toString());
             node.setType(type);
             node.setKey(jsonObject.getStr("id"));
+            node.setName(text.getStr("value"));
             node.setName(text.getStr("value"));
             node.setDocumentation(properties.getStr("name"));
             node.setTag(properties.getStr("tag"));

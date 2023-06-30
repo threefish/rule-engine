@@ -3,6 +3,240 @@
   "name": "个人所得税计算",
   "documentation": "个人所得税计算",
   "executionListeners": [],
+  "businessObjectModels": [
+    {
+      "value": "year",
+      "type": "object",
+      "required": false,
+      "label": "年累计",
+      "descript": "",
+      "children": [
+        {
+          "value": "preTaxIncome",
+          "type": "number",
+          "required": false,
+          "label": "税前收入",
+          "descript": "",
+          "children": [],
+          "key": "719c433e-23ff-42b4-b340-cf6c297d9359",
+          "response": true
+        },
+        {
+          "value": "afterTaxIncome",
+          "type": "number",
+          "required": false,
+          "label": "税后收入",
+          "descript": "",
+          "children": [],
+          "key": "598dd649-afb9-453f-8eba-cb24192ab725",
+          "response": true
+        },
+        {
+          "value": "cumulativeDeductions",
+          "type": "number",
+          "required": false,
+          "label": "减除费用",
+          "descript": "",
+          "children": [],
+          "key": "d9e59597-5933-4693-9a5c-b4eb009e72a3",
+          "response": true
+        },
+        {
+          "value": "cumulativeSocialSecurityAndProvidentFund",
+          "type": "number",
+          "required": false,
+          "label": "社保公积金费用",
+          "descript": "",
+          "children": [],
+          "key": "1207ecac-a50d-4605-9441-e886c6a92239",
+          "response": true
+        },
+        {
+          "value": "cumulativeTaxPayable",
+          "type": "number",
+          "required": false,
+          "label": "应纳税额",
+          "descript": "",
+          "children": [],
+          "key": "49f793c7-d1b5-4432-9f3c-392c7e68a310",
+          "response": true
+        },
+        {
+          "value": "taxPayable",
+          "type": "number",
+          "required": false,
+          "label": "应付税款",
+          "descript": "",
+          "children": [],
+          "key": "6a581379-2332-48e4-99d4-d09294a46daf",
+          "response": true
+        }
+      ],
+      "key": "5bcda6ba-cf9c-484c-82ed-c27d39885774",
+      "response": true
+    },
+    {
+      "value": "salaryDetail",
+      "type": "list",
+      "required": true,
+      "label": "月薪",
+      "descript": "",
+      "children": [
+        {
+          "value": "month",
+          "type": "number",
+          "required": false,
+          "label": "月份",
+          "descript": "",
+          "children": [],
+          "key": "456bc84b-f1ee-42ef-b4e9-4955d83a3a49",
+          "response": true
+        },
+        {
+          "value": "preTaxIncome",
+          "type": "number",
+          "required": false,
+          "label": "税前收入",
+          "descript": "",
+          "children": [],
+          "key": "154ac1a8-f09a-43c1-be2f-471af8049e86",
+          "response": true
+        },
+        {
+          "value": "afterTaxIncome",
+          "type": "number",
+          "required": false,
+          "label": "税后收入",
+          "descript": "",
+          "children": [],
+          "key": "3a41a045-1a9b-4175-9f24-18b01c388c76",
+          "response": true
+        },
+        {
+          "value": "taxThreshold",
+          "type": "number",
+          "required": false,
+          "label": "个税起征点",
+          "descript": "",
+          "children": [],
+          "key": "1b6bcc37-e3d3-43a3-b2be-dd37efe2df77",
+          "response": true
+        },
+        {
+          "value": "specialAdditionalAndOtherDeduct",
+          "type": "number",
+          "required": false,
+          "label": "专项附加扣除及其他扣除",
+          "descript": "",
+          "children": [],
+          "key": "d7715f5e-bd8f-4cc2-bfe5-ed3321d210f6",
+          "response": true
+        },
+        {
+          "value": "socialSecurity",
+          "type": "number",
+          "required": false,
+          "label": "社保",
+          "descript": "",
+          "children": [],
+          "key": "c76d9ed1-1897-44c6-98a1-eb1a0c67e9a3",
+          "response": true
+        },
+        {
+          "value": "providentFund",
+          "type": "number",
+          "required": false,
+          "label": "公积金",
+          "descript": "",
+          "children": [],
+          "key": "88759218-2e04-4237-b32b-532a854be8e4",
+          "response": true
+        },
+        {
+          "value": "cumulativeIncome",
+          "type": "number",
+          "required": false,
+          "label": "累计收入",
+          "descript": "",
+          "children": [],
+          "key": "1a157568-b349-491b-a971-d0e8aca01594",
+          "response": true
+        },
+        {
+          "value": "cumulativeDeductions",
+          "type": "number",
+          "required": false,
+          "label": "累计减除费用",
+          "descript": "",
+          "children": [],
+          "key": "0affac42-676a-4528-86a1-e12d3add5038",
+          "response": true
+        },
+        {
+          "value": "cumulativeSocialSecurityAndProvidentFund",
+          "type": "number",
+          "required": false,
+          "label": "累计社保公积金费用",
+          "descript": "",
+          "children": [],
+          "key": "c45b6e41-4f09-48b7-9a9c-45e339d5936f",
+          "response": true
+        },
+        {
+          "value": "cumulativeWithholdingTaxableIncome",
+          "type": "number",
+          "required": false,
+          "label": "累计预扣预缴应纳税所得额",
+          "descript": "",
+          "children": [],
+          "key": "07dc2ade-94ab-490e-8795-7694137d5f11",
+          "response": true
+        },
+        {
+          "value": "cumulativeTaxPayable",
+          "type": "number",
+          "required": false,
+          "label": "累计应纳税额",
+          "descript": "",
+          "children": [],
+          "key": "ef7d3ea0-3c2b-4a73-bd9c-168c028a2936",
+          "response": true
+        },
+        {
+          "value": "applicableTaxRate",
+          "type": "number",
+          "required": false,
+          "label": "适用税率",
+          "descript": "",
+          "children": [],
+          "key": "316dca2a-6404-4a22-a6cb-2880842270f1",
+          "response": true
+        },
+        {
+          "value": "applicableQuickDeduction",
+          "type": "number",
+          "required": false,
+          "label": "适用速算扣除数",
+          "descript": "",
+          "children": [],
+          "key": "f8e85657-ca26-4867-b6c7-3a2f3772b9b1",
+          "response": true
+        },
+        {
+          "value": "taxPayable",
+          "type": "number",
+          "required": false,
+          "label": "应付税款",
+          "descript": "",
+          "children": [],
+          "key": "dd6eaa70-b660-4127-8560-8e84e2568a8e",
+          "response": true
+        }
+      ],
+      "key": "6ac2fba5-a6e1-4b8a-a9b0-ec65c5bcb5c2",
+      "response": true
+    }
+  ],
   "nodes": [
     {
       "id": "001",
@@ -212,7 +446,21 @@
               {
                 "key": "10d28d67-f158-4b9c-a064-f93e38212370",
                 "whenRule": {
-                  "rules": [],
+                  "rules": [
+                    {
+                      "key": "rule_2ec5eca3-d78a-4ec7-a535-6f9c2242d32b",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "循环对象.税前收入",
+                      "root": false,
+                      "field": "循环对象.税前收入",
+                      "value": 5000,
+                      "varType": "number",
+                      "operator": ">",
+                      "descript": ""
+                    }
+                  ],
                   "combinator": "AND",
                   "ruleType": "rule",
                   "root": true,
@@ -278,7 +526,21 @@
               {
                 "key": "cb607540-b652-49e9-b683-6f67e879aee2",
                 "whenRule": {
-                  "rules": [],
+                  "rules": [
+                    {
+                      "key": "rule_2ec5eca3-d78a-4ec7-a535-6f9c2242d32b",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "循环对象.税前收入",
+                      "root": false,
+                      "field": "循环对象.税前收入",
+                      "value": 5000,
+                      "varType": "number",
+                      "operator": ">",
+                      "descript": ""
+                    }
+                  ],
                   "combinator": "AND",
                   "ruleType": "rule",
                   "root": true,

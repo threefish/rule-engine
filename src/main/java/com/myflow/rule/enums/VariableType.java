@@ -2,6 +2,7 @@ package com.myflow.rule.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.myflow.rule.translate.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -16,18 +17,19 @@ import java.util.stream.Stream;
 public enum VariableType {
 
 
-    NUMBER("number"),
-    DATE_TIME("dateTime"),
-    DATE("date"),
-    LIST("list"),
-    STRING("string"),
-    BOOLEAN("boolean"),
-    OBJECT("object"),
+    NUMBER("number", new NumberTranslate()),
+    DATE_TIME("dateTime", new DateTimeTranslate()),
+    DATE("date", new DateTranslate()),
+    LIST("list", new ListTranslate()),
+    STRING("string", new StringTranslate()),
+    BOOLEAN("boolean", new BooleanTranslate()),
+    OBJECT("object", new ObjectTranslate()),
     ;
 
     @JsonValue
     String value;
 
+    AbstractTranslate translate;
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static VariableType fromValue(String value) {

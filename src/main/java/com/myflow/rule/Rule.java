@@ -1,9 +1,6 @@
 package com.myflow.rule;
 
-import com.myflow.rule.enums.AssignmentType;
-import com.myflow.rule.enums.CombinatorType;
-import com.myflow.rule.enums.RuleType;
-import com.myflow.rule.enums.VariableType;
+import com.myflow.rule.enums.*;
 import lombok.Data;
 
 import java.util.List;
@@ -31,7 +28,7 @@ public class Rule {
     private Object valueEnd;
     private List<Object> values;
     private VariableType varType;
-    private String operator;
+    private OperatorType operator;
     private String descript;
 
 

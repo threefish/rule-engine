@@ -30,6 +30,10 @@ public class ProcessModel {
      */
     protected List<ExcutionListener> executionListeners = new ArrayList<>();
     /**
+     * 业务对象模型
+     */
+    protected List<ObjectModel> businessObjectModels = new ArrayList<>();
+    /**
      * 子节点
      */
     private List<? extends Node> childNodes = new ArrayList<>();

@@ -6,7 +6,7 @@ import java.util.Map;
  * @author 黄川 huchuc@vip.qq.com
  * date: 2022/9/30
  */
-
+@SuppressWarnings("all")
 public interface ExecutionEntity {
 
 
@@ -70,4 +70,5 @@ public interface ExecutionEntity {
      * @param variable
      */
     void setVariable(Map<String, Object> variable);
+    Map<String, Object> getVariable();
 }
