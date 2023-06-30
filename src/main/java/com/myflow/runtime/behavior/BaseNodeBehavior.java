@@ -21,7 +21,7 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
     public void execution(ExecutionEntity executionEntity) {
         ExecutionEntity currentExecutionEntity = executionEntity.createChild();
         Node node = getNode();
-        log.info("执行 节点ID:{} TAG:{} 名称:{}", node.getKey(),node.getTag(),node.getName());
+        log.info("执行 节点ID:{} TAG:{} 名称:{}", node.getKey(), node.getTag(), node.getName());
         if (StrUtil.isNotBlank(node.getSkipExpression())) {
             // 跳过表达式不为空，表示需要进行判断
             if (ConditionUtil.resolve(node.getSkipExpression(), currentExecutionEntity)) {

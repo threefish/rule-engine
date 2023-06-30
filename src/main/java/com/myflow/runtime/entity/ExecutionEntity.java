@@ -16,7 +16,7 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 public class ExecutionEntity {
-    
+
     private Long id;
     private Long parentExecutionId;
 

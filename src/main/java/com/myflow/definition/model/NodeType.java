@@ -1,7 +1,12 @@
 package com.myflow.definition.model;
 
-import com.myflow.definition.model.activity.*;
-import com.myflow.definition.model.gateway.*;
+import com.myflow.definition.model.activity.DecisionTablesNode;
+import com.myflow.definition.model.activity.FunctionActivityNode;
+import com.myflow.definition.model.activity.RuleSetNode;
+import com.myflow.definition.model.activity.ScoringCardNode;
+import com.myflow.definition.model.gateway.ExclusiveGatewayNode;
+import com.myflow.definition.model.gateway.InclusiveGatewayNode;
+import com.myflow.definition.model.gateway.ParallelGatewayNode;
 import com.myflow.definition.validator.*;
 import com.myflow.runtime.behavior.*;
 import lombok.AllArgsConstructor;
