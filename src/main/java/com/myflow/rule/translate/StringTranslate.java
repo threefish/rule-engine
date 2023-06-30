@@ -1,7 +1,6 @@
 package com.myflow.rule.translate;
 
 import cn.hutool.core.util.StrUtil;
-import com.myflow.rule.Rule;
 import com.myflow.rule.enums.OperatorType;
 
 import java.util.HashMap;
@@ -10,9 +9,9 @@ import java.util.Map;
 /**
  * @author 黄川 huchuc@vip.qq.com
  * date: 2023/6/30
- *  ["=", "!=", "like", "notLike", "beginWith", "endWith","doesNotBeginWith","doesNotEndWith", "isNull", "isNotNull", "inCollection", "notInCollection", "isEmpty", "isNotEmpty"],
+ * ["=", "!=", "like", "notLike", "beginWith", "endWith","doesNotBeginWith","doesNotEndWith", "isNull", "isNotNull", "inCollection", "notInCollection", "isEmpty", "isNotEmpty"],
  */
-public class StringTranslate extends AbstractTranslate{
+public class StringTranslate extends AbstractTranslate {
 
     private static final Map<OperatorType, OperatorSupplier> OPERATOR_TYPE_CACHE = new HashMap() {
         {

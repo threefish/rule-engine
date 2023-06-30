@@ -1,6 +1,5 @@
 package com.myflow.aviator;
 
-import cn.hutool.json.JSONUtil;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Options;
 import com.myflow.common.utils.JsonUtil;
@@ -30,7 +29,7 @@ public class AviatorExecutor {
      */
     public static Object execute(AviatorContext context) {
         Object result = AviatorEvaluator.execute(context.getExpression(), context.getEnv(), context.isCached());
-        log.info("Aviator执行器result={},context={}",result, JsonUtil.obj2Json(context));
+        log.info("Aviator执行器result={},context={}", result, JsonUtil.obj2Json(context));
         return result;
     }
 

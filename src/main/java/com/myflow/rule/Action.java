@@ -17,6 +17,7 @@ public class Action {
     private String key;
     private ActionType type;
     private String left;
+    private String fieldValue;
     private String expressionValue;
     private List<Object> values;
     private AssignmentType assignmentType;

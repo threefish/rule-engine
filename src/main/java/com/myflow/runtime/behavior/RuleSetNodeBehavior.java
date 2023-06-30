@@ -1,14 +1,16 @@
 package com.myflow.runtime.behavior;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.StrUtil;
 import com.myflow.aviator.AviatorContext;
 import com.myflow.aviator.AviatorExecutor;
+import com.myflow.common.utils.ActionUtils;
 import com.myflow.common.utils.VariableUtils;
 import com.myflow.definition.model.Node;
 import com.myflow.definition.model.activity.RuleSetNode;
+import com.myflow.rule.Action;
 import com.myflow.rule.RuleAction;
 import com.myflow.rule.RuleSet;
+import com.myflow.rule.enums.ActionType;
 import com.myflow.rule.enums.RuleSetType;
 import com.myflow.rule.translate.RuleExpressionTranslate;
 import com.myflow.runtime.entity.ExecutionEntity;
@@ -47,6 +49,8 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
                 RuleSetType type = ruleSet.getType();
                 Map<String, Object> variable = executionEntity.getVariable();
                 Object currentVariable = VariableUtils.getByPathVariable(ruleSet.getLoopVariableName(), variable);
+                RuleExpressionTranslate ruleExpressionTranslate = new RuleExpressionTranslate(ruleAction.getWhenRule());
+                AviatorContext aviatorContext = AviatorContext.builder().expression(ruleExpressionTranslate.getExpression()).cached(true).env(variable).build();
                 if (type == RuleSetType.LOOP) {
                     if (Objects.nonNull(currentVariable)) {
                         Assert.isTrue(currentVariable instanceof List, "循环变量只能为List结构");
@@ -57,23 +61,43 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
                             Map object = BeanUtil.beanToMap(list.get(i));
                             object.put("index", i);
                             variable.put("循环对象", object);
-                            RuleExpressionTranslate ruleExpressionTranslate = new RuleExpressionTranslate(ruleAction.getWhenRule());
-                            AviatorContext aviatorContext = AviatorContext.builder().expression(ruleExpressionTranslate.getExpression()).cached(true).env(executionEntity.getVariable()).build();
-                            if (StrUtil.isBlank(aviatorContext.getExpression())) {
-                                log.info("节点:{} 条件表达式为空", ruleAction.getWhenRule().getKey());
-                            }
-                            if (StrUtil.isBlank(aviatorContext.getExpression()) || AviatorExecutor.executeBoolean(aviatorContext)) {
-                                System.out.println("true");
+                            if (AviatorExecutor.executeBoolean(aviatorContext)) {
+                                excuteActions(ruleAction.getThenActions(), variable);
+                            } else {
+                                excuteActions(ruleAction.getOtherwiseActions(), variable);
                             }
                         }
                     }
                 } else {
-
+                    if (AviatorExecutor.executeBoolean(aviatorContext)) {
+                        excuteActions(ruleAction.getThenActions(), variable);
+                    } else {
+                        excuteActions(ruleAction.getOtherwiseActions(), variable);
+                    }
                 }
 
             }
         }
     }
+
+    private void excuteActions(List<Action> actions, Map<String, Object> variable) {
+        for (Action action : actions) {
+            ActionType type = action.getType();
+            switch (type) {
+                case ASSIGNMENT:
+                    ActionUtils.assignment(action, variable);
+                    break;
+                case CONTINUE:
+                    break;
+                case BREAK:
+                    break;
+                case DELETE:
+                    break;
+            }
+            System.out.println();
+        }
+    }
+
 
     @Override
     public Node getNode() {

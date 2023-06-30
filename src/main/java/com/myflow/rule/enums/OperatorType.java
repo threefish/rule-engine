@@ -43,8 +43,8 @@ public enum OperatorType {
     NOT_BETWEEN("notBetween"),
     IS_EMPTY("isEmpty"),
     IS_NOT_EMPTY("isNotEmpty"),
-    
-    
+
+
     ;
 
 

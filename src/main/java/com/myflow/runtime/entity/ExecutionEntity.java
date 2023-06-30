@@ -64,11 +64,12 @@ public interface ExecutionEntity {
      */
     void setEnded(boolean isEnded);
 
+    Map<String, Object> getVariable();
+
     /**
      * 设置变量
      *
      * @param variable
      */
     void setVariable(Map<String, Object> variable);
-    Map<String, Object> getVariable();
 }
