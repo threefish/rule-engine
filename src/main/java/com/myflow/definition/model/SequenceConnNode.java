@@ -1,5 +1,6 @@
 package com.myflow.definition.model;
 
+import com.myflow.rule.Rule;
 import lombok.Data;
 
 /**
@@ -29,10 +30,14 @@ public class SequenceConnNode extends Node {
      */
     protected Node targetNode;
 
-    /**
-     * 条件
-     */
-    protected String conditionExpression;
+    protected int sortNum;
+
+    protected Rule rule;
+
+    protected boolean readonly;
+
+    private String conditionalExpression;
+
 
     @Override
     public NodeType getType() {

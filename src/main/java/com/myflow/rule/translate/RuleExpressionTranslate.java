@@ -29,6 +29,9 @@ public class RuleExpressionTranslate {
     }
 
     public String getExpression() {
+        if (this.rule == null) {
+            return "";
+        }
         if (StrUtil.isBlank(expression)) {
             expressions.add(rule.getCombinator().name());
             if (rule.isRoot() || rule.getRuleType() == RuleType.group) {
