@@ -83,6 +83,7 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
                     }
                     list.removeAll(eachRowContext.getWaitDeleteRows());
                     variable.remove(LOOP_OBJECT_KEY);
+                    variable.remove(LOOP_OBJECT_INDEX_KEY);
                 }
             } else {
                 try {
@@ -104,7 +105,14 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
         }
     }
 
-
+    /**
+     * 执行操作
+     *
+     * @param actions
+     * @param variable
+     * @param eachRowContext
+     * @param object
+     */
     private void excuteActions(List<Action> actions, Map<String, Object> variable, EachRowContext eachRowContext, Object object) {
         for (Action action : actions) {
             ActionType actionType = action.getType();
@@ -113,7 +121,9 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
                     ActionUtils.assignment(action, variable);
                     break;
                 case DELETE:
-                    eachRowContext.addDeleteObject(object);
+                    if (eachRowContext != null && object != null) {
+                        eachRowContext.addDeleteObject(object);
+                    }
                     break;
                 case CONTINUE:
                     throw new ActionExcuteException(ActionType.CONTINUE);
