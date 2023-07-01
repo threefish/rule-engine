@@ -39,7 +39,7 @@ public class ParallelGatewayNodeBehavior implements NodeBehavior {
         List<SequenceConnNode> outgoingNodes = node.getOutgoingNodes();
         Collections.sort(outgoingNodes, Comparator.comparing(SequenceConnNode::getSortNum));
         for (SequenceConnNode outgoingNode : outgoingNodes) {
-            String expression = outgoingNode.getConditionalExpression();
+            String expression = outgoingNode.getRule().getExpressionCacheString();
             AviatorContext aviatorContext = AviatorContext.create(expression, executionEntity.getVariable());
             if (StrUtil.isNotBlank(expression) || AviatorExecutor.executeBoolean(aviatorContext)) {
                 i++;

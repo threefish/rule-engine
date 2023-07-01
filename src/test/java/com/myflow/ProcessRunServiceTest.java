@@ -8,7 +8,9 @@ import com.myflow.definition.parse.ProcessModelParse;
 import com.myflow.runtime.DefaultProcessRunService;
 import com.myflow.runtime.ProcessRunService;
 import com.myflow.runtime.context.ProcessRuntimeContext;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.springframework.util.StopWatch;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -18,6 +20,7 @@ import java.util.Map;
  * @author 黄川 huchuc@vip.qq.com
  * date: 2022/9/30
  */
+@Slf4j
 public class ProcessRunServiceTest {
     private static final ProcessModelParse PROCESS_MODEL_JSON_CONVERTER = new ProcessModelParse();
 
@@ -42,21 +45,24 @@ public class ProcessRunServiceTest {
     @Test
     void startTestGrsdsjs() {
         InputStream resourceAsStream = ProcessRunServiceTest.class.getResourceAsStream("/process/个人所得税计算.json");
-        ProcessModel processModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(IoUtil.readUtf8(resourceAsStream));
-
         String requestJson = IoUtil.readUtf8(ProcessRunServiceTest.class.getResourceAsStream("/process/个人所得税计算_request.json"));
-
-        Map<String, Object> variable = new HashMap<>();
-        variable.put("业务对象", VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), requestJson));
-
-        ProcessRuntimeContext processRuntimeContext = new ProcessRuntimeContext(processModel, variable);
-
-        ProcessRunService processRunService = new DefaultProcessRunService();
-
-        Long processId = processRunService.start(processRuntimeContext);
-
-        System.out.println("流程ID：" + processId);
-        System.out.println("流程结果：" + JsonUtil.obj2Json(variable));
+        ProcessModel processModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(IoUtil.readUtf8(resourceAsStream));
+        StopWatch sw = new StopWatch();
+        for (int i = 0; i < 100; i++) {
+            sw.start("task_" + i);
+            try {
+                Map<String, Object> variable = new HashMap<>();
+                variable.put("业务对象", VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), requestJson));
+                ProcessRuntimeContext processRuntimeContext = new ProcessRuntimeContext(processModel, variable);
+                ProcessRunService processRunService = new DefaultProcessRunService();
+                Long processId = processRunService.start(processRuntimeContext);
+                System.out.println("流程ID：" + processId);
+            } finally {
+                sw.stop();
+                log.info("耗时:{}ms", sw.getLastTaskTimeMillis());
+            }
+        }
+        log.info("总耗时:{}ms", sw.getTotalTimeMillis());
     }
 
 

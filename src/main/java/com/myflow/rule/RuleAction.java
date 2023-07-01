@@ -16,4 +16,6 @@ public class RuleAction {
     private Rule whenRule;
     private List<Action> thenActions;
     private List<Action> otherwiseActions;
+
+
 }

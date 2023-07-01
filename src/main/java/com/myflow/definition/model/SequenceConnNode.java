@@ -36,9 +36,6 @@ public class SequenceConnNode extends Node {
 
     protected boolean readonly;
 
-    private String conditionalExpression;
-
-
     @Override
     public NodeType getType() {
         return NodeType.SequenceConnNode;

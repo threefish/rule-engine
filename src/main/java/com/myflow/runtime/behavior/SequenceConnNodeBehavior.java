@@ -5,7 +5,6 @@ import com.myflow.aviator.AviatorContext;
 import com.myflow.aviator.AviatorExecutor;
 import com.myflow.definition.model.Node;
 import com.myflow.definition.model.SequenceConnNode;
-import com.myflow.rule.translate.RuleExpressionTranslate;
 import com.myflow.runtime.entity.ExecutionEntity;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,7 +19,6 @@ public class SequenceConnNodeBehavior implements NodeBehavior {
 
     public SequenceConnNodeBehavior(SequenceConnNode node) {
         this.node = node;
-        this.node.setConditionalExpression(new RuleExpressionTranslate(node.getRule()).getExpression());
     }
 
     @Override
@@ -29,7 +27,7 @@ public class SequenceConnNodeBehavior implements NodeBehavior {
         if (this.node.getRule() == null) {
             this.leave(executionEntity);
         } else {
-            String expression = this.node.getConditionalExpression();
+            String expression = this.node.getRule().getExpressionCacheString();
             AviatorContext aviatorContext = AviatorContext.create(expression, executionEntity.getVariable());
             if (StrUtil.isBlank(expression) || AviatorExecutor.executeBoolean(aviatorContext)) {
                 this.leave(executionEntity);

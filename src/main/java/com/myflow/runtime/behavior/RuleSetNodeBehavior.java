@@ -10,7 +10,6 @@ import com.myflow.rule.RuleAction;
 import com.myflow.rule.RuleSet;
 import com.myflow.rule.enums.ActionType;
 import com.myflow.rule.enums.RuleSetType;
-import com.myflow.rule.translate.RuleExpressionTranslate;
 import com.myflow.runtime.behavior.holder.EachRowContext;
 import com.myflow.runtime.entity.ExecutionEntity;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +63,7 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
                             variable.put(LOOP_OBJECT_INDEX_KEY, index);
                             List<RuleAction> ruleActions = ruleSet.getRuleActions();
                             for (RuleAction ruleAction : ruleActions) {
-                                AviatorContext aviatorContext = AviatorContext.create(new RuleExpressionTranslate(ruleAction.getWhenRule()).getExpression(), variable);
+                                AviatorContext aviatorContext = AviatorContext.create(ruleAction.getWhenRule().getExpressionCacheString(), variable);
                                 if (AviatorExecutor.executeBoolean(aviatorContext)) {
                                     excuteActions(ruleAction.getThenActions(), variable, eachRowContext, object);
                                 } else {
@@ -89,7 +88,7 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
                 try {
                     List<RuleAction> ruleActions = ruleSet.getRuleActions();
                     for (RuleAction ruleAction : ruleActions) {
-                        AviatorContext aviatorContext = AviatorContext.create(new RuleExpressionTranslate(ruleAction.getWhenRule()).getExpression(), variable);
+                        AviatorContext aviatorContext = AviatorContext.create(ruleAction.getWhenRule().getExpressionCacheString(), variable);
                         if (AviatorExecutor.executeBoolean(aviatorContext)) {
                             excuteActions(ruleAction.getThenActions(), variable, null, null);
                         } else {

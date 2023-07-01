@@ -1,6 +1,7 @@
 package com.myflow.rule;
 
 import com.myflow.rule.enums.*;
+import com.myflow.rule.translate.RuleExpressionTranslate;
 import lombok.Data;
 
 import java.util.List;
@@ -31,5 +32,13 @@ public class Rule {
     private OperatorType operator;
     private String descript;
 
+    private String expressionCacheString;
+
+    public String getExpressionCacheString() {
+        if (this.expressionCacheString == null) {
+            this.expressionCacheString = new RuleExpressionTranslate(this).getExpression();
+        }
+        return this.expressionCacheString;
+    }
 
 }
