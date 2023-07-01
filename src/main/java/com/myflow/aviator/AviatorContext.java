@@ -25,4 +25,9 @@ public class AviatorContext implements Serializable {
      * 是否缓存
      */
     private boolean cached;
+
+
+    public static AviatorContext create(String expression, Map<String, Object> env) {
+        return AviatorContext.builder().expression(expression).cached(true).env(env).build();
+    }
 }

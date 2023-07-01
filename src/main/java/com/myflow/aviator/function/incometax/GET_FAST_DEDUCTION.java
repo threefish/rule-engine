@@ -10,7 +10,10 @@ import java.util.Map;
  * @author 黄川 huchuc@vip.qq.com
  * date: 2023/7/1
  */
+@SuppressWarnings("all")
 public class GET_FAST_DEDUCTION extends AbstractFunction {
+    private static final String FUNCTION_NAME = GET_FAST_DEDUCTION.class.getSimpleName();
+
     @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1) {
         Object target = arg1.getValue(env);
@@ -36,6 +39,6 @@ public class GET_FAST_DEDUCTION extends AbstractFunction {
 
     @Override
     public String getName() {
-        return this.getClass().getSimpleName();
+        return FUNCTION_NAME;
     }
 }

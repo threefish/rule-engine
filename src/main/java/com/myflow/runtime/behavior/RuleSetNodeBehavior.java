@@ -1,11 +1,8 @@
 package com.myflow.runtime.behavior;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.myflow.aviator.AviatorContext;
 import com.myflow.aviator.AviatorExecutor;
 import com.myflow.common.utils.ActionUtils;
-import com.myflow.common.utils.JsonUtil;
-import com.myflow.common.utils.VariableUtils;
 import com.myflow.definition.model.Node;
 import com.myflow.definition.model.activity.RuleSetNode;
 import com.myflow.rule.Action;
@@ -14,6 +11,7 @@ import com.myflow.rule.RuleSet;
 import com.myflow.rule.enums.ActionType;
 import com.myflow.rule.enums.RuleSetType;
 import com.myflow.rule.translate.RuleExpressionTranslate;
+import com.myflow.runtime.behavior.holder.EachRowContext;
 import com.myflow.runtime.entity.ExecutionEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
@@ -29,6 +27,8 @@ import java.util.Objects;
 @Slf4j
 public class RuleSetNodeBehavior extends BaseNodeBehavior {
 
+    private final static String LOOP_OBJECT_KEY = "循环对象";
+    private final static String LOOP_OBJECT_INDEX_KEY = "循环对象索引";
     private final RuleSetNode node;
 
     public RuleSetNodeBehavior(RuleSetNode node) {
@@ -44,81 +44,88 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
     public void doExecution(ExecutionEntity executionEntity) {
         log.info("开始执行规则集");
         List<RuleSet> ruleSets = node.getRuleSet();
+        ruleSetTag:
         for (RuleSet ruleSet : ruleSets) {
             RuleSetType type = ruleSet.getType();
             Map<String, Object> variable = executionEntity.getVariable();
-            Object currentVariable = VariableUtils.getByPathVariable(ruleSet.getLoopVariableName(), variable);
-
+            Object currentVariable = AviatorExecutor.execute(AviatorContext.create(ruleSet.getLoopVariableName(), variable));
             if (type == RuleSetType.LOOP) {
                 if (Objects.nonNull(currentVariable)) {
-                    Assert.isTrue(currentVariable instanceof List, "循环变量只能为List结构");
+                    Assert.isTrue(currentVariable instanceof List, "循环变量不是一个有效的集合对象");
                 }
-                if (currentVariable instanceof List) {
-                    List list = ((List<?>) currentVariable);
-                    for (int i = 0; i < list.size(); i++) {
-                        Map object = BeanUtil.beanToMap(list.get(i));
-                        object.put("index", i);
-                        variable.put("循环对象", object);
-
-                        List<RuleAction> ruleActions = ruleSet.getRuleActions();
-                        for (RuleAction ruleAction : ruleActions) {
-
-                            RuleExpressionTranslate ruleExpressionTranslate = new RuleExpressionTranslate(ruleAction.getWhenRule());
-                            AviatorContext aviatorContext = AviatorContext.builder().expression(ruleExpressionTranslate.getExpression()).cached(true).env(variable).build();
-
-                            if (AviatorExecutor.executeBoolean(aviatorContext)) {
-                                excuteActions(ruleAction.getThenActions(), variable);
-                            } else {
-                                excuteActions(ruleAction.getOtherwiseActions(), variable);
+                if (currentVariable != null) {
+                    List list = ((List) currentVariable);
+                    EachRowContext eachRowContext = new EachRowContext();
+                    listTag:
+                    for (int index = 0; index < list.size(); index++) {
+                        Object object = list.get(index);
+                        try {
+                            variable.put(LOOP_OBJECT_KEY, object);
+                            variable.put(LOOP_OBJECT_INDEX_KEY, index);
+                            List<RuleAction> ruleActions = ruleSet.getRuleActions();
+                            for (RuleAction ruleAction : ruleActions) {
+                                AviatorContext aviatorContext = AviatorContext.create(new RuleExpressionTranslate(ruleAction.getWhenRule()).getExpression(), variable);
+                                if (AviatorExecutor.executeBoolean(aviatorContext)) {
+                                    excuteActions(ruleAction.getThenActions(), variable, eachRowContext, object);
+                                } else {
+                                    excuteActions(ruleAction.getOtherwiseActions(), variable, eachRowContext, object);
+                                }
                             }
-
+                        } catch (ActionExcuteException excuteException) {
+                            if (excuteException.getActionType() == ActionType.CONTINUE) {
+                                continue listTag;
+                            } else if (excuteException.getActionType() == ActionType.BREAK) {
+                                break listTag;
+                            } else if (excuteException.getActionType() == ActionType.BREAK_RULE_SET) {
+                                break ruleSetTag;
+                            }
                         }
-
-
-                        object.remove("index");
-                        list.set(i, object);
                     }
-                    variable.remove("循环对象");
+                    list.removeAll(eachRowContext.getWaitDeleteRows());
+                    variable.remove(LOOP_OBJECT_KEY);
                 }
             } else {
-                List<RuleAction> ruleActions = ruleSet.getRuleActions();
-                for (RuleAction ruleAction : ruleActions) {
-
-                    RuleExpressionTranslate ruleExpressionTranslate = new RuleExpressionTranslate(ruleAction.getWhenRule());
-                    AviatorContext aviatorContext = AviatorContext.builder().expression(ruleExpressionTranslate.getExpression()).cached(true).env(variable).build();
-
-                    if (AviatorExecutor.executeBoolean(aviatorContext)) {
-                        excuteActions(ruleAction.getThenActions(), variable);
-                    } else {
-                        excuteActions(ruleAction.getOtherwiseActions(), variable);
+                try {
+                    List<RuleAction> ruleActions = ruleSet.getRuleActions();
+                    for (RuleAction ruleAction : ruleActions) {
+                        AviatorContext aviatorContext = AviatorContext.create(new RuleExpressionTranslate(ruleAction.getWhenRule()).getExpression(), variable);
+                        if (AviatorExecutor.executeBoolean(aviatorContext)) {
+                            excuteActions(ruleAction.getThenActions(), variable, null, null);
+                        } else {
+                            excuteActions(ruleAction.getOtherwiseActions(), variable, null, null);
+                        }
                     }
-
+                } catch (ActionExcuteException excuteException) {
+                    if (excuteException.getActionType() == ActionType.BREAK_RULE_SET) {
+                        break ruleSetTag;
+                    }
                 }
             }
-
-
         }
     }
 
-    private void excuteActions(List<Action> actions, Map<String, Object> variable) {
+
+    private void excuteActions(List<Action> actions, Map<String, Object> variable, EachRowContext eachRowContext, Object object) {
         for (Action action : actions) {
-            ActionType type = action.getType();
-            switch (type) {
+            ActionType actionType = action.getType();
+            switch (actionType) {
                 case ASSIGNMENT:
-                    System.out.println(JsonUtil.obj2Json(variable));
                     ActionUtils.assignment(action, variable);
-                    System.out.println(action.getExpressionValue());
-                    System.out.println(JsonUtil.obj2Json(variable));
-                    break;
-                case CONTINUE:
-                    break;
-                case BREAK:
                     break;
                 case DELETE:
+                    eachRowContext.addDeleteObject(object);
+                    break;
+                case CONTINUE:
+                    throw new ActionExcuteException(ActionType.CONTINUE);
+                case BREAK:
+                    throw new ActionExcuteException(ActionType.BREAK);
+                case BREAK_RULE_SET:
+                    throw new ActionExcuteException(ActionType.BREAK_RULE_SET);
+                default:
                     break;
             }
-            System.out.println();
         }
+
     }
 
 

@@ -47,7 +47,7 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
 
     @Override
     public void leave(ExecutionEntity executionEntity) {
-        log.info("离开[{}]节点", getNode().getKey());
+        log.info("离开[{}:{}]节点", getNode().getName(), getNode().getKey());
         // 满足离开节点条件
         List<SequenceConnNode> outgoingNodes = getNode().getOutgoingNodes();
         for (SequenceConnNode outgoingNode : outgoingNodes) {

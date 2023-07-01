@@ -12,6 +12,7 @@ public enum ActionType {
     CONTINUE("跳出本次循环"),
     BREAK("结束循环"),
     DELETE("结束循环"),
+    BREAK_RULE_SET("中断执行后续规则集"),
 
 
     ;

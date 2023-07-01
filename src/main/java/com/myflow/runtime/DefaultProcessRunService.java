@@ -3,7 +3,6 @@ package com.myflow.runtime;
 import cn.hutool.core.util.IdUtil;
 import com.myflow.definition.model.ProcessModel;
 import com.myflow.definition.model.StartNode;
-import com.myflow.runtime.behavior.NodeBehavior;
 import com.myflow.runtime.context.ProcessRuntimeContext;
 import com.myflow.runtime.entity.ExecutionEntity;
 import com.myflow.runtime.entity.ExecutionEntityImpl;
@@ -20,8 +19,7 @@ public class DefaultProcessRunService implements ProcessRunService {
         ExecutionEntity executionEntity = new ExecutionEntityImpl(snowflakeNextId, processRuntimeContext.getVariable());
         ProcessModel processModel = processRuntimeContext.getProcessModel();
         StartNode startNode = processModel.getStartNode();
-        NodeBehavior behavior = startNode.getBehavior();
-        behavior.execution(executionEntity);
+        startNode.getBehavior().execution(executionEntity);
         return executionEntity.getProcessInstanceId();
     }
 
