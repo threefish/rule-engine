@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.myflow.aviator.AviatorContext;
 import com.myflow.aviator.AviatorExecutor;
 import com.myflow.common.utils.ActionUtils;
+import com.myflow.common.utils.JsonUtil;
 import com.myflow.common.utils.VariableUtils;
 import com.myflow.definition.model.Node;
 import com.myflow.definition.model.activity.RuleSetNode;
@@ -44,42 +45,58 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
         log.info("开始执行规则集");
         List<RuleSet> ruleSets = node.getRuleSet();
         for (RuleSet ruleSet : ruleSets) {
-            List<RuleAction> ruleActions = ruleSet.getRuleActions();
-            for (RuleAction ruleAction : ruleActions) {
-                RuleSetType type = ruleSet.getType();
-                Map<String, Object> variable = executionEntity.getVariable();
-                Object currentVariable = VariableUtils.getByPathVariable(ruleSet.getLoopVariableName(), variable);
-                RuleExpressionTranslate ruleExpressionTranslate = new RuleExpressionTranslate(ruleAction.getWhenRule());
-                AviatorContext aviatorContext = AviatorContext.builder().expression(ruleExpressionTranslate.getExpression()).cached(true).env(variable).build();
-                if (type == RuleSetType.LOOP) {
-                    if (Objects.nonNull(currentVariable)) {
-                        Assert.isTrue(currentVariable instanceof List, "循环变量只能为List结构");
-                    }
-                    if (currentVariable instanceof List) {
-                        List list = ((List<?>) currentVariable);
-                        for (int i = 0; i < list.size(); i++) {
-                            Map object = BeanUtil.beanToMap(list.get(i));
-                            object.put("index", i);
-                            variable.put("循环对象", object);
+            RuleSetType type = ruleSet.getType();
+            Map<String, Object> variable = executionEntity.getVariable();
+            Object currentVariable = VariableUtils.getByPathVariable(ruleSet.getLoopVariableName(), variable);
+
+            if (type == RuleSetType.LOOP) {
+                if (Objects.nonNull(currentVariable)) {
+                    Assert.isTrue(currentVariable instanceof List, "循环变量只能为List结构");
+                }
+                if (currentVariable instanceof List) {
+                    List list = ((List<?>) currentVariable);
+                    for (int i = 0; i < list.size(); i++) {
+                        Map object = BeanUtil.beanToMap(list.get(i));
+                        object.put("index", i);
+                        variable.put("循环对象", object);
+
+                        List<RuleAction> ruleActions = ruleSet.getRuleActions();
+                        for (RuleAction ruleAction : ruleActions) {
+
+                            RuleExpressionTranslate ruleExpressionTranslate = new RuleExpressionTranslate(ruleAction.getWhenRule());
+                            AviatorContext aviatorContext = AviatorContext.builder().expression(ruleExpressionTranslate.getExpression()).cached(true).env(variable).build();
+
                             if (AviatorExecutor.executeBoolean(aviatorContext)) {
                                 excuteActions(ruleAction.getThenActions(), variable);
                             } else {
                                 excuteActions(ruleAction.getOtherwiseActions(), variable);
                             }
-                            object.remove("index");
-                            list.set(i, object);
+
                         }
-                        variable.remove("循环对象");
+
+
+                        object.remove("index");
+                        list.set(i, object);
                     }
-                } else {
+                    variable.remove("循环对象");
+                }
+            } else {
+                List<RuleAction> ruleActions = ruleSet.getRuleActions();
+                for (RuleAction ruleAction : ruleActions) {
+
+                    RuleExpressionTranslate ruleExpressionTranslate = new RuleExpressionTranslate(ruleAction.getWhenRule());
+                    AviatorContext aviatorContext = AviatorContext.builder().expression(ruleExpressionTranslate.getExpression()).cached(true).env(variable).build();
+
                     if (AviatorExecutor.executeBoolean(aviatorContext)) {
                         excuteActions(ruleAction.getThenActions(), variable);
                     } else {
                         excuteActions(ruleAction.getOtherwiseActions(), variable);
                     }
-                }
 
+                }
             }
+
+
         }
     }
 
@@ -88,7 +105,10 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
             ActionType type = action.getType();
             switch (type) {
                 case ASSIGNMENT:
+                    System.out.println(JsonUtil.obj2Json(variable));
                     ActionUtils.assignment(action, variable);
+                    System.out.println(action.getExpressionValue());
+                    System.out.println(JsonUtil.obj2Json(variable));
                     break;
                 case CONTINUE:
                     break;

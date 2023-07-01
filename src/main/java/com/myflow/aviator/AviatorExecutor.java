@@ -16,7 +16,8 @@ import java.math.MathContext;
 @Slf4j
 public class AviatorExecutor {
     static {
-//        AviatorEvaluator.setOption(Options.ALWAYS_USE_DOUBLE_AS_DECIMAL, true);
+        AviatorEvaluator.setOption(Options.ALWAYS_PARSE_FLOATING_POINT_NUMBER_INTO_DECIMAL, true);
+        AviatorEvaluator.setOption(Options.ALWAYS_PARSE_INTEGRAL_NUMBER_INTO_DECIMAL, true);
         AviatorEvaluator.setOption(Options.MATH_CONTEXT, MathContext.DECIMAL128);
         AviatorEvaluator.addFunction(new GET_INCOME_TAX_RATE());
         AviatorEvaluator.addFunction(new GET_FAST_DEDUCTION());

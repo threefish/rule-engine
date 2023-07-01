@@ -354,11 +354,19 @@
                   },
                   {
                     "type": "ASSIGNMENT",
-                    "left": "循环对象.累计收入",
-                    "expressionValue": "循环对象.累计减除费用 - 循环对象.累计社保公积金费用",
+                    "left": "循环对象.累计预扣预缴应纳税所得额",
+                    "expressionValue": "循环对象.累计收入 - 循环对象.累计减除费用 - 循环对象.累计社保公积金费用",
                     "values": [],
                     "assignmentType": "CALC",
-                    "key": "1d3a6db8-dc1d-413b-9e86-bfdf8bb36488"
+                    "key": "3087bbac-cd92-440b-9bce-f1aa5f38e866"
+                  },
+                  {
+                    "type": "ASSIGNMENT",
+                    "left": "业务对象.年累计.应纳税额",
+                    "expressionValue": "循环对象.累计应纳税额 + 业务对象.年累计.应纳税额",
+                    "values": [],
+                    "assignmentType": "CALC",
+                    "key": "072be607-f569-491c-900e-ce09f4e0fb12"
                   }
                 ],
                 "otherwiseActions": []
@@ -439,6 +447,14 @@
                     "values": [],
                     "assignmentType": "CALC",
                     "key": "fba36873-9769-4a9d-9442-e4a9c167f329"
+                  },
+                  {
+                    "type": "ASSIGNMENT",
+                    "left": "业务对象.年累计.应纳税额",
+                    "expressionValue": "循环对象.累计应纳税额 + 业务对象.年累计.应纳税额",
+                    "values": [],
+                    "assignmentType": "CALC",
+                    "key": "7ffa852c-a387-4dfe-b8af-00e8b8834914"
                   }
                 ],
                 "otherwiseActions": []
@@ -472,8 +488,9 @@
                     "type": "ASSIGNMENT",
                     "left": "循环对象.应付税款",
                     "fieldValue": "业务对象.年累计.应付税款",
+                    "expressionValue": "循环对象.累计应纳税额 - 业务对象.年累计.应付税款",
                     "values": [],
-                    "assignmentType": "VAR",
+                    "assignmentType": "CALC",
                     "key": "8b0b53ab-3c43-4c1f-a275-e642ac1f1915"
                   }
                 ],
