@@ -48,7 +48,7 @@ public class ProcessRunServiceTest {
         String requestJson = IoUtil.readUtf8(ProcessRunServiceTest.class.getResourceAsStream("/process/个人所得税计算_request.json"));
         ProcessModel processModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(IoUtil.readUtf8(resourceAsStream));
         StopWatch sw = new StopWatch();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1; i++) {
             sw.start("task_" + i);
             try {
                 Map<String, Object> variable = new HashMap<>();
@@ -57,6 +57,7 @@ public class ProcessRunServiceTest {
                 ProcessRunService processRunService = new DefaultProcessRunService();
                 Long processId = processRunService.start(processRuntimeContext);
                 System.out.println("流程ID：" + processId);
+                System.out.println("返回信息：" + JsonUtil.obj2Json(variable));
             } finally {
                 sw.stop();
                 log.info("耗时:{}ms", sw.getLastTaskTimeMillis());
