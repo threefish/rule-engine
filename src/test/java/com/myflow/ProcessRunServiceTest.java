@@ -1,26 +1,17 @@
 package com.myflow;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.json.JSONUtil;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.myflow.common.utils.JsonUtil;
 import com.myflow.common.utils.VariableTranslateUtils;
-import com.myflow.definition.model.ObjectModel;
 import com.myflow.definition.model.ProcessModel;
 import com.myflow.definition.parse.ProcessModelParse;
-import com.myflow.rule.enums.VariableType;
 import com.myflow.runtime.DefaultProcessRunService;
 import com.myflow.runtime.ProcessRunService;
 import com.myflow.runtime.context.ProcessRuntimeContext;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,7 +47,7 @@ public class ProcessRunServiceTest {
         String requestJson = IoUtil.readUtf8(ProcessRunServiceTest.class.getResourceAsStream("/process/个人所得税计算_request.json"));
 
         Map<String, Object> variable = new HashMap<>();
-        variable.put("业务对象",VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), requestJson));
+        variable.put("业务对象", VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), requestJson));
 
         ProcessRuntimeContext processRuntimeContext = new ProcessRuntimeContext(processModel, variable);
 
@@ -65,6 +56,7 @@ public class ProcessRunServiceTest {
         Long processId = processRunService.start(processRuntimeContext);
 
         System.out.println("流程ID：" + processId);
+        System.out.println("流程结果：" + JsonUtil.obj2Json(variable));
     }
 
 

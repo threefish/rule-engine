@@ -66,7 +66,10 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
                             } else {
                                 excuteActions(ruleAction.getOtherwiseActions(), variable);
                             }
+                            object.remove("index");
+                            list.set(i, object);
                         }
+                        variable.remove("循环对象");
                     }
                 } else {
                     if (AviatorExecutor.executeBoolean(aviatorContext)) {

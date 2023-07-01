@@ -2,6 +2,8 @@ package com.myflow.aviator;
 
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Options;
+import com.myflow.aviator.function.incometax.GET_FAST_DEDUCTION;
+import com.myflow.aviator.function.incometax.GET_INCOME_TAX_RATE;
 import com.myflow.common.utils.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,6 +18,8 @@ public class AviatorExecutor {
     static {
 //        AviatorEvaluator.setOption(Options.ALWAYS_USE_DOUBLE_AS_DECIMAL, true);
         AviatorEvaluator.setOption(Options.MATH_CONTEXT, MathContext.DECIMAL128);
+        AviatorEvaluator.addFunction(new GET_INCOME_TAX_RATE());
+        AviatorEvaluator.addFunction(new GET_FAST_DEDUCTION());
     }
 
     private AviatorExecutor() {
@@ -29,7 +33,9 @@ public class AviatorExecutor {
      */
     public static Object execute(AviatorContext context) {
         Object result = AviatorEvaluator.execute(context.getExpression(), context.getEnv(), context.isCached());
-        log.info("Aviator执行器result={},context={}", result, JsonUtil.obj2Json(context));
+        if (log.isDebugEnabled()) {
+            log.debug("Aviator执行器result={},context={}", result, JsonUtil.obj2Json(context));
+        }
         return result;
     }
 
