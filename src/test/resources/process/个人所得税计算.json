@@ -2,7 +2,6 @@
   "key": "grsdsjs",
   "name": "个人所得税计算",
   "documentation": "个人所得税计算",
-  "executionListeners": [],
   "businessObjectModels": [
     {
       "value": "year",
@@ -76,7 +75,7 @@
       "response": true
     },
     {
-      "value": "salaryDetail",
+      "value": "salaryDetails",
       "type": "list",
       "required": true,
       "label": "月薪",
@@ -299,35 +298,7 @@
                     "values": [],
                     "assignmentType": "CALC",
                     "key": "f512acbc-bf04-4e9f-91aa-9fdcd34f1c86"
-                  }
-                ],
-                "otherwiseActions": []
-              },
-              {
-                "key": "89cd4385-7596-4025-98b4-40ca61cf6499",
-                "whenRule": {
-                  "rules": [
-                    {
-                      "key": "rule_0d938832-2cdc-4d2f-81df-9cd4d2a57369",
-                      "assignmentType": "FIXED",
-                      "ruleType": "rule",
-                      "combinator": "AND",
-                      "name": "循环对象.税前收入",
-                      "root": false,
-                      "field": "循环对象.税前收入",
-                      "value": 5000,
-                      "varType": "number",
-                      "operator": ">",
-                      "descript": ""
-                    }
-                  ],
-                  "combinator": "AND",
-                  "ruleType": "rule",
-                  "root": true,
-                  "key": "064a2bfa-734b-46b0-859e-c0b340fb58d8",
-                  "assignmentType": "FIXED"
-                },
-                "thenActions": [
+                  },
                   {
                     "type": "ASSIGNMENT",
                     "left": "业务对象.年累计.税前收入",
@@ -359,35 +330,7 @@
                     "values": [],
                     "assignmentType": "CALC",
                     "key": "3087bbac-cd92-440b-9bce-f1aa5f38e866"
-                  }
-                ],
-                "otherwiseActions": []
-              },
-              {
-                "key": "3b0ec178-93ac-40fe-b280-fabf3b30e3fa",
-                "whenRule": {
-                  "rules": [
-                    {
-                      "key": "rule_bfa39518-1df7-4109-aecd-837c3b34876a",
-                      "assignmentType": "FIXED",
-                      "ruleType": "rule",
-                      "combinator": "AND",
-                      "name": "循环对象.税前收入",
-                      "root": false,
-                      "field": "循环对象.税前收入",
-                      "value": 5000,
-                      "varType": "number",
-                      "operator": ">",
-                      "descript": ""
-                    }
-                  ],
-                  "combinator": "AND",
-                  "ruleType": "rule",
-                  "root": true,
-                  "key": "c040694e-e01f-4d02-bc8f-8f49c081f6a7",
-                  "assignmentType": "FIXED"
-                },
-                "thenActions": [
+                  },
                   {
                     "type": "ASSIGNMENT",
                     "left": "循环对象.适用税率",
@@ -403,35 +346,7 @@
                     "values": [],
                     "assignmentType": "CALC",
                     "key": "283fdd45-8721-4836-8d5b-a32a9c1b3f8b"
-                  }
-                ],
-                "otherwiseActions": []
-              },
-              {
-                "key": "6ac0595d-23bd-4ec2-b129-dfaf300e6be0",
-                "whenRule": {
-                  "rules": [
-                    {
-                      "key": "rule_916bbc38-ba64-4685-92d0-7f103d7c7f34",
-                      "assignmentType": "FIXED",
-                      "ruleType": "rule",
-                      "combinator": "AND",
-                      "name": "循环对象.税前收入",
-                      "root": false,
-                      "field": "循环对象.税前收入",
-                      "value": 5000,
-                      "varType": "number",
-                      "operator": ">",
-                      "descript": ""
-                    }
-                  ],
-                  "combinator": "AND",
-                  "ruleType": "rule",
-                  "root": true,
-                  "key": "f1c37d60-a320-44a2-839d-f367aa12a79b",
-                  "assignmentType": "FIXED"
-                },
-                "thenActions": [
+                  },
                   {
                     "type": "ASSIGNMENT",
                     "left": "循环对象.累计应纳税额",
@@ -447,35 +362,7 @@
                     "values": [],
                     "assignmentType": "CALC",
                     "key": "7ffa852c-a387-4dfe-b8af-00e8b8834914"
-                  }
-                ],
-                "otherwiseActions": []
-              },
-              {
-                "key": "10d28d67-f158-4b9c-a064-f93e38212370",
-                "whenRule": {
-                  "rules": [
-                    {
-                      "key": "rule_2ec5eca3-d78a-4ec7-a535-6f9c2242d32b",
-                      "assignmentType": "FIXED",
-                      "ruleType": "rule",
-                      "combinator": "AND",
-                      "name": "循环对象.税前收入",
-                      "root": false,
-                      "field": "循环对象.税前收入",
-                      "value": 5000,
-                      "varType": "number",
-                      "operator": ">",
-                      "descript": ""
-                    }
-                  ],
-                  "combinator": "AND",
-                  "ruleType": "rule",
-                  "root": true,
-                  "key": "b74bde8b-985e-4da5-9c48-eb9f698b1d49",
-                  "assignmentType": "FIXED"
-                },
-                "thenActions": [
+                  },
                   {
                     "type": "ASSIGNMENT",
                     "left": "循环对象.应付税款",
@@ -484,35 +371,7 @@
                     "values": [],
                     "assignmentType": "CALC",
                     "key": "8b0b53ab-3c43-4c1f-a275-e642ac1f1915"
-                  }
-                ],
-                "otherwiseActions": []
-              },
-              {
-                "key": "15921302-a3d1-4f55-a03b-c775600492c6",
-                "whenRule": {
-                  "rules": [
-                    {
-                      "key": "rule_2ec5eca3-d78a-4ec7-a535-6f9c2242d32b",
-                      "assignmentType": "FIXED",
-                      "ruleType": "rule",
-                      "combinator": "AND",
-                      "name": "循环对象.税前收入",
-                      "root": false,
-                      "field": "循环对象.税前收入",
-                      "value": 5000,
-                      "varType": "number",
-                      "operator": ">",
-                      "descript": ""
-                    }
-                  ],
-                  "combinator": "AND",
-                  "ruleType": "rule",
-                  "root": true,
-                  "key": "c4dc95fe-4460-49b7-b5b4-4a81b1438275",
-                  "assignmentType": "FIXED"
-                },
-                "thenActions": [
+                  },
                   {
                     "type": "ASSIGNMENT",
                     "left": "业务对象.年累计.应付税款",
@@ -528,35 +387,7 @@
                     "values": [],
                     "assignmentType": "CALC",
                     "key": "35b02ce6-92f6-4421-bc15-4fc9bd012ec8"
-                  }
-                ],
-                "otherwiseActions": []
-              },
-              {
-                "key": "cb607540-b652-49e9-b683-6f67e879aee2",
-                "whenRule": {
-                  "rules": [
-                    {
-                      "key": "rule_2ec5eca3-d78a-4ec7-a535-6f9c2242d32b",
-                      "assignmentType": "FIXED",
-                      "ruleType": "rule",
-                      "combinator": "AND",
-                      "name": "循环对象.税前收入",
-                      "root": false,
-                      "field": "循环对象.税前收入",
-                      "value": 5000,
-                      "varType": "number",
-                      "operator": ">",
-                      "descript": ""
-                    }
-                  ],
-                  "combinator": "AND",
-                  "ruleType": "rule",
-                  "root": true,
-                  "key": "b02189c5-a2b6-4afd-b861-72abbbdfd846",
-                  "assignmentType": "FIXED"
-                },
-                "thenActions": [
+                  },
                   {
                     "type": "ASSIGNMENT",
                     "left": "业务对象.年累计.税后收入",
