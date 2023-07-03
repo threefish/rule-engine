@@ -214,6 +214,8 @@
     }
   ],
   "order": {
-    "totalAmount": 66666
+    "totalAmount": 66666,
+    "channelCode": "JD",
+    "integral": 0
   }
 }
