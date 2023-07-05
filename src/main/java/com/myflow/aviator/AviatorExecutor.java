@@ -15,6 +15,7 @@ import java.math.MathContext;
  */
 @Slf4j
 public class AviatorExecutor {
+
     static {
         AviatorEvaluator.setOption(Options.ALWAYS_PARSE_FLOATING_POINT_NUMBER_INTO_DECIMAL, true);
         AviatorEvaluator.setOption(Options.ALWAYS_PARSE_INTEGRAL_NUMBER_INTO_DECIMAL, true);

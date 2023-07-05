@@ -13,6 +13,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.myflow.definition.model.ObjectModel;
 import com.myflow.rule.enums.VariableType;
 import lombok.SneakyThrows;
+import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Map;
@@ -71,22 +72,26 @@ public class VariableTranslateUtils {
     }
 
     private static void translateArray(ObjectModel businessObjectModel, JsonNode currentNode, ObjectNode targetNode) {
-        ArrayNode arrayNode = (ArrayNode) currentNode;
-        ArrayNode tempArrayNode = OBJECT_MAPPER.createArrayNode();
-        for (JsonNode arrChildNode : arrayNode) {
-            List<ObjectModel> children = businessObjectModel.getChildren();
-            if (CollUtil.isNotEmpty(children)) {
-                ObjectNode tempNode = OBJECT_MAPPER.createObjectNode();
-                for (ObjectModel child : children) {
-                    JsonNode childNode = arrChildNode.get(child.getValue());
-//                    tempNode.set(child.getLabel(), childNode);
-
-                    translate(child, childNode, tempNode);
-                }
-                tempArrayNode.add(tempNode);
-            }
+        if (currentNode == null) {
+            return;
         }
-        targetNode.set(businessObjectModel.getLabel(), tempArrayNode);
+        Assert.isTrue(currentNode instanceof ArrayNode, String.format("[%s]字段实际内容不是list格式！", businessObjectModel.getLabel(), businessObjectModel.getType()));
+        if (currentNode instanceof ArrayNode) {
+            ArrayNode arrayNode = (ArrayNode) currentNode;
+            ArrayNode tempArrayNode = OBJECT_MAPPER.createArrayNode();
+            for (JsonNode arrChildNode : arrayNode) {
+                List<ObjectModel> children = businessObjectModel.getChildren();
+                if (CollUtil.isNotEmpty(children)) {
+                    ObjectNode tempNode = OBJECT_MAPPER.createObjectNode();
+                    for (ObjectModel child : children) {
+                        JsonNode childNode = arrChildNode.get(child.getValue());
+                        translate(child, childNode, tempNode);
+                    }
+                    tempArrayNode.add(tempNode);
+                }
+            }
+            targetNode.set(businessObjectModel.getLabel(), tempArrayNode);
+        }
     }
 
 }

@@ -771,7 +771,7 @@
       "response": true
     },
     {
-      "value": "salaryDetail",
+      "value": "salaryDetails",
       "type": "list",
       "required": true,
       "label": "月薪",

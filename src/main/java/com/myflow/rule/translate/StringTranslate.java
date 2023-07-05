@@ -19,7 +19,7 @@ public class StringTranslate extends AbstractTranslate {
             put(OperatorType.NOT_EQ, (OperatorSupplier) rule -> String.format("%s!=%s", rule.getName(), rule.getValue()));
 
             put(OperatorType.LIKE, (OperatorSupplier) rule -> String.format("STR_LIKE(%s,%s)", rule.getName(), rule.getValue()));
-            put(OperatorType.NOT_LIKE, (OperatorSupplier) rule -> String.format("STR_NOT_LIKE(%s,%s)", rule.getName(), rule.getValue()));
+            put(OperatorType.NOT_LIKE, (OperatorSupplier) rule -> String.format("!STR_LIKE(%s,%s)", rule.getName(), rule.getValue()));
 
             put(OperatorType.IS_EMPTY, (OperatorSupplier) rule -> String.format("IS_EMPTY(%s,'string')", rule.getName()));
             put(OperatorType.IS_NOT_EMPTY, (OperatorSupplier) rule -> String.format("!IS_EMPTY(%s,'string')", rule.getName()));

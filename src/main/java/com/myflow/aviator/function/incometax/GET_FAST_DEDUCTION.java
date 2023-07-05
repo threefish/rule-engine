@@ -3,6 +3,7 @@ package com.myflow.aviator.function.incometax;
 import com.googlecode.aviator.runtime.function.AbstractFunction;
 import com.googlecode.aviator.runtime.type.AviatorBigInt;
 import com.googlecode.aviator.runtime.type.AviatorObject;
+import com.myflow.aviator.function.AbstractBaseFunction;
 
 import java.util.Map;
 
@@ -11,8 +12,7 @@ import java.util.Map;
  * date: 2023/7/1
  */
 @SuppressWarnings("all")
-public class GET_FAST_DEDUCTION extends AbstractFunction {
-    private static final String FUNCTION_NAME = GET_FAST_DEDUCTION.class.getSimpleName();
+public class GET_FAST_DEDUCTION extends AbstractBaseFunction {
 
     @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1) {
@@ -37,8 +37,5 @@ public class GET_FAST_DEDUCTION extends AbstractFunction {
         return AviatorBigInt.valueOf(kcs);
     }
 
-    @Override
-    public String getName() {
-        return FUNCTION_NAME;
-    }
+
 }
