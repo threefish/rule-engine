@@ -2,7 +2,6 @@ package cn.xjbpm.rule.engine.runtime.behavior;
 
 import cn.xjbpm.rule.engine.definition.model.Node;
 import cn.xjbpm.rule.engine.definition.model.NodeType;
-import cn.xjbpm.rule.engine.runtime.behavior.NodeBehavior;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.Constructor;
