@@ -6,7 +6,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.xjbpm.rule.engine.definition.model.*;
-import cn.xjbpm.rule.engine.runtime.BehaviorFactory;
+import cn.xjbpm.rule.engine.runtime.behavior.BehaviorFactory;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Type;

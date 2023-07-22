@@ -22,6 +22,7 @@ import java.util.Map;
  * @author 黄川 huchuc@vip.qq.com
  * date: 2023/6/30
  */
+@SuppressWarnings("all")
 public class VariableTranslateUtils {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new Jdk8Module())
             .registerModule(new JavaTimeModule()).setSerializationInclusion(JsonInclude.Include.NON_NULL)
@@ -29,49 +30,82 @@ public class VariableTranslateUtils {
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
     @SneakyThrows
-    public static Map<String, Object> translate(List<ObjectModel> businessObjectModels, String jsonData) {
-        // 创建 ObjectMapper 实例
-        // 解析 JSON 数据
+    public static Map<String, Object> translate(List<ObjectModel> businessObjectModels, boolean response, String jsonData) {
         JsonNode jsonNode = OBJECT_MAPPER.readTree(jsonData);
-        // 创建目标 JSON 数据对象
         ObjectNode targetNode = OBJECT_MAPPER.createObjectNode();
         for (ObjectModel businessObjectModel : businessObjectModels) {
+            if (response && businessObjectModel.isResponse() == false) {
+                continue;
+            }
             JsonNode currentNode = jsonNode.get(businessObjectModel.getValue());
-            translate(businessObjectModel, currentNode, targetNode);
+            if (response) {
+                currentNode = jsonNode.get(businessObjectModel.getLabel());
+            }
+            checkNotNull(businessObjectModel, currentNode);
+            translate(businessObjectModel, response, currentNode, targetNode);
         }
         return OBJECT_MAPPER.convertValue(targetNode, Map.class);
     }
 
-
-    private static void translate(ObjectModel businessObjectModel, JsonNode currentNode, ObjectNode targetNode) {
-        if (businessObjectModel.getType() == VariableType.OBJECT) {
-            translateObject(businessObjectModel, currentNode, targetNode);
-        } else if (businessObjectModel.getType() == VariableType.LIST) {
-            translateArray(businessObjectModel, currentNode, targetNode);
-        } else {
-            translateBaseNode(businessObjectModel, currentNode, targetNode);
+    private static void checkNotNull(ObjectModel businessObjectModel, JsonNode jsonNode) {
+        System.out.println(jsonNode == null);
+        VariableType type = businessObjectModel.getType();
+        Assert.notNull(jsonNode, String.format("[%s]字段不能为空", businessObjectModel.getLabel()));
+        if (type == VariableType.LIST) {
+            Assert.isTrue(jsonNode instanceof ArrayNode, String.format("[%s]字段必须为集合", businessObjectModel.getLabel()));
+            ArrayNode arrayNode = ((ArrayNode) jsonNode);
+            Assert.isTrue(!arrayNode.isEmpty(), String.format("[%s]集合不能为空", businessObjectModel.getLabel()));
+        }
+        if (type == VariableType.OBJECT) {
+            Assert.isTrue(jsonNode instanceof ObjectNode, String.format("[%s]字段必须为对象", businessObjectModel.getLabel()));
+            ObjectNode objectNode = ((ObjectNode) jsonNode);
+            Assert.isTrue(!objectNode.isEmpty(), String.format("[%s]对象下级属性不能为空", businessObjectModel.getLabel()));
         }
     }
 
-    private static void translateBaseNode(ObjectModel businessObjectModel, JsonNode currentNode, ObjectNode targetNode) {
-        targetNode.set(businessObjectModel.getLabel(), currentNode);
+    private static void translate(ObjectModel businessObjectModel, boolean response, JsonNode currentNode, ObjectNode targetNode) {
+        if (businessObjectModel.getType() == VariableType.OBJECT) {
+            translateObject(businessObjectModel, response, currentNode, targetNode);
+        } else if (businessObjectModel.getType() == VariableType.LIST) {
+            translateArray(businessObjectModel, response, currentNode, targetNode);
+        } else {
+            translateBaseNode(businessObjectModel, response, currentNode, targetNode);
+        }
+    }
+
+    private static void translateBaseNode(ObjectModel businessObjectModel, boolean response, JsonNode currentNode, ObjectNode targetNode) {
+        if (!response) {
+            targetNode.set(businessObjectModel.getLabel(), currentNode);
+        } else {
+            targetNode.set(businessObjectModel.getValue(), currentNode);
+        }
     }
 
 
-    private static void translateObject(ObjectModel businessObjectModel, JsonNode currentNode, ObjectNode targetNode) {
+    private static void translateObject(ObjectModel businessObjectModel, boolean response, JsonNode currentNode, ObjectNode targetNode) {
         ObjectNode tempNode = OBJECT_MAPPER.createObjectNode();
         List<ObjectModel> children = businessObjectModel.getChildren();
         if (CollUtil.isNotEmpty(children)) {
             for (ObjectModel child : children) {
+                if (response && child.isResponse() == false) {
+                    continue;
+                }
                 JsonNode childNode = currentNode.get(child.getValue());
-                translate(child, childNode, tempNode);
-
+                if (response) {
+                    childNode = currentNode.get(child.getLabel());
+                }
+                checkNotNull(child, childNode);
+                translate(child, response, childNode, tempNode);
             }
         }
-        targetNode.set(businessObjectModel.getLabel(), tempNode);
+        if (!response) {
+            targetNode.set(businessObjectModel.getLabel(), tempNode);
+        } else {
+            targetNode.set(businessObjectModel.getValue(), tempNode);
+        }
     }
 
-    private static void translateArray(ObjectModel businessObjectModel, JsonNode currentNode, ObjectNode targetNode) {
+    private static void translateArray(ObjectModel businessObjectModel, boolean response, JsonNode currentNode, ObjectNode targetNode) {
         if (currentNode == null) {
             return;
         }
@@ -84,14 +118,26 @@ public class VariableTranslateUtils {
                 if (CollUtil.isNotEmpty(children)) {
                     ObjectNode tempNode = OBJECT_MAPPER.createObjectNode();
                     for (ObjectModel child : children) {
+                        if (response && child.isResponse() == false) {
+                            continue;
+                        }
                         JsonNode childNode = arrChildNode.get(child.getValue());
-                        translate(child, childNode, tempNode);
+                        if (response) {
+                            childNode = arrChildNode.get(child.getLabel());
+                        }
+                        checkNotNull(child, childNode);
+                        translate(child, response, childNode, tempNode);
                     }
                     tempArrayNode.add(tempNode);
                 }
             }
-            targetNode.set(businessObjectModel.getLabel(), tempArrayNode);
+            if (!response) {
+                targetNode.set(businessObjectModel.getLabel(), tempArrayNode);
+            } else {
+                targetNode.set(businessObjectModel.getValue(), tempArrayNode);
+            }
         }
     }
+
 
 }

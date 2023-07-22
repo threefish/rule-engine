@@ -108,7 +108,7 @@
                   {
                     "type": "ASSIGNMENT",
                     "left": "循环对象.适用速算扣除数",
-                    "expressionValue": "GET_FAST_DEDUCTION (循环对象.累计预扣预缴应纳税所得额)",
+                    "expressionValue": "GET_FAST_DEDUCTION(循环对象.累计预扣预缴应纳税所得额)",
                     "values": [],
                     "assignmentType": "CALC",
                     "key": "283fdd45-8721-4836-8d5b-a32a9c1b3f8b"
@@ -705,6 +705,7 @@
       "required": true,
       "label": "年累计",
       "descript": "",
+      "response": true,
       "children": [
         {
           "value": "preTaxIncome",
@@ -767,8 +768,7 @@
           "response": true
         }
       ],
-      "key": "5bcda6ba-cf9c-484c-82ed-c27d39885774",
-      "response": true
+      "key": "5bcda6ba-cf9c-484c-82ed-c27d39885774"
     },
     {
       "value": "salaryDetails",

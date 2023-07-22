@@ -1,6 +1,6 @@
 package cn.xjbpm.rule.engine.runtime.context;
 
-import cn.xjbpm.rule.engine.definition.model.ProcessModel;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.Map;
@@ -10,18 +10,24 @@ import java.util.Map;
  * date: 2022/9/30
  */
 @Data
+@Builder
 public class ProcessRuntimeContext {
+
     /**
-     * 流程模型
+     * 流程定义key
      */
-    private ProcessModel processModel;
+    private String key;
+    /**
+     * 版本号，null取最新
+     */
+    private Integer version;
+    /**
+     * 可重入,会持久化
+     */
+    private boolean reentrant;
     /**
      * 流程变量
      */
     private Map<String, Object> variable;
 
-    public ProcessRuntimeContext(ProcessModel processModel, Map<String, Object> variable) {
-        this.processModel = processModel;
-        this.variable = variable;
-    }
 }

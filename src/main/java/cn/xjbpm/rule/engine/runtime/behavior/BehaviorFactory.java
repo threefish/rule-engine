@@ -1,4 +1,4 @@
-package cn.xjbpm.rule.engine.runtime;
+package cn.xjbpm.rule.engine.runtime.behavior;
 
 import cn.xjbpm.rule.engine.definition.model.Node;
 import cn.xjbpm.rule.engine.definition.model.NodeType;

@@ -1,19 +1,20 @@
 package cn.xjbpm.rule.engine;
 
 import cn.hutool.core.io.IoUtil;
-import cn.xjbpm.rule.engine.definition.model.ProcessModel;
+import cn.xjbpm.rule.RuleEngineApplication;
+import cn.xjbpm.rule.engine.common.utils.JsonUtil;
 import cn.xjbpm.rule.engine.runtime.ProcessRunService;
 import cn.xjbpm.rule.engine.runtime.context.ProcessRuntimeContext;
-import cn.xjbpm.rule.engine.common.utils.JsonUtil;
-import cn.xjbpm.rule.engine.common.utils.VariableTranslateUtils;
-import cn.xjbpm.rule.engine.definition.parse.ProcessModelParse;
-import cn.xjbpm.rule.engine.runtime.DefaultProcessRunService;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StopWatch;
 
-import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,43 +22,25 @@ import java.util.Map;
  * date: 2022/9/30
  */
 @Slf4j
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = RuleEngineApplication.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ProcessRunServiceTest {
-    private static final ProcessModelParse PROCESS_MODEL_JSON_CONVERTER = new ProcessModelParse();
+
+    @Autowired
+    ProcessRunService processRunService;
 
     @Test
-    void startTest() {
-        InputStream resourceAsStream = ProcessRunServiceTest.class.getResourceAsStream("/process/test.json");
-        ProcessModel processModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(IoUtil.readUtf8(resourceAsStream));
-
-        Map<String, Object> variable = new HashMap<>();
-        variable.put("age", 18);
-
-        ProcessRuntimeContext processRuntimeContext = new ProcessRuntimeContext(processModel, variable);
-
-        ProcessRunService processRunService = new DefaultProcessRunService();
-
-        Long processId = processRunService.start(processRuntimeContext);
-
-        System.out.println("流程ID：" + processId);
-    }
-
-
-    @Test
-    void startTestGrsdsjs() {
-        InputStream resourceAsStream = ProcessRunServiceTest.class.getResourceAsStream("/process/个人所得税计算.json");
+    public void startTestGrsdsjs() {
         String requestJson = IoUtil.readUtf8(ProcessRunServiceTest.class.getResourceAsStream("/process/个人所得税计算_request.json"));
-        ProcessModel processModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(IoUtil.readUtf8(resourceAsStream));
+        Map map = JsonUtil.json2Obj(requestJson, Map.class);
         StopWatch sw = new StopWatch();
         for (int i = 0; i < 1; i++) {
             sw.start("task_" + i);
             try {
-                Map<String, Object> variable = new HashMap<>();
-                variable.put("业务对象", VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), requestJson));
-                ProcessRuntimeContext processRuntimeContext = new ProcessRuntimeContext(processModel, variable);
-                ProcessRunService processRunService = new DefaultProcessRunService();
-                Long processId = processRunService.start(processRuntimeContext);
-                System.out.println("流程ID：" + processId);
-                System.out.println("返回信息：" + JsonUtil.obj2Json(variable));
+                ProcessRuntimeContext processRuntimeContext = ProcessRuntimeContext.builder().key("grsds").variable(map).build();
+                Map<String, Object> result = processRunService.start(processRuntimeContext);
+                System.out.println("返回：" + JsonUtil.obj2Json(result));
             } finally {
                 sw.stop();
                 log.info("耗时:{}ms", sw.getLastTaskTimeMillis());
