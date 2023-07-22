@@ -1,6 +1,7 @@
 package cn.xjbpm.rule.engine.common.utils;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.engine.definition.model.ObjectModel;
 import cn.xjbpm.rule.engine.rule.enums.VariableType;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -48,7 +49,6 @@ public class VariableTranslateUtils {
     }
 
     private static void checkNotNull(ObjectModel businessObjectModel, JsonNode jsonNode) {
-        System.out.println(jsonNode == null);
         VariableType type = businessObjectModel.getType();
         Assert.notNull(jsonNode, String.format("[%s]字段不能为空", businessObjectModel.getLabel()));
         if (type == VariableType.LIST) {
@@ -60,6 +60,9 @@ public class VariableTranslateUtils {
             Assert.isTrue(jsonNode instanceof ObjectNode, String.format("[%s]字段必须为对象", businessObjectModel.getLabel()));
             ObjectNode objectNode = ((ObjectNode) jsonNode);
             Assert.isTrue(!objectNode.isEmpty(), String.format("[%s]对象下级属性不能为空", businessObjectModel.getLabel()));
+        }
+        if (type == VariableType.STRING) {
+            Assert.isTrue(StrUtil.isNotBlank(jsonNode.asText()), String.format("[%s]字段不能为空", businessObjectModel.getLabel()));
         }
     }
 
