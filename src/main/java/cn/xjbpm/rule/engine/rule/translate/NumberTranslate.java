@@ -22,8 +22,8 @@ public class NumberTranslate extends AbstractTranslate {
             put(OperatorType.LT, (OperatorSupplier) rule -> String.format("%s<%s", rule.getName(), rule.getValue()));
             put(OperatorType.LTE, (OperatorSupplier) rule -> String.format("%s<=%s", rule.getName(), rule.getValue()));
 
-            put(OperatorType.BETWEEN, (OperatorSupplier) rule -> String.format("BETWEEN(%s,%s,%s)", rule.getName(), rule.getValueStart(), rule.getValueEnd()));
-            put(OperatorType.NOT_BETWEEN, (OperatorSupplier) rule -> String.format("NOT_BETWEEN(%s,%s,%s)", rule.getName(), rule.getValueStart(), rule.getValueEnd()));
+            put(OperatorType.BETWEEN, (OperatorSupplier) rule -> String.format("NUMBER_BETWEEN(%s,%s,%s)", rule.getName(), rule.getValueStart(), rule.getValueEnd()));
+            put(OperatorType.NOT_BETWEEN, (OperatorSupplier) rule -> String.format("!NUMBER_BETWEEN(%s,%s,%s)", rule.getName(), rule.getValueStart(), rule.getValueEnd()));
 
             put(OperatorType.IS_NULL, (OperatorSupplier) rule -> String.format("IS_NULL(%s)", rule.getName()));
             put(OperatorType.IS_NOT_NULL, (OperatorSupplier) rule -> String.format("IS_NOT_NULL(%s)", rule.getName()));

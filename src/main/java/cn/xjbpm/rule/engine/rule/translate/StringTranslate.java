@@ -15,8 +15,8 @@ public class StringTranslate extends AbstractTranslate {
 
     private static final Map<OperatorType, OperatorSupplier> OPERATOR_TYPE_CACHE = new HashMap() {
         {
-            put(OperatorType.EQ, (OperatorSupplier) rule -> String.format("%s==%s", rule.getName(), rule.getValue()));
-            put(OperatorType.NOT_EQ, (OperatorSupplier) rule -> String.format("%s!=%s", rule.getName(), rule.getValue()));
+            put(OperatorType.EQ, (OperatorSupplier) rule -> String.format("%s == \"%s\"", rule.getName(), rule.getValue()));
+            put(OperatorType.NOT_EQ, (OperatorSupplier) rule -> String.format("%s!=\"%s\"", rule.getName(), rule.getValue()));
 
             put(OperatorType.LIKE, (OperatorSupplier) rule -> String.format("STR_LIKE(%s,%s)", rule.getName(), rule.getValue()));
             put(OperatorType.NOT_LIKE, (OperatorSupplier) rule -> String.format("!STR_LIKE(%s,%s)", rule.getName(), rule.getValue()));
