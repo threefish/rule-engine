@@ -12,6 +12,7 @@ import cn.xjbpm.rule.engine.rule.enums.ActionType;
 import cn.xjbpm.rule.engine.rule.enums.RuleSetType;
 import cn.xjbpm.rule.engine.runtime.behavior.holder.EachRowContext;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
+import cn.xjbpm.rule.engine.runtime.util.ConditionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
@@ -63,8 +64,7 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
                             variable.put(LOOP_OBJECT_INDEX_KEY, index);
                             List<RuleAction> ruleActions = ruleSet.getRuleActions();
                             for (RuleAction ruleAction : ruleActions) {
-                                AviatorContext aviatorContext = AviatorContext.create(ruleAction.getWhenRule().getExpressionCacheString(), variable);
-                                if (AviatorExecutor.executeBoolean(aviatorContext)) {
+                                if (ConditionUtil.resolve(ruleAction.getWhenRule().getExpressionCacheString(), executionEntity.getVariable())) {
                                     excuteActions(ruleAction.getThenActions(), variable, eachRowContext, object);
                                 } else {
                                     excuteActions(ruleAction.getOtherwiseActions(), variable, eachRowContext, object);
@@ -88,8 +88,7 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
                 try {
                     List<RuleAction> ruleActions = ruleSet.getRuleActions();
                     for (RuleAction ruleAction : ruleActions) {
-                        AviatorContext aviatorContext = AviatorContext.create(ruleAction.getWhenRule().getExpressionCacheString(), variable);
-                        if (AviatorExecutor.executeBoolean(aviatorContext)) {
+                        if (ConditionUtil.resolve(ruleAction.getWhenRule().getExpressionCacheString(), executionEntity.getVariable())) {
                             excuteActions(ruleAction.getThenActions(), variable, null, null);
                         } else {
                             excuteActions(ruleAction.getOtherwiseActions(), variable, null, null);
@@ -139,7 +138,7 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
 
 
     @Override
-    public Node getNode() {
+    public Node getCurrentNode() {
         return node;
     }
 

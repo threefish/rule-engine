@@ -51,8 +51,10 @@ public class AviatorExecutor {
      */
     public static Object execute(AviatorContext context) {
         Object result = AviatorEvaluator.execute(context.getExpression(), context.getEnv(), context.isCached());
-        if (log.isDebugEnabled()) {
-            log.debug("Aviator执行器result={},context={}", result, JsonUtil.obj2Json(context));
+        if (log.isInfoEnabled()) {
+            log.info("表达式执行器 result:{} 表达式:{}", result, context.getExpression());
+        } else if (log.isDebugEnabled()) {
+            log.debug("表达式执行器 result:{} 表达式:{} 上下文:{}", result, context.getExpression(), JsonUtil.obj2Json(context));
         }
         return result;
     }

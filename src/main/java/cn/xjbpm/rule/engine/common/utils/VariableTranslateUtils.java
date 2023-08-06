@@ -36,9 +36,14 @@ public class VariableTranslateUtils {
         ObjectNode targetNode = OBJECT_MAPPER.createObjectNode();
         for (ObjectModel businessObjectModel : businessObjectModels) {
             if (response && businessObjectModel.isResponse() == false) {
+                // 不需要返回的
                 continue;
             }
             JsonNode currentNode = jsonNode.get(businessObjectModel.getValue());
+            if (!businessObjectModel.isRequired() && currentNode == null) {
+                //非必须的且为null
+                continue;
+            }
             if (response) {
                 currentNode = jsonNode.get(businessObjectModel.getLabel());
             }
@@ -50,19 +55,21 @@ public class VariableTranslateUtils {
 
     private static void checkNotNull(ObjectModel businessObjectModel, JsonNode jsonNode) {
         VariableType type = businessObjectModel.getType();
-        Assert.notNull(jsonNode, String.format("[%s]字段不能为空", businessObjectModel.getLabel()));
-        if (type == VariableType.LIST) {
-            Assert.isTrue(jsonNode instanceof ArrayNode, String.format("[%s]字段必须为集合", businessObjectModel.getLabel()));
-            ArrayNode arrayNode = ((ArrayNode) jsonNode);
-            Assert.isTrue(!arrayNode.isEmpty(), String.format("[%s]集合不能为空", businessObjectModel.getLabel()));
-        }
-        if (type == VariableType.OBJECT) {
-            Assert.isTrue(jsonNode instanceof ObjectNode, String.format("[%s]字段必须为对象", businessObjectModel.getLabel()));
-            ObjectNode objectNode = ((ObjectNode) jsonNode);
-            Assert.isTrue(!objectNode.isEmpty(), String.format("[%s]对象下级属性不能为空", businessObjectModel.getLabel()));
-        }
-        if (type == VariableType.STRING) {
-            Assert.isTrue(StrUtil.isNotBlank(jsonNode.asText()), String.format("[%s]字段不能为空", businessObjectModel.getLabel()));
+        if (businessObjectModel.isRequired()) {
+            Assert.notNull(jsonNode, String.format("[%s]字段不能为空", businessObjectModel.getLabel()));
+            if (type == VariableType.LIST) {
+                Assert.isTrue(jsonNode instanceof ArrayNode, String.format("[%s]字段必须为集合", businessObjectModel.getLabel()));
+                ArrayNode arrayNode = ((ArrayNode) jsonNode);
+                Assert.isTrue(!arrayNode.isEmpty(), String.format("[%s]集合不能为空", businessObjectModel.getLabel()));
+            }
+            if (type == VariableType.OBJECT) {
+                Assert.isTrue(jsonNode instanceof ObjectNode, String.format("[%s]字段必须为对象", businessObjectModel.getLabel()));
+                ObjectNode objectNode = ((ObjectNode) jsonNode);
+                Assert.isTrue(!objectNode.isEmpty(), String.format("[%s]对象下级属性不能为空", businessObjectModel.getLabel()));
+            }
+            if (type == VariableType.STRING) {
+                Assert.isTrue(StrUtil.isNotBlank(jsonNode.asText()), String.format("[%s]字段不能为空", businessObjectModel.getLabel()));
+            }
         }
     }
 

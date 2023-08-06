@@ -213,9 +213,21 @@
       "taxPayable": 0
     }
   ],
-  "order": {
-    "totalAmount": 66666,
-    "channelCode": "JD",
-    "integral": 0
+  "user": {
+    "name": "张三",
+    "age": 18,
+    "gender": "男",
+    "occupation": "软件工程师",
+    "monthlyIncome": 30000,
+    "monthlyExpenses": 15000,
+    "savingsBalance": 100000,
+    "totalDebt": 200000,
+    "familyStatus": "平稳",
+    "educationLevel": "本科",
+    "healthStatus": "健康",
+    "retirementPlan": "无",
+    "expenseManagement": "良好",
+    "assessmentTime": "",
+    "assessmentResult": ""
   }
 }

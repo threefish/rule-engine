@@ -30,7 +30,7 @@ public class StartNodeBehavior extends BaseNodeBehavior {
     }
 
     @Override
-    public Node getNode() {
+    public Node getCurrentNode() {
         return this.node;
     }
 }

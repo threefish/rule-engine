@@ -15,14 +15,14 @@ public class ListTranslate extends AbstractTranslate {
     private static final Map<OperatorType, OperatorSupplier> OPERATOR_TYPE_CACHE = new HashMap() {
         {
 
-            put(OperatorType.IS_EMPTY, (OperatorSupplier) rule -> String.format("IS_EMPTY(%s,'list')", rule.getName()));
-            put(OperatorType.IS_NOT_EMPTY, (OperatorSupplier) rule -> String.format("!IS_EMPTY(%s,'list')", rule.getName()));
+            put(OperatorType.IS_EMPTY, (OperatorSupplier) rule -> String.format("LIST_IS_EMPTY(%s)", rule.getName()));
+            put(OperatorType.IS_NOT_EMPTY, (OperatorSupplier) rule -> String.format("!LIST_IS_EMPTY(%s)", rule.getName()));
 
             put(OperatorType.CONTAINS, (OperatorSupplier) rule -> String.format("CONTAINS(%s,%s)", rule.getName(), rule.getValue()));
             put(OperatorType.NOT_CONTAINS, (OperatorSupplier) rule -> String.format("!CONTAINS(%s,%s)", rule.getName(), rule.getValue()));
 
-            put(OperatorType.IS_NULL, (OperatorSupplier) rule -> String.format("%s==null", rule.getName()));
-            put(OperatorType.IS_NOT_NULL, (OperatorSupplier) rule -> String.format("%s!=null", rule.getName()));
+            put(OperatorType.IS_NULL, (OperatorSupplier) rule -> String.format("IS_NULL(%s)", rule.getName()));
+            put(OperatorType.IS_NOT_NULL, (OperatorSupplier) rule -> String.format("IS_NOT_NULL(%s)", rule.getName()));
         }
     };
 

@@ -6,6 +6,7 @@ import cn.xjbpm.rule.engine.aviator.AviatorExecutor;
 import cn.xjbpm.rule.engine.definition.model.SequenceConnNode;
 import cn.xjbpm.rule.engine.definition.model.gateway.ExclusiveGatewayNode;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
+import cn.xjbpm.rule.engine.runtime.util.ConditionUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collections;
@@ -38,8 +39,7 @@ public class ExclusiveGatewayNodeBehavior implements NodeBehavior {
         Collections.sort(outgoingNodes, Comparator.comparing(SequenceConnNode::getSortNum));
         for (SequenceConnNode outgoingNode : outgoingNodes) {
             String expression = outgoingNode.getRule().getExpressionCacheString();
-            AviatorContext aviatorContext = AviatorContext.create(expression, executionEntity.getVariable());
-            if (StrUtil.isNotBlank(expression) || AviatorExecutor.executeBoolean(aviatorContext)) {
+            if (StrUtil.isNotBlank(expression) || ConditionUtil.resolve(expression, executionEntity.getVariable())) {
                 outgoingNode.getBehavior().execution(executionEntity);
                 // 独占网关，无需执行其他分支
                 return;

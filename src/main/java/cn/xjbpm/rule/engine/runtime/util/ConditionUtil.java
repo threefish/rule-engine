@@ -1,7 +1,11 @@
 package cn.xjbpm.rule.engine.runtime.util;
 
 import cn.hutool.core.util.StrUtil;
+import cn.xjbpm.rule.engine.aviator.AviatorContext;
+import cn.xjbpm.rule.engine.aviator.AviatorExecutor;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
+
+import java.util.Map;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -13,14 +17,14 @@ public class ConditionUtil {
      * 决定表达式
      *
      * @param expression
-     * @param executionEntity
+     * @param variables
      * @return
      */
-    public static boolean resolve(String expression, ExecutionEntity executionEntity) {
+    public static boolean resolve(String expression, Map<String, Object> variables) {
+        AviatorContext aviatorContext = AviatorContext.create(expression, variables);
         if (StrUtil.isBlank(expression)) {
             return true;
         }
-        //todo 表达式解决
-        return true;
+        return AviatorExecutor.executeBoolean(aviatorContext);
     }
 }

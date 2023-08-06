@@ -21,8 +21,8 @@ public class StringTranslate extends AbstractTranslate {
             put(OperatorType.LIKE, (OperatorSupplier) rule -> String.format("STR_LIKE(%s,%s)", rule.getName(), rule.getValue()));
             put(OperatorType.NOT_LIKE, (OperatorSupplier) rule -> String.format("!STR_LIKE(%s,%s)", rule.getName(), rule.getValue()));
 
-            put(OperatorType.IS_EMPTY, (OperatorSupplier) rule -> String.format("IS_EMPTY(%s,'string')", rule.getName()));
-            put(OperatorType.IS_NOT_EMPTY, (OperatorSupplier) rule -> String.format("!IS_EMPTY(%s,'string')", rule.getName()));
+            put(OperatorType.IS_EMPTY, (OperatorSupplier) rule -> String.format("IS_EMPTY(%s)", rule.getName()));
+            put(OperatorType.IS_NOT_EMPTY, (OperatorSupplier) rule -> String.format("!IS_EMPTY(%s)", rule.getName()));
 
             put(OperatorType.BEGIN_WITH, (OperatorSupplier) rule -> String.format("BEGIN_WITH(%s,%s)", rule.getName(), rule.getValue()));
             put(OperatorType.END_WITH, (OperatorSupplier) rule -> String.format("END_WITH(%s,%s)", rule.getName(), rule.getValue()));
@@ -30,8 +30,8 @@ public class StringTranslate extends AbstractTranslate {
             put(OperatorType.DOES_NOT_BEGIN_WITH, (OperatorSupplier) rule -> String.format("!BEGIN_WITH(%s,%s)", rule.getName(), rule.getValue()));
             put(OperatorType.DOES_NOT_END_WITH, (OperatorSupplier) rule -> String.format("!END_WITH(%s,%s)", rule.getName(), rule.getValue()));
 
-            put(OperatorType.IS_NULL, (OperatorSupplier) rule -> String.format("%s==null", rule.getName()));
-            put(OperatorType.IS_NOT_NULL, (OperatorSupplier) rule -> String.format("%s!=null", rule.getName()));
+            put(OperatorType.IS_NULL, (OperatorSupplier) rule -> String.format("IS_NULL(%s)", rule.getName()));
+            put(OperatorType.IS_NOT_NULL, (OperatorSupplier) rule -> String.format("IS_NOT_NULL(%s)", rule.getName()));
             put(OperatorType.IN_COLLECTION, (OperatorSupplier) rule -> String.format("IN_COLLECTION(%s,'%s')", rule.getName(), StrUtil.join(",", rule.getValues())));
             put(OperatorType.NOT_IN_COLLECTION, (OperatorSupplier) rule -> String.format("!IN_COLLECTION(%s,'%s')", rule.getName(), StrUtil.join(",", rule.getValues())));
         }

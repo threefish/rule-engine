@@ -13,8 +13,8 @@ public class BooleanTranslate extends AbstractTranslate {
 
     private static final Map<OperatorType, OperatorSupplier> OPERATOR_TYPE_CACHE = new HashMap() {
         {
-            put(OperatorType.IS_NULL, (OperatorSupplier) rule -> String.format("%s==null", rule.getName()));
-            put(OperatorType.IS_NOT_NULL, (OperatorSupplier) rule -> String.format("%s!=null", rule.getName()));
+            put(OperatorType.IS_NULL, (OperatorSupplier) rule -> String.format("IS_NULL(%s)", rule.getName()));
+            put(OperatorType.IS_NOT_NULL, (OperatorSupplier) rule -> String.format("IS_NOT_NULL(%s)", rule.getName()));
             put(OperatorType.EQ, (OperatorSupplier) rule -> String.format("%s==%s", rule.getName(), rule.getValue()));
             put(OperatorType.NOT_EQ, (OperatorSupplier) rule -> String.format("%s!=%s", rule.getName(), rule.getValue()));
         }

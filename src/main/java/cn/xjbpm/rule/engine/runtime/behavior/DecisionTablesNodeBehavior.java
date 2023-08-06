@@ -29,7 +29,7 @@ public class DecisionTablesNodeBehavior extends BaseNodeBehavior {
     }
 
     @Override
-    public Node getNode() {
+    public Node getCurrentNode() {
         return node;
     }
 

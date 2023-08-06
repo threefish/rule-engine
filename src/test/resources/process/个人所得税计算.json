@@ -6,7 +6,7 @@
     {
       "id": "001",
       "type": "RuleSetNode",
-      "x": 480,
+      "x": 740,
       "y": 160,
       "properties": {
         "name": "规则集",
@@ -108,7 +108,7 @@
                   {
                     "type": "ASSIGNMENT",
                     "left": "循环对象.适用速算扣除数",
-                    "expressionValue": "GET_FAST_DEDUCTION(循环对象.累计预扣预缴应纳税所得额)",
+                    "expressionValue": "GET_FAST_DEDUCTION (循环对象.累计预扣预缴应纳税所得额)",
                     "values": [],
                     "assignmentType": "CALC",
                     "key": "283fdd45-8721-4836-8d5b-a32a9c1b3f8b"
@@ -172,7 +172,7 @@
         ]
       },
       "text": {
-        "x": 480,
+        "x": 740,
         "y": 160,
         "value": "计算个人所得税"
       }
@@ -180,14 +180,14 @@
     {
       "id": "002",
       "type": "StartNode",
-      "x": 280,
+      "x": 520,
       "y": 160,
       "properties": {
         "name": "开始",
         "tag": "A1"
       },
       "text": {
-        "x": 280,
+        "x": 520,
         "y": 160,
         "value": "开始"
       }
@@ -195,14 +195,14 @@
     {
       "id": "004",
       "type": "EndNode",
-      "x": 1000,
+      "x": 1120,
       "y": 160,
       "properties": {
         "name": "结束",
         "tag": "A2"
       },
       "text": {
-        "x": 1000,
+        "x": 1120,
         "y": 160,
         "value": "结束"
       }
@@ -210,374 +210,902 @@
     {
       "id": "005",
       "type": "ScoringCardNode",
-      "x": 760,
-      "y": 160,
+      "x": 740,
+      "y": 260,
       "properties": {
         "name": "评分卡",
         "tag": "A8",
-        "values": [
+        "dataList": [
           {
-            "0": {
-              "descript": "未设置条件",
-              "rules": [
-                {
-                  "key": "rule_1090a538-3650-4c76-9bfc-f4c150725cdb",
-                  "assignmentType": "FIXED",
-                  "ruleType": "rule",
-                  "combinator": "AND",
-                  "name": "业务对象.订单.总金额",
-                  "root": false,
-                  "field": "业务对象.订单.总金额",
-                  "value": 0,
-                  "varType": "number",
-                  "operator": ">",
-                  "descript": ""
-                },
-                {
-                  "key": "rule_7af75c2e-cb23-480a-9af2-12477fe82f40",
-                  "assignmentType": "FIXED",
-                  "ruleType": "rule",
-                  "combinator": "AND",
-                  "name": "业务对象.订单.总金额",
-                  "root": false,
-                  "field": "业务对象.订单.总金额",
-                  "value": 1000,
-                  "varType": "number",
-                  "operator": "<",
-                  "descript": ""
-                }
-              ],
-              "combinator": "AND",
-              "ruleType": "rule",
-              "root": true,
-              "key": "cbe41012-e5f8-4ef4-a01b-599e561ef186",
-              "assignmentType": "FIXED"
-            },
+            "dataList": [
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.性别",
+                    "root": false,
+                    "field": "业务对象.用户.性别",
+                    "value": "男",
+                    "varType": "string",
+                    "operator": "=",
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
+                "assignmentType": "FIXED"
+              },
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.年龄",
+                    "root": false,
+                    "field": "业务对象.用户.年龄",
+                    "varType": "number",
+                    "operator": "between",
+                    "valueStart": 18,
+                    "valueEnd": 30,
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "e069040e-25b2-4179-9d25-6c481beef05b",
+                "assignmentType": "FIXED"
+              }
+            ],
             "conditionColumns": [
               {
-                "label": "订单金额",
+                "label": "性别",
                 "rule": {
                   "descript": "未设置条件",
                   "rules": [
                     {
-                      "key": "rule_1090a538-3650-4c76-9bfc-f4c150725cdb",
-                      "assignmentType": "CALC",
-                      "ruleType": "rule",
-                      "combinator": "AND",
-                      "name": "业务对象.订单.总金额",
-                      "root": false,
-                      "field": "业务对象.订单.总金额",
-                      "value": 0,
-                      "varType": "number",
-                      "operator": ">",
-                      "descript": ""
-                    },
-                    {
-                      "key": "rule_7af75c2e-cb23-480a-9af2-12477fe82f40",
+                      "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
                       "assignmentType": "FIXED",
                       "ruleType": "rule",
                       "combinator": "AND",
-                      "name": "业务对象.订单.总金额",
+                      "name": "业务对象.用户.性别",
                       "root": false,
-                      "field": "业务对象.订单.总金额",
-                      "value": 1000,
-                      "varType": "number",
-                      "operator": "<",
+                      "field": "业务对象.用户.性别",
+                      "value": "男",
+                      "varType": "string",
+                      "operator": "=",
                       "descript": ""
                     }
                   ],
                   "combinator": "AND",
                   "ruleType": "rule",
                   "root": true,
-                  "key": "cbe41012-e5f8-4ef4-a01b-599e561ef186",
+                  "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
+                  "assignmentType": "FIXED"
+                }
+              },
+              {
+                "label": "年龄",
+                "rule": {
+                  "descript": "未设置条件",
+                  "rules": [
+                    {
+                      "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "业务对象.用户.年龄",
+                      "root": false,
+                      "field": "业务对象.用户.年龄",
+                      "varType": "number",
+                      "operator": "between",
+                      "valueStart": 18,
+                      "valueEnd": 30,
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "e069040e-25b2-4179-9d25-6c481beef05b",
                   "assignmentType": "FIXED"
                 }
               }
             ],
             "score": 100,
-            "rowKey": "8156e859-ed1f-4725-949a-d01bb5f7c95e",
-            "weight": 1
+            "weight": 0,
+            "rowKey": "aa73941d-be05-4274-91b9-63c97c4caf33"
           },
           {
-            "0": {
-              "descript": "未设置条件",
-              "rules": [
-                {
-                  "key": "rule_91335825-35f6-4bf3-befa-bc827866dc0c",
-                  "assignmentType": "FIXED",
-                  "ruleType": "rule",
-                  "combinator": "AND",
-                  "name": "业务对象.订单.总金额",
-                  "root": false,
-                  "field": "业务对象.订单.总金额",
-                  "value": 1000,
-                  "varType": "number",
-                  "operator": ">=",
-                  "descript": ""
-                },
-                {
-                  "key": "rule_91335825-35f6-4bf3-befa-bc827866dc0c",
-                  "assignmentType": "FIXED",
-                  "ruleType": "rule",
-                  "combinator": "AND",
-                  "name": "业务对象.订单.总金额",
-                  "root": false,
-                  "field": "业务对象.订单.总金额",
-                  "value": 5000,
-                  "varType": "number",
-                  "operator": "<",
-                  "descript": ""
-                }
-              ],
-              "combinator": "AND",
-              "ruleType": "rule",
-              "root": true,
-              "key": "c9c93d1d-5b0d-44e3-8630-2a5c49ec1698",
-              "assignmentType": "FIXED"
-            },
+            "dataList": [
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.性别",
+                    "root": false,
+                    "field": "业务对象.用户.性别",
+                    "value": "男",
+                    "varType": "string",
+                    "operator": "=",
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
+                "assignmentType": "FIXED"
+              },
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.年龄",
+                    "root": false,
+                    "field": "业务对象.用户.年龄",
+                    "varType": "number",
+                    "operator": "between",
+                    "valueStart": 31,
+                    "valueEnd": 40,
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "e069040e-25b2-4179-9d25-6c481beef05b",
+                "assignmentType": "FIXED"
+              }
+            ],
             "conditionColumns": [
               {
-                "label": "订单金额",
+                "label": "性别",
                 "rule": {
                   "descript": "未设置条件",
                   "rules": [
                     {
-                      "key": "rule_91335825-35f6-4bf3-befa-bc827866dc0c",
+                      "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
                       "assignmentType": "FIXED",
                       "ruleType": "rule",
                       "combinator": "AND",
-                      "name": "业务对象.订单.总金额",
+                      "name": "业务对象.用户.性别",
                       "root": false,
-                      "field": "业务对象.订单.总金额",
-                      "value": 1000,
-                      "varType": "number",
-                      "operator": ">=",
-                      "descript": ""
-                    },
-                    {
-                      "key": "rule_91335825-35f6-4bf3-befa-bc827866dc0c",
-                      "assignmentType": "FIXED",
-                      "ruleType": "rule",
-                      "combinator": "AND",
-                      "name": "业务对象.订单.总金额",
-                      "root": false,
-                      "field": "业务对象.订单.总金额",
-                      "value": 5000,
-                      "varType": "number",
-                      "operator": "<",
+                      "field": "业务对象.用户.性别",
+                      "value": "男",
+                      "varType": "string",
+                      "operator": "=",
                       "descript": ""
                     }
                   ],
                   "combinator": "AND",
                   "ruleType": "rule",
                   "root": true,
-                  "key": "c9c93d1d-5b0d-44e3-8630-2a5c49ec1698",
+                  "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
                   "assignmentType": "FIXED"
                 }
-              }
-            ],
-            "score": 200,
-            "rowKey": "16dd1cb5-3f8a-4152-b4fb-2fafbb2a97d5",
-            "weight": 2
-          },
-          {
-            "0": {
-              "descript": "未设置条件",
-              "rules": [
-                {
-                  "key": "rule_ef7e309a-6cfc-41f2-a544-07a2bc10cfc9",
-                  "assignmentType": "FIXED",
-                  "ruleType": "rule",
-                  "combinator": "AND",
-                  "name": "业务对象.订单.总金额",
-                  "root": false,
-                  "field": "业务对象.订单.总金额",
-                  "varType": "number",
-                  "operator": "between",
-                  "valueStart": 5000,
-                  "valueEnd": 50000,
-                  "descript": ""
-                }
-              ],
-              "combinator": "AND",
-              "ruleType": "rule",
-              "root": true,
-              "key": "e52a1d26-9caa-4a8f-8441-bf795928c69d",
-              "assignmentType": "FIXED"
-            },
-            "conditionColumns": [
+              },
               {
-                "label": "订单金额",
+                "label": "年龄",
                 "rule": {
                   "descript": "未设置条件",
                   "rules": [
                     {
-                      "key": "rule_ef7e309a-6cfc-41f2-a544-07a2bc10cfc9",
+                      "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
                       "assignmentType": "FIXED",
                       "ruleType": "rule",
                       "combinator": "AND",
-                      "name": "业务对象.订单.总金额",
+                      "name": "业务对象.用户.年龄",
                       "root": false,
-                      "field": "业务对象.订单.总金额",
+                      "field": "业务对象.用户.年龄",
                       "varType": "number",
                       "operator": "between",
-                      "valueStart": 5000,
-                      "valueEnd": 50000,
+                      "valueStart": 31,
+                      "valueEnd": 40,
                       "descript": ""
                     }
                   ],
                   "combinator": "AND",
                   "ruleType": "rule",
                   "root": true,
-                  "key": "e52a1d26-9caa-4a8f-8441-bf795928c69d",
+                  "key": "e069040e-25b2-4179-9d25-6c481beef05b",
                   "assignmentType": "FIXED"
                 }
               }
             ],
-            "score": 500,
-            "rowKey": "d7c2be2f-1395-4506-813d-2bfde4ee0f98",
-            "weight": 3
+            "score": 80,
+            "weight": 0,
+            "rowKey": "b24e4218-9b5e-4640-b6cc-a59d6f7aea00"
           },
           {
-            "0": {
-              "descript": "未设置条件",
-              "rules": [
-                {
-                  "key": "rule_d01c4423-954f-498d-9020-05e7101c09f3",
-                  "assignmentType": "FIXED",
-                  "ruleType": "rule",
-                  "combinator": "AND",
-                  "name": "业务对象.订单.总金额",
-                  "root": false,
-                  "field": "业务对象.订单.总金额",
-                  "value": 50000,
-                  "varType": "number",
-                  "operator": ">",
-                  "descript": ""
-                }
-              ],
-              "combinator": "AND",
-              "ruleType": "rule",
-              "root": true,
-              "key": "04d6cf31-a5c4-4613-9890-cb1462eaa9fb",
-              "assignmentType": "FIXED"
-            },
+            "dataList": [
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.性别",
+                    "root": false,
+                    "field": "业务对象.用户.性别",
+                    "value": "男",
+                    "varType": "string",
+                    "operator": "=",
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
+                "assignmentType": "FIXED"
+              },
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.年龄",
+                    "root": false,
+                    "field": "业务对象.用户.年龄",
+                    "varType": "number",
+                    "operator": "between",
+                    "valueStart": 41,
+                    "valueEnd": 50,
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "e069040e-25b2-4179-9d25-6c481beef05b",
+                "assignmentType": "FIXED"
+              }
+            ],
             "conditionColumns": [
               {
-                "label": "订单金额",
+                "label": "性别",
                 "rule": {
                   "descript": "未设置条件",
                   "rules": [
                     {
-                      "key": "rule_d01c4423-954f-498d-9020-05e7101c09f3",
+                      "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
                       "assignmentType": "FIXED",
                       "ruleType": "rule",
                       "combinator": "AND",
-                      "name": "业务对象.订单.总金额",
+                      "name": "业务对象.用户.性别",
                       "root": false,
-                      "field": "业务对象.订单.总金额",
-                      "value": 50000,
-                      "varType": "number",
-                      "operator": ">",
+                      "field": "业务对象.用户.性别",
+                      "value": "男",
+                      "varType": "string",
+                      "operator": "=",
                       "descript": ""
                     }
                   ],
                   "combinator": "AND",
                   "ruleType": "rule",
                   "root": true,
-                  "key": "04d6cf31-a5c4-4613-9890-cb1462eaa9fb",
+                  "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
                   "assignmentType": "FIXED"
                 }
-              }
-            ],
-            "score": 1000,
-            "rowKey": "77546b59-ced2-49a9-94d7-3cce19845590",
-            "weight": 4
-          },
-          {
-            "conditionColumns": [
+              },
               {
-                "label": "订单金额",
+                "label": "年龄",
                 "rule": {
                   "descript": "未设置条件",
-                  "rules": [],
+                  "rules": [
+                    {
+                      "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "业务对象.用户.年龄",
+                      "root": false,
+                      "field": "业务对象.用户.年龄",
+                      "varType": "number",
+                      "operator": "between",
+                      "valueStart": 41,
+                      "valueEnd": 50,
+                      "descript": ""
+                    }
+                  ],
                   "combinator": "AND",
                   "ruleType": "rule",
                   "root": true,
-                  "key": "1b167686-636f-4c49-a353-4b4dc686a986",
+                  "key": "e069040e-25b2-4179-9d25-6c481beef05b",
                   "assignmentType": "FIXED"
                 }
               }
             ],
-            "score": 0,
+            "score": 60,
             "weight": 0,
-            "rowKey": "c14e3c07-939b-4fab-94f8-984aad559c96"
+            "rowKey": "5b944ec9-4b06-4a54-9761-8f26823a21a0"
           },
           {
+            "dataList": [
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.性别",
+                    "root": false,
+                    "field": "业务对象.用户.性别",
+                    "value": "男",
+                    "varType": "string",
+                    "operator": "=",
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
+                "assignmentType": "FIXED"
+              },
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.年龄",
+                    "root": false,
+                    "field": "业务对象.用户.年龄",
+                    "varType": "number",
+                    "operator": "between",
+                    "valueStart": 51,
+                    "valueEnd": 60,
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "e069040e-25b2-4179-9d25-6c481beef05b",
+                "assignmentType": "FIXED"
+              }
+            ],
             "conditionColumns": [
               {
-                "label": "订单金额",
+                "label": "性别",
                 "rule": {
                   "descript": "未设置条件",
-                  "rules": [],
+                  "rules": [
+                    {
+                      "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "业务对象.用户.性别",
+                      "root": false,
+                      "field": "业务对象.用户.性别",
+                      "value": "男",
+                      "varType": "string",
+                      "operator": "=",
+                      "descript": ""
+                    }
+                  ],
                   "combinator": "AND",
                   "ruleType": "rule",
                   "root": true,
-                  "key": "a5a470c3-6f1c-41fd-9458-c74f4fa28054",
+                  "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
                   "assignmentType": "FIXED"
                 }
-              }
-            ],
-            "score": 0,
-            "weight": 0,
-            "rowKey": "e910502a-0605-42b3-b06c-30edf2420e6e"
-          },
-          {
-            "conditionColumns": [
+              },
               {
-                "label": "订单金额",
+                "label": "年龄",
                 "rule": {
                   "descript": "未设置条件",
-                  "rules": [],
+                  "rules": [
+                    {
+                      "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "业务对象.用户.年龄",
+                      "root": false,
+                      "field": "业务对象.用户.年龄",
+                      "varType": "number",
+                      "operator": "between",
+                      "valueStart": 51,
+                      "valueEnd": 60,
+                      "descript": ""
+                    }
+                  ],
                   "combinator": "AND",
                   "ruleType": "rule",
                   "root": true,
-                  "key": "6ca14ef9-1034-4499-a913-0f6d09d381f9",
+                  "key": "e069040e-25b2-4179-9d25-6c481beef05b",
                   "assignmentType": "FIXED"
                 }
               }
             ],
-            "score": 0,
+            "score": 40,
             "weight": 0,
-            "rowKey": "429332e7-3b34-4a59-bbbb-9de19dcf1b0e"
+            "rowKey": "a7e2f75c-09ba-464f-b5fd-d5c3dac4bd2b"
+          },
+          {
+            "dataList": [
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.性别",
+                    "root": false,
+                    "field": "业务对象.用户.性别",
+                    "value": "女",
+                    "varType": "string",
+                    "operator": "=",
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
+                "assignmentType": "FIXED"
+              },
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.年龄",
+                    "root": false,
+                    "field": "业务对象.用户.年龄",
+                    "varType": "number",
+                    "operator": "between",
+                    "valueStart": 18,
+                    "valueEnd": 30,
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "e069040e-25b2-4179-9d25-6c481beef05b",
+                "assignmentType": "FIXED"
+              }
+            ],
+            "conditionColumns": [
+              {
+                "label": "性别",
+                "rule": {
+                  "descript": "未设置条件",
+                  "rules": [
+                    {
+                      "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "业务对象.用户.性别",
+                      "root": false,
+                      "field": "业务对象.用户.性别",
+                      "value": "女",
+                      "varType": "string",
+                      "operator": "=",
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
+                  "assignmentType": "FIXED"
+                }
+              },
+              {
+                "label": "年龄",
+                "rule": {
+                  "descript": "未设置条件",
+                  "rules": [
+                    {
+                      "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "业务对象.用户.年龄",
+                      "root": false,
+                      "field": "业务对象.用户.年龄",
+                      "varType": "number",
+                      "operator": "between",
+                      "valueStart": 18,
+                      "valueEnd": 30,
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "e069040e-25b2-4179-9d25-6c481beef05b",
+                  "assignmentType": "FIXED"
+                }
+              }
+            ],
+            "score": 90,
+            "weight": 0,
+            "rowKey": "6be160f3-b090-43d3-9fba-b70cf9698288"
+          },
+          {
+            "dataList": [
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.性别",
+                    "root": false,
+                    "field": "业务对象.用户.性别",
+                    "value": "女",
+                    "varType": "string",
+                    "operator": "=",
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
+                "assignmentType": "FIXED"
+              },
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.年龄",
+                    "root": false,
+                    "field": "业务对象.用户.年龄",
+                    "varType": "number",
+                    "operator": "between",
+                    "valueStart": 31,
+                    "valueEnd": 40,
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "e069040e-25b2-4179-9d25-6c481beef05b",
+                "assignmentType": "FIXED"
+              }
+            ],
+            "conditionColumns": [
+              {
+                "label": "性别",
+                "rule": {
+                  "descript": "未设置条件",
+                  "rules": [
+                    {
+                      "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "业务对象.用户.性别",
+                      "root": false,
+                      "field": "业务对象.用户.性别",
+                      "value": "女",
+                      "varType": "string",
+                      "operator": "=",
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
+                  "assignmentType": "FIXED"
+                }
+              },
+              {
+                "label": "年龄",
+                "rule": {
+                  "descript": "未设置条件",
+                  "rules": [
+                    {
+                      "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "业务对象.用户.年龄",
+                      "root": false,
+                      "field": "业务对象.用户.年龄",
+                      "varType": "number",
+                      "operator": "between",
+                      "valueStart": 31,
+                      "valueEnd": 40,
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "e069040e-25b2-4179-9d25-6c481beef05b",
+                  "assignmentType": "FIXED"
+                }
+              }
+            ],
+            "score": 70,
+            "weight": 0,
+            "rowKey": "6e0bdeee-24ff-4311-ab3f-b506b0937dcc"
+          },
+          {
+            "dataList": [
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.性别",
+                    "root": false,
+                    "field": "业务对象.用户.性别",
+                    "value": "女",
+                    "varType": "string",
+                    "operator": "=",
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
+                "assignmentType": "FIXED"
+              },
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.年龄",
+                    "root": false,
+                    "field": "业务对象.用户.年龄",
+                    "varType": "number",
+                    "operator": "between",
+                    "valueStart": 41,
+                    "valueEnd": 50,
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "e069040e-25b2-4179-9d25-6c481beef05b",
+                "assignmentType": "FIXED"
+              }
+            ],
+            "conditionColumns": [
+              {
+                "label": "性别",
+                "rule": {
+                  "descript": "未设置条件",
+                  "rules": [
+                    {
+                      "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "业务对象.用户.性别",
+                      "root": false,
+                      "field": "业务对象.用户.性别",
+                      "value": "女",
+                      "varType": "string",
+                      "operator": "=",
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
+                  "assignmentType": "FIXED"
+                }
+              },
+              {
+                "label": "年龄",
+                "rule": {
+                  "descript": "未设置条件",
+                  "rules": [
+                    {
+                      "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "业务对象.用户.年龄",
+                      "root": false,
+                      "field": "业务对象.用户.年龄",
+                      "varType": "number",
+                      "operator": "between",
+                      "valueStart": 41,
+                      "valueEnd": 50,
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "e069040e-25b2-4179-9d25-6c481beef05b",
+                  "assignmentType": "FIXED"
+                }
+              }
+            ],
+            "score": 50,
+            "weight": 0,
+            "rowKey": "3fb82d0f-9578-488b-ae6a-6f07de1310ce"
+          },
+          {
+            "dataList": [
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.性别",
+                    "root": false,
+                    "field": "业务对象.用户.性别",
+                    "value": "女",
+                    "varType": "string",
+                    "operator": "=",
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
+                "assignmentType": "FIXED"
+              },
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.年龄",
+                    "root": false,
+                    "field": "业务对象.用户.年龄",
+                    "varType": "number",
+                    "operator": "between",
+                    "valueStart": 51,
+                    "valueEnd": 60,
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "e069040e-25b2-4179-9d25-6c481beef05b",
+                "assignmentType": "FIXED"
+              }
+            ],
+            "conditionColumns": [
+              {
+                "label": "性别",
+                "rule": {
+                  "descript": "未设置条件",
+                  "rules": [
+                    {
+                      "key": "rule_67d8607c-ca54-4ab6-ac38-f88a900316c9",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "业务对象.用户.性别",
+                      "root": false,
+                      "field": "业务对象.用户.性别",
+                      "value": "女",
+                      "varType": "string",
+                      "operator": "=",
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "16792d8a-3b5a-4deb-82c5-ab82d20e728e",
+                  "assignmentType": "FIXED"
+                }
+              },
+              {
+                "label": "年龄",
+                "rule": {
+                  "descript": "未设置条件",
+                  "rules": [
+                    {
+                      "key": "rule_43314994-e8c4-4194-b32b-c5654d305975",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "业务对象.用户.年龄",
+                      "root": false,
+                      "field": "业务对象.用户.年龄",
+                      "varType": "number",
+                      "operator": "between",
+                      "valueStart": 51,
+                      "valueEnd": 60,
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "e069040e-25b2-4179-9d25-6c481beef05b",
+                  "assignmentType": "FIXED"
+                }
+              }
+            ],
+            "score": 30,
+            "weight": 0,
+            "rowKey": "bc2bbf67-3b9a-497c-b911-69e9c69ca35b"
           }
         ],
         "conditionColumns": [
-          "订单金额"
+          "性别",
+          "年龄"
         ],
-        "scoringCalcMethod": "SUM_WEIGHT",
-        "assignmentFiled": "业务对象.订单.本单积分",
         "weights": [
           {
-            "weight": 80,
-            "start": 1,
-            "end": 3
-          },
-          {
-            "weight": 2,
-            "start": 4,
-            "end": 4
-          },
-          {
             "weight": 100,
-            "start": 5,
-            "end": 7
+            "start": 1,
+            "end": 1
           }
-        ]
+        ],
+        "scoringCalcMethod": "SUM_FRACTIONS",
+        "assignmentFiled": "业务对象.用户.评估结果"
       },
       "text": {
-        "x": 760,
-        "y": 160,
+        "x": 740,
+        "y": 260,
         "value": "评分卡"
       }
     }
@@ -589,72 +1117,50 @@
       "sourceNodeId": "002",
       "targetNodeId": "001",
       "startPoint": {
-        "x": 302,
+        "x": 542,
         "y": 160
       },
       "endPoint": {
-        "x": 415,
+        "x": 675,
         "y": 160
       },
-      "properties": {},
+      "properties": {
+        "rule": {
+          "rules": [
+            {
+              "key": "rule_ee67607b-8c3a-4918-b44b-5762a1cb0675",
+              "assignmentType": "FIXED",
+              "ruleType": "rule",
+              "combinator": "AND",
+              "name": "业务对象.月薪",
+              "root": false,
+              "field": "业务对象.月薪",
+              "varType": "list",
+              "operator": "isNotEmpty",
+              "descript": ""
+            }
+          ],
+          "combinator": "AND",
+          "ruleType": "rule",
+          "root": true,
+          "key": "5122e92a-699c-4d43-97c6-29c4da0da09c",
+          "assignmentType": "fixed"
+        },
+        "readonly": false,
+        "sortNum": 0
+      },
       "text": {
-        "x": 358.5,
+        "x": 608.5,
         "y": 160,
         "value": "003"
       },
       "pointsList": [
         {
-          "x": 302,
+          "x": 542,
           "y": 160
         },
         {
-          "x": 402,
-          "y": 160
-        },
-        {
-          "x": 315,
-          "y": 160
-        },
-        {
-          "x": 415,
-          "y": 160
-        }
-      ]
-    },
-    {
-      "id": "006",
-      "type": "SequenceConnNode",
-      "sourceNodeId": "001",
-      "targetNodeId": "005",
-      "startPoint": {
-        "x": 545,
-        "y": 160
-      },
-      "endPoint": {
-        "x": 695,
-        "y": 160
-      },
-      "properties": {},
-      "text": {
-        "x": 620,
-        "y": 160,
-        "value": "006"
-      },
-      "pointsList": [
-        {
-          "x": 545,
-          "y": 160
-        },
-        {
-          "x": 645,
-          "y": 160
-        },
-        {
-          "x": 595,
-          "y": 160
-        },
-        {
-          "x": 695,
+          "x": 675,
           "y": 160
         }
       ]
@@ -665,34 +1171,118 @@
       "sourceNodeId": "005",
       "targetNodeId": "004",
       "startPoint": {
-        "x": 825,
-        "y": 160
+        "x": 805,
+        "y": 260
       },
       "endPoint": {
-        "x": 978,
-        "y": 160
+        "x": 1117,
+        "y": 181.79449471770337
       },
       "properties": {},
       "text": {
-        "x": 901.5,
-        "y": 160,
+        "x": 961,
+        "y": 260,
         "value": "007"
       },
       "pointsList": [
         {
-          "x": 825,
+          "x": 805,
+          "y": 260
+        },
+        {
+          "x": 1117,
+          "y": 260
+        },
+        {
+          "x": 1117,
+          "y": 181.79449471770337
+        }
+      ]
+    },
+    {
+      "id": "006",
+      "type": "SequenceConnNode",
+      "sourceNodeId": "002",
+      "targetNodeId": "005",
+      "startPoint": {
+        "x": 521,
+        "y": 181.97726097583592
+      },
+      "endPoint": {
+        "x": 675,
+        "y": 260
+      },
+      "properties": {
+        "rule": {
+          "rules": [
+            {
+              "key": "rule_61afc706-537b-4bcc-9668-caf0aebcc066",
+              "assignmentType": "FIXED",
+              "ruleType": "rule",
+              "combinator": "AND",
+              "name": "业务对象.用户",
+              "root": false,
+              "field": "业务对象.用户",
+              "varType": "object",
+              "operator": "isNotNull",
+              "descript": ""
+            }
+          ],
+          "combinator": "AND",
+          "ruleType": "rule",
+          "root": true,
+          "key": "ffc281cd-4047-4238-8e42-17d0f2a56a7c",
+          "assignmentType": "fixed"
+        },
+        "readonly": false,
+        "sortNum": 0
+      },
+      "text": {
+        "x": 598,
+        "y": 260,
+        "value": "006"
+      },
+      "pointsList": [
+        {
+          "x": 521,
+          "y": 181.97726097583592
+        },
+        {
+          "x": 521,
+          "y": 260
+        },
+        {
+          "x": 675,
+          "y": 260
+        }
+      ]
+    },
+    {
+      "id": "008",
+      "type": "SequenceConnNode",
+      "sourceNodeId": "001",
+      "targetNodeId": "004",
+      "startPoint": {
+        "x": 805,
+        "y": 160
+      },
+      "endPoint": {
+        "x": 1098,
+        "y": 160
+      },
+      "properties": {},
+      "text": {
+        "x": 951.5,
+        "y": 160,
+        "value": "008"
+      },
+      "pointsList": [
+        {
+          "x": 805,
           "y": 160
         },
         {
-          "x": 925,
-          "y": 160
-        },
-        {
-          "x": 878,
-          "y": 160
-        },
-        {
-          "x": 978,
+          "x": 1098,
           "y": 160
         }
       ]
@@ -932,40 +1522,160 @@
       "response": true
     },
     {
-      "value": "order",
+      "value": "user",
       "type": "object",
-      "required": true,
-      "label": "订单",
+      "required": false,
+      "label": "用户",
       "descript": "",
       "children": [
         {
-          "value": "totalAmount",
-          "type": "number",
-          "required": true,
-          "label": "总金额",
-          "descript": "",
-          "children": [],
-          "key": "9eb6974f-41cd-457a-ac58-782bfc37b9d8",
-          "response": true
-        },
-        {
-          "value": "channelCode",
+          "value": "name",
           "type": "string",
           "required": true,
-          "label": "渠道编码",
+          "label": "姓名",
           "descript": "",
           "children": [],
-          "key": "e870c08c-4354-443b-8b0e-024148214568",
+          "key": "dd6eaa70-b660-4127-8560-8e84e2568a8e",
           "response": true
         },
         {
-          "value": "integral",
+          "value": "age",
           "type": "number",
           "required": true,
-          "label": "本单积分",
+          "label": "年龄",
           "descript": "",
           "children": [],
-          "key": "b8bdef06-66f7-4414-81d1-239c7c26f936",
+          "key": "4a9a6289-61ac-4c6b-b5c9-5dfc7d2ecb54",
+          "response": true
+        },
+        {
+          "value": "gender",
+          "type": "string",
+          "required": true,
+          "label": "性别",
+          "descript": "",
+          "children": [],
+          "key": "d7e7d0c3-b8c1-43a3-8e92-58d0d1eb1a1f",
+          "response": true
+        },
+        {
+          "value": "occupation",
+          "type": "string",
+          "required": true,
+          "label": "职业",
+          "descript": "",
+          "children": [],
+          "key": "9a8c28d6-0c5e-4f6b-9b12-0dfb1c5ad1f8",
+          "response": true
+        },
+        {
+          "value": "monthlyIncome",
+          "type": "number",
+          "required": true,
+          "label": "月收入",
+          "descript": "",
+          "children": [],
+          "key": "67b42f77-9c3e-4ac7-a6a5-6a90e2d6e48f",
+          "response": true
+        },
+        {
+          "value": "monthlyExpenses",
+          "type": "number",
+          "required": true,
+          "label": "月支出",
+          "descript": "",
+          "children": [],
+          "key": "5c7a45eb-bbe2-4d5b-bf7f-d931c0a5d96a",
+          "response": true
+        },
+        {
+          "value": "savingsBalance",
+          "type": "number",
+          "required": true,
+          "label": "储蓄余额",
+          "descript": "",
+          "children": [],
+          "key": "aa8b3483-65c4-44e0-a38e-34bb4be15944",
+          "response": true
+        },
+        {
+          "value": "totalDebt",
+          "type": "number",
+          "required": true,
+          "label": "负债总额",
+          "descript": "",
+          "children": [],
+          "key": "3e5b84c9-3957-42e7-9ed3-176f599ceac7",
+          "response": true
+        },
+        {
+          "value": "familyStatus",
+          "type": "string",
+          "required": true,
+          "label": "家庭状况",
+          "descript": "",
+          "children": [],
+          "key": "936b17f1-7752-48af-9cb3-305c1685b16a",
+          "response": true
+        },
+        {
+          "value": "educationLevel",
+          "type": "string",
+          "required": true,
+          "label": "教育程度",
+          "descript": "",
+          "children": [],
+          "key": "e4ec0ecf-5795-4dbd-b08e-5929e1174b18",
+          "response": true
+        },
+        {
+          "value": "healthStatus",
+          "type": "string",
+          "required": true,
+          "label": "健康状况",
+          "descript": "",
+          "children": [],
+          "key": "5d0c22e2-bcfb-42e4-91b9-98e6f5d78b18",
+          "response": true
+        },
+        {
+          "value": "retirementPlan",
+          "type": "string",
+          "required": true,
+          "label": "退休计划",
+          "descript": "",
+          "children": [],
+          "key": "02ff5f4d-aa2a-4e9a-9374-9ab978f1e3f2",
+          "response": true
+        },
+        {
+          "value": "expenseManagement",
+          "type": "string",
+          "required": true,
+          "label": "支出管理能力",
+          "descript": "",
+          "children": [],
+          "key": "9ebcb1ea-0d6a-4f2a-a699-cfe5ca3c731a",
+          "response": true
+        },
+        {
+          "value": "assessmentTime",
+          "type": "date",
+          "required": false,
+          "label": "评估时间",
+          "descript": "",
+          "children": [],
+          "key": "827ef3b5-d6ef-4e5e-a0d3-5ff0061a4c04",
+          "response": true
+        },
+        {
+          "value": "assessmentResult",
+          "type": "string",
+          "required": false,
+          "label": "评估结果",
+          "descript": "",
+          "children": [],
+          "key": "3cfdd37b-39e2-40e0-aa16-96ec12b335cc",
           "response": true
         }
       ],

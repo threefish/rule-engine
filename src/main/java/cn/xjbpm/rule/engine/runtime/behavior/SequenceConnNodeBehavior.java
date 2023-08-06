@@ -1,11 +1,10 @@
 package cn.xjbpm.rule.engine.runtime.behavior;
 
 import cn.hutool.core.util.StrUtil;
-import cn.xjbpm.rule.engine.aviator.AviatorContext;
-import cn.xjbpm.rule.engine.aviator.AviatorExecutor;
 import cn.xjbpm.rule.engine.definition.model.Node;
 import cn.xjbpm.rule.engine.definition.model.SequenceConnNode;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
+import cn.xjbpm.rule.engine.runtime.util.ConditionUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -28,8 +27,7 @@ public class SequenceConnNodeBehavior implements NodeBehavior {
             this.leave(executionEntity);
         } else {
             String expression = this.node.getRule().getExpressionCacheString();
-            AviatorContext aviatorContext = AviatorContext.create(expression, executionEntity.getVariable());
-            if (StrUtil.isBlank(expression) || AviatorExecutor.executeBoolean(aviatorContext)) {
+            if (StrUtil.isBlank(expression) || ConditionUtil.resolve(expression, executionEntity.getVariable())) {
                 this.leave(executionEntity);
             } else {
                 if (log.isDebugEnabled()) {
