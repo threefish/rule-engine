@@ -1,8 +1,10 @@
 package cn.xjbpm.rule.engine.runtime.behavior;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.xjbpm.rule.engine.common.utils.VariableUtils;
 import cn.xjbpm.rule.engine.definition.model.Node;
 import cn.xjbpm.rule.engine.definition.model.activity.ScoringCardNode;
+import cn.xjbpm.rule.engine.definition.model.activity.scoringcard.ScoringCalcMethodEnums;
 import cn.xjbpm.rule.engine.definition.model.activity.scoringcard.ScoringCardRow;
 import cn.xjbpm.rule.engine.rule.Rule;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
@@ -48,7 +50,15 @@ public class ScoringCardNodeBehavior extends BaseNodeBehavior {
                 }
             }
         }
-        System.out.println(values);
+        ScoringCalcMethodEnums scoringCalcMethod = this.node.getScoringCalcMethod();
+        double sum = 0D;
+        if (scoringCalcMethod == ScoringCalcMethodEnums.SUM_FRACTIONS) {
+            sum = values.stream().mapToDouble(v -> v.getValue()).sum();
+        } else if (scoringCalcMethod == ScoringCalcMethodEnums.SUM_WEIGHT) {
+            sum = values.stream().mapToDouble(v -> v.getValue()).sum();
+        }
+        String assignmentFiled = this.node.getAssignmentFiled();
+        VariableUtils.setPathVariable(assignmentFiled,"分数结果", sum, executionEntity.getVariable());
     }
 
     @Override

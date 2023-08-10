@@ -211,7 +211,7 @@
       "id": "009",
       "type": "ScoringCardNode",
       "x": 740,
-      "y": 340,
+      "y": 240,
       "properties": {
         "name": "评分卡",
         "tag": "A8",
@@ -391,6 +391,61 @@
                     "name": "业务对象.用户.性别",
                     "root": false,
                     "field": "业务对象.用户.性别",
+                    "value": "男",
+                    "varType": "string",
+                    "operator": "=",
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "2785b667-ff4c-4839-9ae2-860478b5e921",
+                "assignmentType": "FIXED"
+              },
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_cabaa7de-d762-4026-adac-c4f7e2dcf0c3",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.职业",
+                    "root": false,
+                    "field": "业务对象.用户.职业",
+                    "value": "IT",
+                    "varType": "string",
+                    "operator": "=",
+                    "valueStart": 41,
+                    "valueEnd": 60,
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "2cd7d711-4594-4b64-a42c-0ebdef485e3d",
+                "assignmentType": "FIXED"
+              }
+            ],
+            "score": 50,
+            "weight": 0,
+            "rowKey": "f3189330-20c7-4c41-aea9-ed4ee7deb3c8"
+          },
+          {
+            "conditionColumns": [
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_aebbccd7-e180-438c-a0c8-331265867fca",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.性别",
+                    "root": false,
+                    "field": "业务对象.用户.性别",
                     "value": "女",
                     "varType": "string",
                     "operator": "=",
@@ -538,6 +593,61 @@
             ],
             "score": 50,
             "weight": 0,
+            "rowKey": "a19be80d-2b58-4741-8256-6061cdf6dd1c"
+          },
+          {
+            "conditionColumns": [
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_aebbccd7-e180-438c-a0c8-331265867fca",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.性别",
+                    "root": false,
+                    "field": "业务对象.用户.性别",
+                    "value": "女",
+                    "varType": "string",
+                    "operator": "=",
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "2785b667-ff4c-4839-9ae2-860478b5e921",
+                "assignmentType": "FIXED"
+              },
+              {
+                "descript": "未设置条件",
+                "rules": [
+                  {
+                    "key": "rule_cabaa7de-d762-4026-adac-c4f7e2dcf0c3",
+                    "assignmentType": "FIXED",
+                    "ruleType": "rule",
+                    "combinator": "AND",
+                    "name": "业务对象.用户.职业",
+                    "root": false,
+                    "field": "业务对象.用户.职业",
+                    "value": "IT",
+                    "varType": "string",
+                    "operator": "=",
+                    "valueStart": 41,
+                    "valueEnd": 60,
+                    "descript": ""
+                  }
+                ],
+                "combinator": "AND",
+                "ruleType": "rule",
+                "root": true,
+                "key": "2cd7d711-4594-4b64-a42c-0ebdef485e3d",
+                "assignmentType": "FIXED"
+              }
+            ],
+            "score": 50,
+            "weight": 0,
             "rowKey": "18a9861e-6859-4236-86a2-05cf524a373e"
           }
         ],
@@ -550,6 +660,11 @@
             "weight": 100,
             "start": 1,
             "end": 1
+          },
+          {
+            "weight": 100,
+            "start": 7,
+            "end": 7
           }
         ],
         "scoringCalcMethod": "SUM_FRACTIONS",
@@ -557,7 +672,7 @@
       },
       "text": {
         "x": 740,
-        "y": 340,
+        "y": 240,
         "value": "评分卡"
       }
     }
@@ -658,7 +773,7 @@
       },
       "endPoint": {
         "x": 675,
-        "y": 340
+        "y": 240
       },
       "properties": {
         "rule": {
@@ -687,7 +802,7 @@
       },
       "text": {
         "x": 520,
-        "y": 261,
+        "y": 240,
         "value": "005"
       },
       "pointsList": [
@@ -697,11 +812,11 @@
         },
         {
           "x": 520,
-          "y": 340
+          "y": 240
         },
         {
           "x": 675,
-          "y": 340
+          "y": 240
         }
       ]
     },
@@ -712,7 +827,7 @@
       "targetNodeId": "004",
       "startPoint": {
         "x": 805,
-        "y": 340
+        "y": 240
       },
       "endPoint": {
         "x": 1120,
@@ -721,17 +836,17 @@
       "properties": {},
       "text": {
         "x": 962.5,
-        "y": 340,
+        "y": 240,
         "value": "006"
       },
       "pointsList": [
         {
           "x": 805,
-          "y": 340
+          "y": 240
         },
         {
           "x": 1120,
-          "y": 340
+          "y": 240
         },
         {
           "x": 1120,
@@ -1023,7 +1138,7 @@
         {
           "value": "monthlyIncome",
           "type": "number",
-          "required": true,
+          "required": false,
           "label": "月收入",
           "descript": "",
           "children": [],
@@ -1033,7 +1148,7 @@
         {
           "value": "monthlyExpenses",
           "type": "number",
-          "required": true,
+          "required": false,
           "label": "月支出",
           "descript": "",
           "children": [],
@@ -1043,7 +1158,7 @@
         {
           "value": "savingsBalance",
           "type": "number",
-          "required": true,
+          "required": false,
           "label": "储蓄余额",
           "descript": "",
           "children": [],
@@ -1053,7 +1168,7 @@
         {
           "value": "totalDebt",
           "type": "number",
-          "required": true,
+          "required": false,
           "label": "负债总额",
           "descript": "",
           "children": [],
@@ -1063,7 +1178,7 @@
         {
           "value": "familyStatus",
           "type": "string",
-          "required": true,
+          "required": false,
           "label": "家庭状况",
           "descript": "",
           "children": [],

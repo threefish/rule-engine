@@ -40,12 +40,12 @@ public class VariableTranslateUtils {
                 continue;
             }
             JsonNode currentNode = jsonNode.get(businessObjectModel.getValue());
+            if (response) {
+                currentNode = jsonNode.get(businessObjectModel.getLabel());
+            }
             if (!businessObjectModel.isRequired() && currentNode == null) {
                 //非必须的且为null
                 continue;
-            }
-            if (response) {
-                currentNode = jsonNode.get(businessObjectModel.getLabel());
             }
             checkNotNull(businessObjectModel, currentNode);
             translate(businessObjectModel, response, currentNode, targetNode);
