@@ -6,6 +6,7 @@ import cn.xjbpm.rule.engine.definition.model.Node;
 import cn.xjbpm.rule.engine.definition.model.activity.ScoringCardNode;
 import cn.xjbpm.rule.engine.definition.model.activity.scoringcard.ScoringCalcMethodEnums;
 import cn.xjbpm.rule.engine.definition.model.activity.scoringcard.ScoringCardRow;
+import cn.xjbpm.rule.engine.definition.model.activity.scoringcard.ScoringCardWeight;
 import cn.xjbpm.rule.engine.rule.Rule;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 import cn.xjbpm.rule.engine.runtime.util.ConditionUtil;
@@ -50,15 +51,30 @@ public class ScoringCardNodeBehavior extends BaseNodeBehavior {
                 }
             }
         }
+        String assignmentFiled = this.node.getAssignmentFiled();
         ScoringCalcMethodEnums scoringCalcMethod = this.node.getScoringCalcMethod();
-        double sum = 0D;
+        double sum;
         if (scoringCalcMethod == ScoringCalcMethodEnums.SUM_FRACTIONS) {
             sum = values.stream().mapToDouble(v -> v.getValue()).sum();
+            VariableUtils.setPathVariable(assignmentFiled, "分数求和结果", sum, executionEntity.getVariable());
         } else if (scoringCalcMethod == ScoringCalcMethodEnums.SUM_WEIGHT) {
-            sum = values.stream().mapToDouble(v -> v.getValue()).sum();
+            List<ScoreRowValue> weightWalues = new ArrayList<>();
+            List<ScoringCardWeight> weights = this.node.getWeights();
+            for (int i = 1; i <= weights.size(); i++) {
+                ScoringCardWeight weight = weights.get(i - 1);
+                int start = weight.getStart();
+                int end = weight.getEnd();
+                double rowSum = values.stream().filter(v -> v.getRowIndex() >= start && v.getRowIndex() <= end).mapToDouble(v -> v.getValue()).sum();
+                weightWalues.add(new ScoreRowValue(i, rowSum, weight.getWeight()));
+            }
+            sum = weightWalues.stream()
+                    // 计算分数与权重的乘积
+                    .mapToDouble(row -> row.getValue() * row.getWeight() / 100)
+                    .sum();
+            VariableUtils.setPathVariable(assignmentFiled, "加权求和结果", sum, executionEntity.getVariable());
+        } else {
+            throw new UnsupportedOperationException(String.format("评分卡不支持[%s]", scoringCalcMethod.getLabel()));
         }
-        String assignmentFiled = this.node.getAssignmentFiled();
-        VariableUtils.setPathVariable(assignmentFiled,"分数结果", sum, executionEntity.getVariable());
     }
 
     @Override
@@ -66,13 +82,21 @@ public class ScoringCardNodeBehavior extends BaseNodeBehavior {
         return node;
     }
 
-
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     static class ScoreRowValue {
+        /**
+         * 行序号
+         */
         int rowIndex;
+        /**
+         * 分数
+         */
         double value;
+        /**
+         * 权重
+         */
         double weight;
     }
 

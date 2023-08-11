@@ -10,9 +10,10 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum ScoringCalcMethodEnums {
+
     SUM_FRACTIONS("分数求和"),
-    SUM_WEIGHT("加权求和"),
-    CALC("表达式计算");
+
+    SUM_WEIGHT("加权求和");
 
     String label;
 }
