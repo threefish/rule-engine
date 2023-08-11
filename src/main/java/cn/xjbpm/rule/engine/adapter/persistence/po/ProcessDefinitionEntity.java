@@ -1,4 +1,4 @@
-package cn.xjbpm.rule.engine.persistence.po;
+package cn.xjbpm.rule.engine.adapter.persistence.po;
 
 import lombok.Data;
 
@@ -7,7 +7,7 @@ import lombok.Data;
  * date: 2023/7/22
  */
 @Data
-public class ProcessDefinition implements java.io.Serializable {
+public class ProcessDefinitionEntity implements java.io.Serializable {
 
     private Long id;
 

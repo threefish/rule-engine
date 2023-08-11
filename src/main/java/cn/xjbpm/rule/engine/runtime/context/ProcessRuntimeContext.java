@@ -18,6 +18,14 @@ public class ProcessRuntimeContext {
      */
     private String key;
     /**
+     * 流程定义ID
+     */
+    private Long processDefinitionId;
+    /**
+     * 环境
+     */
+    private String environment;
+    /**
      * 版本号，null取最新
      */
     private Integer version;

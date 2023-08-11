@@ -1,5 +1,6 @@
-package cn.xjbpm.rule.engine.runtime.entity;
+package cn.xjbpm.rule.engine.adapter.persistence.po;
 
+import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,10 +16,15 @@ import java.util.Map;
 @Builder
 @Data
 @NoArgsConstructor
-public class ExecutionEntityImpl implements ExecutionEntity {
+public class NodeExecutionEntity implements ExecutionEntity {
 
-
+    /**
+     * 当前ID
+     */
     private Long id;
+    /**
+     * 上级执行ID
+     */
     private Long parentExecutionId;
     /**
      * 流程实例id
@@ -34,17 +40,17 @@ public class ExecutionEntityImpl implements ExecutionEntity {
      */
     private boolean active;
     /**
-     * 是否已结束
+     * 是否已完成
      */
-    private boolean isEnded;
+    private boolean completed;
 
-    public ExecutionEntityImpl(Long processInstanceId, Map<String, Object> variable) {
+    public NodeExecutionEntity(Long processInstanceId, Map<String, Object> variable) {
         this.id = processInstanceId;
         this.processInstanceId = processInstanceId;
         this.variable = variable;
     }
 
-    public ExecutionEntityImpl(Long id, Long processInstanceId, Map<String, Object> variable) {
+    public NodeExecutionEntity(Long id, Long processInstanceId, Map<String, Object> variable) {
         this.id = id;
         this.processInstanceId = processInstanceId;
         this.variable = variable;
@@ -52,11 +58,11 @@ public class ExecutionEntityImpl implements ExecutionEntity {
 
     @Override
     public ExecutionEntity createChild() {
-        ExecutionEntity executionEntity = new ExecutionEntityImpl();
+        ExecutionEntity executionEntity = new NodeExecutionEntity();
         executionEntity.setParentExecutionId(this.getId());
         executionEntity.setVariable(this.getVariable());
         executionEntity.setProcessInstanceId(this.getProcessInstanceId());
-        executionEntity.setEnded(isEnded);
+        executionEntity.setCompleted(completed);
         executionEntity.setActive(active);
         return executionEntity;
     }

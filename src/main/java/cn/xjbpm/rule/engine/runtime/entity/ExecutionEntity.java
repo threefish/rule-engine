@@ -55,14 +55,14 @@ public interface ExecutionEntity {
      *
      * @return
      */
-    boolean isEnded();
+    boolean isCompleted();
 
     /**
      * 设置结束状态
      *
      * @param isEnded
      */
-    void setEnded(boolean isEnded);
+    void setCompleted(boolean isEnded);
 
     Map<String, Object> getVariable();
 

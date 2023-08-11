@@ -5,9 +5,10 @@ import cn.xjbpm.rule.RuleEngineApplication;
 import cn.xjbpm.rule.engine.common.utils.JsonUtil;
 import cn.xjbpm.rule.engine.runtime.ProcessRunService;
 import cn.xjbpm.rule.engine.runtime.context.ProcessRuntimeContext;
+import cn.xjbpm.rule.engine.runtime.entity.ProcessInstance;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.Test;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +39,12 @@ public class ProcessRunServiceTest {
         for (int i = 0; i < 1; i++) {
             sw.start("task_" + i);
             try {
-                ProcessRuntimeContext processRuntimeContext = ProcessRuntimeContext.builder().key("grsds").variable(map).build();
-                Map<String, Object> result = processRunService.start(processRuntimeContext);
+                ProcessRuntimeContext processRuntimeContext = ProcessRuntimeContext.builder()
+                        .key("grsds")
+                        .environment("dev")
+                        .variable(map)
+                        .build();
+                ProcessInstance result = processRunService.start(processRuntimeContext);
                 System.out.println("返回：" + JsonUtil.obj2Json(result));
             } finally {
                 sw.stop();

@@ -10,35 +10,35 @@ public interface ProcessDefinitionCache {
     /**
      * 获取流程定义模型
      *
-     * @param deploymentId
+     * @param id
      * @return
      */
-    ProcessModel get(String deploymentId);
+    ProcessModel get(Long id);
 
     /**
      * 设置流程定义模型
      *
-     * @param deploymentId
+     * @param id
      * @param processModel
      */
-    void set(String deploymentId, ProcessModel processModel);
+    void set(Long id, ProcessModel processModel);
 
 
     /**
      * 移除
      *
-     * @param deploymentId
+     * @param id
      */
-    void remove(String deploymentId);
+    void remove(Long id);
 
     /**
      * 判断是否在缓存中
      *
-     * @param deploymentId
+     * @param id
      * @return
      */
 
-    boolean contains(String deploymentId);
+    boolean contains(Long id);
 
     /**
      * 清空缓存

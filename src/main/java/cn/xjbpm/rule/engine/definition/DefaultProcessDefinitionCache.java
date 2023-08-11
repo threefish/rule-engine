@@ -12,25 +12,25 @@ import java.util.Map;
  */
 public class DefaultProcessDefinitionCache implements ProcessDefinitionCache {
 
-    private final Map<String, ProcessModel> cache = Collections.synchronizedMap(new HashMap<>());
+    private final Map<Long, ProcessModel> cache = Collections.synchronizedMap(new HashMap<>());
 
     @Override
-    public ProcessModel get(String deploymentId) {
-        return cache.get(deploymentId);
+    public ProcessModel get(Long id) {
+        return cache.get(id);
     }
 
     @Override
-    public void set(String deploymentId, ProcessModel processModel) {
+    public void set(Long deploymentId, ProcessModel processModel) {
         cache.put(deploymentId, processModel);
     }
 
     @Override
-    public void remove(String deploymentId) {
+    public void remove(Long deploymentId) {
         cache.remove(deploymentId);
     }
 
     @Override
-    public boolean contains(String deploymentId) {
+    public boolean contains(Long deploymentId) {
         return cache.containsKey(deploymentId);
     }
 

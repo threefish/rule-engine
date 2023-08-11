@@ -1,10 +1,10 @@
-package cn.xjbpm.rule.engine.runtime;
+package cn.xjbpm.rule.engine.adapter;
 
 import cn.xjbpm.rule.engine.definition.ProcessDefinitionCache;
 import cn.xjbpm.rule.engine.definition.model.ProcessModel;
 import cn.xjbpm.rule.engine.definition.parse.ProcessModelParse;
-import cn.xjbpm.rule.engine.persistence.ProcessDefinitionRepository;
-import cn.xjbpm.rule.engine.persistence.po.ProcessDefinition;
+import cn.xjbpm.rule.engine.adapter.persistence.ProcessDefinitionRepository;
+import cn.xjbpm.rule.engine.adapter.persistence.po.ProcessDefinitionEntity;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +16,7 @@ import java.util.Objects;
  */
 @Service
 @AllArgsConstructor
-public class ProcessDefinitionService {
+public class ProcessDefinitionAdapter {
 
     private static final ProcessModelParse PROCESS_MODEL_JSON_CONVERTER = new ProcessModelParse();
 
@@ -30,23 +30,17 @@ public class ProcessDefinitionService {
      * @param version 版本为空取最新
      * @return
      */
-    public ProcessDefinition getProcessDefinition(String key, Integer version) {
+    public ProcessDefinitionEntity getProcessDefinition(String key, Integer version) {
         return processDefinitionRepository.getMainProcessDefinition(key, version);
     }
 
     /**
-     * @param key
-     * @param version 版本为空取最新
+     * @param processDefinition
      * @return
      */
-    public ProcessModel getProcessModel(String key, Integer version) {
-        String deploymentId = String.format("%s:%s", key, Objects.isNull(version) ? "MAX" : version);
-        if (processDefinitionCache.contains(deploymentId)) {
-            return processDefinitionCache.get(deploymentId);
-        }
-        ProcessDefinition processDefinition = getProcessDefinition(key, version);
+    public ProcessModel getProcessModel(ProcessDefinitionEntity processDefinition) {
         ProcessModel processModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(processDefinition.getDefinitionContent());
-        processDefinitionCache.set(deploymentId, processModel);
+        processDefinitionCache.set(processDefinition.getId(), processModel);
         return processModel;
     }
 }

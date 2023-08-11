@@ -1,7 +1,7 @@
-package cn.xjbpm.rule.engine.persistence;
+package cn.xjbpm.rule.engine.adapter.persistence;
 
 import cn.hutool.core.io.IoUtil;
-import cn.xjbpm.rule.engine.persistence.po.ProcessDefinition;
+import cn.xjbpm.rule.engine.adapter.persistence.po.ProcessDefinitionEntity;
 import org.springframework.stereotype.Repository;
 
 import java.io.InputStream;
@@ -18,9 +18,9 @@ public class ProcessDefinitionRepository {
      * @param key
      * @return
      */
-    public ProcessDefinition getMainProcessDefinition(String key, Integer version) {
+    public ProcessDefinitionEntity getMainProcessDefinition(String key, Integer version) {
         InputStream resourceAsStream = ProcessDefinitionRepository.class.getResourceAsStream("/process/个人所得税计算.json");
-        ProcessDefinition processDefinition = new ProcessDefinition();
+        ProcessDefinitionEntity processDefinition = new ProcessDefinitionEntity();
         processDefinition.setKey(key);
         processDefinition.setId(1L);
         processDefinition.setDefinitionContent(IoUtil.readUtf8(resourceAsStream));
