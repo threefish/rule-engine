@@ -19,8 +19,8 @@ public class NUMBER_BETWEEN extends AbstractBaseFunction {
         Object startValue = arg2.getValue(env);
         Object endValue = arg3.getValue(env);
         if (value instanceof Number && startValue instanceof Number && endValue instanceof Number) {
-            BigDecimal v =new BigDecimal(value.toString());;
-            BigDecimal start =new BigDecimal(startValue.toString());
+            BigDecimal v = new BigDecimal(value.toString());
+            BigDecimal start = new BigDecimal(startValue.toString());
             BigDecimal end = new BigDecimal(endValue.toString());
             if (v.compareTo(start) >= 0 && v.compareTo(end) <= 0) {
                 return AviatorBoolean.TRUE;

@@ -1,6 +1,6 @@
 package cn.xjbpm.rule.engine.runtime.entity;
 
-import java.util.Map;
+import cn.xjbpm.rule.engine.definition.model.NodeType;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -22,9 +22,9 @@ public interface ExecutionEntity {
      *
      * @return
      */
-    Long getParentExecutionId();
+    Long getParentId();
 
-    void setParentExecutionId(Long parentExecutionId);
+    void setParentId(Long parentId);
 
     /**
      * 获取根节点流程实例ID
@@ -33,10 +33,22 @@ public interface ExecutionEntity {
 
     void setProcessInstanceId(Long processInstanceId);
 
-    ExecutionEntity createChild();
+
+    String getDefinitionKey();
+
+    void setDefinitionKey(String definitionKey);
+
+    String getDefinitionName();
+
+    void setDefinitionName(String definitionName);
+
+    NodeType getNodeType();
+
+    void setNodeType(NodeType nodeType);
+
 
     /**
-     * 设置当前为未活动状态
+     * 设置当前为 未活动状态
      */
     void inactivate();
 
@@ -62,14 +74,7 @@ public interface ExecutionEntity {
      *
      * @param isEnded
      */
-    void setCompleted(boolean isEnded);
+    void setCompleted(boolean completed);
 
-    Map<String, Object> getVariable();
 
-    /**
-     * 设置变量
-     *
-     * @param variable
-     */
-    void setVariable(Map<String, Object> variable);
 }

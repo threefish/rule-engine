@@ -10,17 +10,18 @@ import org.nutz.dao.enhance.annotation.LastModifiedDate;
 import org.nutz.dao.entity.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * date: 2023/7/22
+ * date: 2023/8/11
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table("process_definition")
-public class ProcessDefinitionEntity implements java.io.Serializable {
+@Table("process_variable")
+public class ProcessVariableEntity {
 
     @Id(auto = false)
     @AutoID
@@ -28,14 +29,15 @@ public class ProcessDefinitionEntity implements java.io.Serializable {
     private Long id;
 
     @Column
-    private String definitionKey;
+    private Long processInstanceId;
 
-    @Column
-    private String definitionName;
-
+    /**
+     * 参数
+     */
     @Column
     @ColDefine(type = ColType.MYSQL_JSON)
-    private String definitionContent;
+    private Map<String, Object> variable;
+
 
     @Column
     @CreatedDate
@@ -44,5 +46,6 @@ public class ProcessDefinitionEntity implements java.io.Serializable {
     @Column
     @LastModifiedDate
     private LocalDateTime updateTime;
+
 
 }

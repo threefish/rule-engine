@@ -2,9 +2,9 @@ package cn.xjbpm.rule.engine;
 
 import cn.hutool.core.io.IoUtil;
 import cn.xjbpm.rule.RuleEngineApplication;
-import cn.xjbpm.rule.engine.common.utils.JsonUtil;
+import cn.xjbpm.rule.engine.common.utils.JsonUtils;
 import cn.xjbpm.rule.engine.runtime.ProcessRunService;
-import cn.xjbpm.rule.engine.runtime.context.ProcessRuntimeContext;
+import cn.xjbpm.rule.engine.model.CreateProcessRequest;
 import cn.xjbpm.rule.engine.runtime.entity.ProcessInstance;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -34,18 +34,18 @@ public class ProcessRunServiceTest {
     @Test
     public void startTestGrsdsjs() {
         String requestJson = IoUtil.readUtf8(ProcessRunServiceTest.class.getResourceAsStream("/process/个人所得税计算_request.json"));
-        Map map = JsonUtil.json2Obj(requestJson, Map.class);
+        Map map = JsonUtils.json2Obj(requestJson, Map.class);
         StopWatch sw = new StopWatch();
         for (int i = 0; i < 1; i++) {
             sw.start("task_" + i);
             try {
-                ProcessRuntimeContext processRuntimeContext = ProcessRuntimeContext.builder()
+                CreateProcessRequest createProcessRequest = CreateProcessRequest.builder()
                         .key("grsds")
                         .environment("dev")
                         .variable(map)
                         .build();
-                ProcessInstance result = processRunService.start(processRuntimeContext);
-                System.out.println("返回：" + JsonUtil.obj2Json(result));
+                ProcessInstance result = processRunService.start(createProcessRequest);
+                System.out.println("返回：" + JsonUtils.obj2Json(result));
             } finally {
                 sw.stop();
                 log.info("耗时:{}ms", sw.getLastTaskTimeMillis());

@@ -217,7 +217,7 @@
     "name": "张三",
     "age": 18,
     "gender": "男",
-    "occupation": "软件工程师",
+    "occupation": "IT",
     "monthlyIncome": 30000,
     "monthlyExpenses": 15000,
     "savingsBalance": 100000,

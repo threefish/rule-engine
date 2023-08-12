@@ -1,10 +1,10 @@
 package cn.xjbpm.rule.engine.runtime.behavior;
 
 import cn.hutool.core.util.StrUtil;
-import cn.xjbpm.rule.engine.aviator.AviatorContext;
-import cn.xjbpm.rule.engine.aviator.AviatorExecutor;
 import cn.xjbpm.rule.engine.definition.model.SequenceConnNode;
 import cn.xjbpm.rule.engine.definition.model.gateway.ExclusiveGatewayNode;
+import cn.xjbpm.rule.engine.runtime.context.ProcessContextHolder;
+import cn.xjbpm.rule.engine.runtime.context.ProcessRuntimeContext;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 import cn.xjbpm.rule.engine.runtime.util.ConditionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -34,12 +35,14 @@ public class ExclusiveGatewayNodeBehavior implements NodeBehavior {
 
     @Override
     public void leave(ExecutionEntity executionEntity) {
+        ProcessRuntimeContext context = ProcessContextHolder.getContext();
+        Map<String, Object> variable = context.getVariable();
         // 满足离开节点条件
         List<SequenceConnNode> outgoingNodes = node.getOutgoingNodes();
         Collections.sort(outgoingNodes, Comparator.comparing(SequenceConnNode::getSortNum));
         for (SequenceConnNode outgoingNode : outgoingNodes) {
             String expression = outgoingNode.getRule().getExpressionCacheString();
-            if (StrUtil.isNotBlank(expression) || ConditionUtil.resolve(expression, executionEntity.getVariable())) {
+            if (StrUtil.isNotBlank(expression) || ConditionUtil.resolve(expression, variable)) {
                 outgoingNode.getBehavior().execution(executionEntity);
                 // 独占网关，无需执行其他分支
                 return;

@@ -1,13 +1,18 @@
 package cn.xjbpm.rule.engine.runtime.behavior;
 
 import cn.hutool.core.util.StrUtil;
+import cn.xjbpm.rule.engine.adapter.AdapterContextHolder;
+import cn.xjbpm.rule.engine.adapter.persistence.po.NodeExecutionEntity;
 import cn.xjbpm.rule.engine.definition.model.Node;
 import cn.xjbpm.rule.engine.definition.model.SequenceConnNode;
+import cn.xjbpm.rule.engine.runtime.context.ProcessContextHolder;
+import cn.xjbpm.rule.engine.runtime.context.ProcessRuntimeContext;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 import cn.xjbpm.rule.engine.runtime.util.ConditionUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -17,14 +22,29 @@ import java.util.List;
 public abstract class BaseNodeBehavior implements NodeBehavior {
 
 
+    protected ExecutionEntity createChild(ExecutionEntity parentEntity) {
+        NodeExecutionEntity executionEntity = new NodeExecutionEntity();
+        executionEntity.setParentId(parentEntity.getId());
+        executionEntity.setProcessInstanceId(parentEntity.getProcessInstanceId());
+        executionEntity.setDefinitionName(this.getCurrentNode().getName());
+        executionEntity.setNodeType(this.getCurrentNode().getType());
+        executionEntity.setDefinitionKey(this.getCurrentNode().getKey());
+        executionEntity.setCompleted(false);
+        executionEntity.setActive(true);
+        AdapterContextHolder.nodeExecutionAdapter.createExecutionEntity(executionEntity);
+        return executionEntity;
+    }
+
     @Override
     public void execution(ExecutionEntity executionEntity) {
-        ExecutionEntity currentExecutionEntity = executionEntity.createChild();
+        ExecutionEntity currentExecutionEntity = createChild(executionEntity);
+        ProcessRuntimeContext context = ProcessContextHolder.getContext();
+        Map<String, Object> variable = context.getVariable();
         Node node = getCurrentNode();
         log.info("执行 节点ID:{} TAG:{} 名称:{}", node.getKey(), node.getTag(), node.getName());
         if (StrUtil.isNotBlank(node.getSkipExpression())) {
             // 跳过表达式不为空，表示需要进行判断
-            if (ConditionUtil.resolve(node.getSkipExpression(), currentExecutionEntity.getVariable())) {
+            if (ConditionUtil.resolve(node.getSkipExpression(), variable)) {
                 // 表示当前节点满足跳过规则，执行跳过
                 if (log.isDebugEnabled()) {
                     log.debug("节点[{}]满足跳过条件", node.getKey());
@@ -37,7 +57,7 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
             //执行
             this.doExecution(currentExecutionEntity);
             // 执行后判断是否满足完成条件，为空表示则任务满足
-            if (ConditionUtil.resolve(getCurrentNode().getCompletionExpression(), currentExecutionEntity.getVariable())) {
+            if (ConditionUtil.resolve(getCurrentNode().getCompletionExpression(), variable)) {
                 this.leave(currentExecutionEntity);
             } else {
                 this.unableToComplete(currentExecutionEntity);

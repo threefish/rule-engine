@@ -2,7 +2,7 @@ package cn.xjbpm.rule.engine.aviator;
 
 import cn.hutool.core.lang.ClassScanner;
 import cn.xjbpm.rule.engine.aviator.function.AviatorExtendFunction;
-import cn.xjbpm.rule.engine.common.utils.JsonUtil;
+import cn.xjbpm.rule.engine.common.utils.JsonUtils;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Options;
 import com.googlecode.aviator.runtime.type.AviatorFunction;
@@ -54,7 +54,7 @@ public class AviatorExecutor {
         if (log.isInfoEnabled()) {
             log.info("表达式执行器 result:{} 表达式:{}", result, context.getExpression());
         } else if (log.isDebugEnabled()) {
-            log.debug("表达式执行器 result:{} 表达式:{} 上下文:{}", result, context.getExpression(), JsonUtil.obj2Json(context));
+            log.debug("表达式执行器 result:{} 表达式:{} 上下文:{}", result, context.getExpression(), JsonUtils.obj2Json(context));
         }
         return result;
     }

@@ -18,7 +18,7 @@ import java.lang.reflect.Type;
  * @author 黄川 huchuc@vip.qq.com
  */
 @UtilityClass
-public class JsonUtil {
+public class JsonUtils {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new Jdk8Module())
             .registerModule(new JavaTimeModule()).setSerializationInclusion(JsonInclude.Include.NON_NULL)

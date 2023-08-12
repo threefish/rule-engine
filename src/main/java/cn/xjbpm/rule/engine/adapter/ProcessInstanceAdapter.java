@@ -1,12 +1,15 @@
 package cn.xjbpm.rule.engine.adapter;
 
 import cn.xjbpm.rule.engine.adapter.persistence.ProcessInstanceRepository;
+import cn.xjbpm.rule.engine.adapter.persistence.ProcessVariableRepository;
+import cn.xjbpm.rule.engine.adapter.persistence.po.ProcessDefinitionEntity;
 import cn.xjbpm.rule.engine.adapter.persistence.po.ProcessInstanceEntity;
+import cn.xjbpm.rule.engine.adapter.persistence.po.ProcessVariableEntity;
 import cn.xjbpm.rule.engine.common.enums.ProcessStatusEnum;
-import cn.xjbpm.rule.engine.runtime.entity.ProcessInstance;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -17,17 +20,25 @@ import org.springframework.stereotype.Component;
 public class ProcessInstanceAdapter {
 
     private final ProcessInstanceRepository processInstanceRepository;
+    private final ProcessVariableRepository processVariableRepository;
 
-    public ProcessInstance createProcessInstance(long id, Long processDefinitionId, String processDefinitionKey) {
+    public ProcessInstanceEntity createProcessInstance(Long processInstanceId, ProcessDefinitionEntity processDefinition, Map<String, Object> runtimeVar) {
+
         ProcessInstanceEntity processInstanceEntity = ProcessInstanceEntity.builder()
-                .id(id)
-                .processDefinitionKey(processDefinitionKey)
-                .processDefinitionId(processDefinitionId)
+                .id(processInstanceId)
+                .definitionKey(processDefinition.getDefinitionKey())
+                .definitionName(processDefinition.getDefinitionName())
+                .processDefinitionId(processDefinition.getId())
                 .processStatus(ProcessStatusEnum.UNDERWAY)
+                .active(true)
+                .build();
+        ProcessVariableEntity processVariableEntity = ProcessVariableEntity.builder()
+                .processInstanceId(processInstanceId)
+                .variable(runtimeVar)
                 .build();
         processInstanceRepository.save(processInstanceEntity);
-        ProcessInstance processInstance = new ProcessInstance();
-        BeanUtils.copyProperties(processInstanceEntity, processInstance);
-        return processInstance;
+        processVariableRepository.save(processVariableEntity);
+
+        return processInstanceEntity;
     }
 }

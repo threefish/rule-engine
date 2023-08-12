@@ -11,7 +11,10 @@ import cn.xjbpm.rule.engine.rule.RuleSet;
 import cn.xjbpm.rule.engine.rule.enums.ActionType;
 import cn.xjbpm.rule.engine.rule.enums.RuleSetType;
 import cn.xjbpm.rule.engine.runtime.behavior.holder.EachRowContext;
+import cn.xjbpm.rule.engine.runtime.context.ProcessContextHolder;
+import cn.xjbpm.rule.engine.runtime.context.ProcessRuntimeContext;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
+import cn.xjbpm.rule.engine.runtime.exception.ActionExcuteException;
 import cn.xjbpm.rule.engine.runtime.util.ConditionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
@@ -43,11 +46,12 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
     @Override
     public void doExecution(ExecutionEntity executionEntity) {
         log.info("开始执行规则集");
+        ProcessRuntimeContext context = ProcessContextHolder.getContext();
+        Map<String, Object> variable = context.getVariable();
         List<RuleSet> ruleSets = node.getRuleSet();
         ruleSetTag:
         for (RuleSet ruleSet : ruleSets) {
             RuleSetType type = ruleSet.getType();
-            Map<String, Object> variable = executionEntity.getVariable();
             Object currentVariable = AviatorExecutor.execute(AviatorContext.create(ruleSet.getLoopVariableName(), variable));
             if (type == RuleSetType.LOOP) {
                 if (Objects.nonNull(currentVariable)) {
@@ -64,7 +68,7 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
                             variable.put(LOOP_OBJECT_INDEX_KEY, index);
                             List<RuleAction> ruleActions = ruleSet.getRuleActions();
                             for (RuleAction ruleAction : ruleActions) {
-                                if (ConditionUtil.resolve(ruleAction.getWhenRule().getExpressionCacheString(), executionEntity.getVariable())) {
+                                if (ConditionUtil.resolve(ruleAction.getWhenRule().getExpressionCacheString(), variable)) {
                                     excuteActions(ruleAction.getThenActions(), variable, eachRowContext, object);
                                 } else {
                                     excuteActions(ruleAction.getOtherwiseActions(), variable, eachRowContext, object);
@@ -88,7 +92,7 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
                 try {
                     List<RuleAction> ruleActions = ruleSet.getRuleActions();
                     for (RuleAction ruleAction : ruleActions) {
-                        if (ConditionUtil.resolve(ruleAction.getWhenRule().getExpressionCacheString(), executionEntity.getVariable())) {
+                        if (ConditionUtil.resolve(ruleAction.getWhenRule().getExpressionCacheString(), variable)) {
                             excuteActions(ruleAction.getThenActions(), variable, null, null);
                         } else {
                             excuteActions(ruleAction.getOtherwiseActions(), variable, null, null);

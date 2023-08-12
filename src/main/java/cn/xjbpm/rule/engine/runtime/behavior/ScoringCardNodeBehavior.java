@@ -8,6 +8,8 @@ import cn.xjbpm.rule.engine.definition.model.activity.scoringcard.ScoringCalcMet
 import cn.xjbpm.rule.engine.definition.model.activity.scoringcard.ScoringCardRow;
 import cn.xjbpm.rule.engine.definition.model.activity.scoringcard.ScoringCardWeight;
 import cn.xjbpm.rule.engine.rule.Rule;
+import cn.xjbpm.rule.engine.runtime.context.ProcessContextHolder;
+import cn.xjbpm.rule.engine.runtime.context.ProcessRuntimeContext;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 import cn.xjbpm.rule.engine.runtime.util.ConditionUtil;
 import lombok.AllArgsConstructor;
@@ -17,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -39,13 +42,15 @@ public class ScoringCardNodeBehavior extends BaseNodeBehavior {
     @Override
     public void doExecution(ExecutionEntity executionEntity) {
         log.info("开始执行评分卡");
+        ProcessRuntimeContext context = ProcessContextHolder.getContext();
+        Map<String, Object> variable = context.getVariable();
         List<ScoringCardRow> dataList = node.getDataList();
         List<ScoreRowValue> values = new ArrayList<>();
         if (CollUtil.isNotEmpty(dataList)) {
             for (int i = 0; i < dataList.size(); i++) {
                 ScoringCardRow scoringCardRow = dataList.get(i);
                 List<Rule> conditionColumns = scoringCardRow.getConditionColumns();
-                boolean status = conditionColumns.stream().allMatch(rule -> ConditionUtil.resolve(rule.getExpressionCacheString(), executionEntity.getVariable()));
+                boolean status = conditionColumns.stream().allMatch(rule -> ConditionUtil.resolve(rule.getExpressionCacheString(), variable));
                 if (status) {
                     values.add(new ScoreRowValue(i + 1, scoringCardRow.getScore(), scoringCardRow.getWeight()));
                 }
@@ -56,7 +61,7 @@ public class ScoringCardNodeBehavior extends BaseNodeBehavior {
         double sum;
         if (scoringCalcMethod == ScoringCalcMethodEnums.SUM_FRACTIONS) {
             sum = values.stream().mapToDouble(v -> v.getValue()).sum();
-            VariableUtils.setPathVariable(assignmentFiled, "分数求和结果", sum, executionEntity.getVariable());
+            VariableUtils.setPathVariable(assignmentFiled, "分数求和结果", sum, variable);
         } else if (scoringCalcMethod == ScoringCalcMethodEnums.SUM_WEIGHT) {
             List<ScoreRowValue> weightWalues = new ArrayList<>();
             List<ScoringCardWeight> weights = this.node.getWeights();
@@ -71,7 +76,7 @@ public class ScoringCardNodeBehavior extends BaseNodeBehavior {
                     // 计算分数与权重的乘积
                     .mapToDouble(row -> row.getValue() * row.getWeight() / 100)
                     .sum();
-            VariableUtils.setPathVariable(assignmentFiled, "加权求和结果", sum, executionEntity.getVariable());
+            VariableUtils.setPathVariable(assignmentFiled, "加权求和结果", sum, variable);
         } else {
             throw new UnsupportedOperationException(String.format("评分卡不支持[%s]", scoringCalcMethod.getLabel()));
         }

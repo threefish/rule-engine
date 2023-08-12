@@ -21,7 +21,8 @@ public class ProcessDefinitionRepository {
     public ProcessDefinitionEntity getMainProcessDefinition(String key, Integer version) {
         InputStream resourceAsStream = ProcessDefinitionRepository.class.getResourceAsStream("/process/个人所得税计算.json");
         ProcessDefinitionEntity processDefinition = new ProcessDefinitionEntity();
-        processDefinition.setKey(key);
+        processDefinition.setDefinitionKey(key);
+        processDefinition.setDefinitionName(key);
         processDefinition.setId(1L);
         processDefinition.setDefinitionContent(IoUtil.readUtf8(resourceAsStream));
         return processDefinition;

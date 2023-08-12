@@ -3,9 +3,13 @@ package cn.xjbpm.rule.engine.runtime.behavior;
 import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.engine.definition.model.Node;
 import cn.xjbpm.rule.engine.definition.model.SequenceConnNode;
+import cn.xjbpm.rule.engine.runtime.context.ProcessContextHolder;
+import cn.xjbpm.rule.engine.runtime.context.ProcessRuntimeContext;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 import cn.xjbpm.rule.engine.runtime.util.ConditionUtil;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Map;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -23,11 +27,13 @@ public class SequenceConnNodeBehavior implements NodeBehavior {
     @Override
     public void execution(ExecutionEntity executionEntity) {
         log.info("[{}]执行处理逻辑", node.getKey());
+        ProcessRuntimeContext context = ProcessContextHolder.getContext();
+        Map<String, Object> variable = context.getVariable();
         if (this.node.getRule() == null) {
             this.leave(executionEntity);
         } else {
             String expression = this.node.getRule().getExpressionCacheString();
-            if (StrUtil.isBlank(expression) || ConditionUtil.resolve(expression, executionEntity.getVariable())) {
+            if (StrUtil.isBlank(expression) || ConditionUtil.resolve(expression, variable)) {
                 this.leave(executionEntity);
             } else {
                 if (log.isDebugEnabled()) {

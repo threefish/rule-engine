@@ -1,41 +1,20 @@
 package cn.xjbpm.rule.engine.runtime.context;
 
-import lombok.Builder;
+import cn.xjbpm.rule.engine.adapter.persistence.po.ProcessDefinitionEntity;
 import lombok.Data;
 
 import java.util.Map;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * date: 2022/9/30
+ * date: 2023/8/12
  */
 @Data
-@Builder
 public class ProcessRuntimeContext {
 
-    /**
-     * 流程定义key
-     */
-    private String key;
-    /**
-     * 流程定义ID
-     */
-    private Long processDefinitionId;
-    /**
-     * 环境
-     */
-    private String environment;
-    /**
-     * 版本号，null取最新
-     */
-    private Integer version;
-    /**
-     * 可重入,会持久化
-     */
-    private boolean reentrant;
-    /**
-     * 流程变量
-     */
-    private Map<String, Object> variable;
+    Long processIntanceId;
 
+    ProcessDefinitionEntity processDefinition;
+
+    Map<String, Object> variable;
 }

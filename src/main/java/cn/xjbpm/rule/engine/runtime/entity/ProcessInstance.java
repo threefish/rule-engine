@@ -18,15 +18,15 @@ import java.util.Map;
 @Builder
 public class ProcessInstance {
 
-    private  Long id;
+    private Long id;
 
     private Long processDefinitionId;
 
     private String processDefinitionKey;
 
-    private  Map<String, Object> response;
+    private Map<String, Object> response;
 
-    private  ProcessStatusEnum processStatus;
+    private ProcessStatusEnum processStatus;
 
 
 }

@@ -3,7 +3,6 @@ package cn.xjbpm.rule.engine.runtime.util;
 import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.engine.aviator.AviatorContext;
 import cn.xjbpm.rule.engine.aviator.AviatorExecutor;
-import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 
 import java.util.Map;
 

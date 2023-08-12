@@ -659,15 +659,25 @@
           {
             "weight": 100,
             "start": 1,
-            "end": 1
+            "end": 3
           },
           {
             "weight": 100,
-            "start": 7,
+            "start": 4,
+            "end": 4
+          },
+          {
+            "weight": 100,
+            "start": 5,
             "end": 7
+          },
+          {
+            "weight": 100,
+            "start": 8,
+            "end": 8
           }
         ],
-        "scoringCalcMethod": "SUM_FRACTIONS",
+        "scoringCalcMethod": "SUM_WEIGHT",
         "assignmentFiled": "业务对象.用户.评估结果"
       },
       "text": {

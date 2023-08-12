@@ -1,4 +1,4 @@
-package cn.xjbpm.rule.engine.runtime.behavior;
+package cn.xjbpm.rule.engine.runtime.exception;
 
 import cn.xjbpm.rule.engine.rule.enums.ActionType;
 

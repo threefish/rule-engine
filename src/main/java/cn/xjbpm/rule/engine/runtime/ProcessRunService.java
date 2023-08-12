@@ -1,22 +1,25 @@
 package cn.xjbpm.rule.engine.runtime;
 
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.engine.adapter.ProcessDefinitionAdapter;
 import cn.xjbpm.rule.engine.adapter.ProcessInstanceAdapter;
 import cn.xjbpm.rule.engine.adapter.persistence.po.ProcessDefinitionEntity;
+import cn.xjbpm.rule.engine.adapter.persistence.po.ProcessInstanceEntity;
 import cn.xjbpm.rule.engine.common.constant.ProcessConstant;
 import cn.xjbpm.rule.engine.common.enums.ProcessStatusEnum;
-import cn.xjbpm.rule.engine.common.utils.JsonUtil;
+import cn.xjbpm.rule.engine.common.utils.IdGenerUtils;
+import cn.xjbpm.rule.engine.common.utils.JsonUtils;
 import cn.xjbpm.rule.engine.common.utils.VariableTranslateUtils;
 import cn.xjbpm.rule.engine.definition.model.ProcessModel;
 import cn.xjbpm.rule.engine.definition.model.StartNode;
-import cn.xjbpm.rule.engine.runtime.context.ProcessRuntimeContext;
-import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
-import cn.xjbpm.rule.engine.adapter.persistence.po.NodeExecutionEntity;
+import cn.xjbpm.rule.engine.model.CreateProcessRequest;
+import cn.xjbpm.rule.engine.runtime.behavior.NodeBehavior;
+import cn.xjbpm.rule.engine.runtime.context.ProcessContextHolder;
 import cn.xjbpm.rule.engine.runtime.entity.ProcessInstance;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.nutz.dao.enhance.incrementer.IdentifierGenerator;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -37,32 +40,43 @@ public class ProcessRunService {
 
     private final ProcessDefinitionAdapter processDefinitionService;
     private final ProcessInstanceAdapter processInstanceAdapter;
+    private final IdentifierGenerator identifierGenerator;
 
     /**
      * 开始流程
      *
-     * @param processRuntimeContext
+     * @param createProcessRequest
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ProcessInstance start(ProcessRuntimeContext processRuntimeContext) {
-        Assert.isTrue(StrUtil.isNotBlank(processRuntimeContext.getKey()));
-        long snowflakeNextId = IdUtil.getSnowflakeNextId();
-        ProcessDefinitionEntity processDefinition = processDefinitionService.getProcessDefinition(processRuntimeContext.getKey(), processRuntimeContext.getVersion());
-        ProcessModel processModel = processDefinitionService.getProcessModel(processDefinition);
-        Map<String, Object> runtimeVar = new HashMap<>();
-        runtimeVar.put(ProcessConstant.BUSINESS_OBJECTS, VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), false, JsonUtil.obj2Json(new HashMap<>(processRuntimeContext.getVariable()))));
+    public ProcessInstance start(CreateProcessRequest createProcessRequest) {
+        try {
+            Assert.isTrue(StrUtil.isNotBlank(createProcessRequest.getKey()));
+            long snowflakeNextId = IdGenerUtils.nextGlobalId();
 
-        ProcessInstance processInstance = processInstanceAdapter.createProcessInstance(snowflakeNextId, processDefinition.getId(), processDefinition.getKey());
-        ExecutionEntity executionEntity = new NodeExecutionEntity(snowflakeNextId, runtimeVar);
+            ProcessDefinitionEntity processDefinition = processDefinitionService.getProcessDefinition(createProcessRequest.getKey(), createProcessRequest.getVersion());
+            ProcessModel processModel = processDefinitionService.getProcessModel(processDefinition);
+            Map<String, Object> runtimeVar = new HashMap<>();
+            runtimeVar.put(ProcessConstant.BUSINESS_OBJECTS, VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), false, JsonUtils.obj2Json(new HashMap<>(createProcessRequest.getVariable()))));
 
-        StartNode startNode = processModel.getStartNode();
-        startNode.getBehavior().execution(executionEntity);
+            ProcessContextHolder.createContext(snowflakeNextId, processDefinition, runtimeVar);
 
-        Map<String, Object> response = VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), true, JsonUtil.obj2Json(runtimeVar.get(ProcessConstant.BUSINESS_OBJECTS)));
-        processInstance.setProcessStatus(executionEntity.isCompleted() ? ProcessStatusEnum.COMPLETED : ProcessStatusEnum.UNDERWAY);
-        processInstance.setResponse(response);
-        return processInstance;
+            ProcessInstanceEntity processInstanceEntity = processInstanceAdapter.createProcessInstance(snowflakeNextId, processDefinition, runtimeVar);
+
+            StartNode startNode = processModel.getStartNode();
+            NodeBehavior behavior = startNode.getBehavior();
+            behavior.execution(processInstanceEntity);
+
+            ProcessInstance processInstance = new ProcessInstance();
+            BeanUtils.copyProperties(processInstanceEntity, processInstance);
+            Map<String, Object> response = VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), true, JsonUtils.obj2Json(runtimeVar.get(ProcessConstant.BUSINESS_OBJECTS)));
+            processInstance.setProcessStatus(processInstanceEntity.isCompleted() ? ProcessStatusEnum.COMPLETED : ProcessStatusEnum.UNDERWAY);
+            processInstance.setResponse(response);
+            return processInstance;
+        } finally {
+            ProcessContextHolder.destroy();
+        }
+
     }
 
     /**
