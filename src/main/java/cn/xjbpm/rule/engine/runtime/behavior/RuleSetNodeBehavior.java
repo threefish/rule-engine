@@ -60,27 +60,29 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
                 if (currentVariable != null) {
                     List list = ((List) currentVariable);
                     EachRowContext eachRowContext = new EachRowContext();
-                    listTag:
-                    for (int index = 0; index < list.size(); index++) {
-                        Object object = list.get(index);
-                        try {
-                            variable.put(LOOP_OBJECT_KEY, object);
-                            variable.put(LOOP_OBJECT_INDEX_KEY, index);
-                            List<RuleAction> ruleActions = ruleSet.getRuleActions();
-                            for (RuleAction ruleAction : ruleActions) {
+                    List<RuleAction> ruleActions = ruleSet.getRuleActions();
+                    for (RuleAction ruleAction : ruleActions) {
+                        listTag:
+                        for (int index = 0; index < list.size(); index++) {
+                            Object object = list.get(index);
+                            try {
+                                variable.put(LOOP_OBJECT_KEY, object);
+                                variable.put(LOOP_OBJECT_INDEX_KEY, index);
+
                                 if (ConditionUtil.resolve(ruleAction.getWhenRule().getExpressionCacheString(), variable)) {
                                     excuteActions(ruleAction.getThenActions(), variable, eachRowContext, object);
                                 } else {
                                     excuteActions(ruleAction.getOtherwiseActions(), variable, eachRowContext, object);
                                 }
-                            }
-                        } catch (ActionExcuteException excuteException) {
-                            if (excuteException.getActionType() == ActionType.CONTINUE) {
-                                continue listTag;
-                            } else if (excuteException.getActionType() == ActionType.BREAK) {
-                                break listTag;
-                            } else if (excuteException.getActionType() == ActionType.BREAK_RULE_SET) {
-                                break ruleSetTag;
+
+                            } catch (ActionExcuteException excuteException) {
+                                if (excuteException.getActionType() == ActionType.CONTINUE) {
+                                    continue listTag;
+                                } else if (excuteException.getActionType() == ActionType.BREAK) {
+                                    break listTag;
+                                } else if (excuteException.getActionType() == ActionType.BREAK_RULE_SET) {
+                                    break ruleSetTag;
+                                }
                             }
                         }
                     }

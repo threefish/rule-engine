@@ -11,6 +11,7 @@ import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 import cn.xjbpm.rule.engine.runtime.util.ConditionUtil;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -21,23 +22,9 @@ import java.util.Map;
 @Slf4j
 public abstract class BaseNodeBehavior implements NodeBehavior {
 
-
-    protected ExecutionEntity createChild(ExecutionEntity parentEntity) {
-        NodeExecutionEntity executionEntity = new NodeExecutionEntity();
-        executionEntity.setParentId(parentEntity.getId());
-        executionEntity.setProcessInstanceId(parentEntity.getProcessInstanceId());
-        executionEntity.setDefinitionName(this.getCurrentNode().getName());
-        executionEntity.setNodeType(this.getCurrentNode().getType());
-        executionEntity.setDefinitionKey(this.getCurrentNode().getKey());
-        executionEntity.setCompleted(false);
-        executionEntity.setActive(true);
-        AdapterContextHolder.nodeExecutionAdapter.createExecutionEntity(executionEntity);
-        return executionEntity;
-    }
-
     @Override
     public void execution(ExecutionEntity executionEntity) {
-        ExecutionEntity currentExecutionEntity = createChild(executionEntity);
+        ExecutionEntity currentExecutionEntity = createChildExecution(executionEntity);
         ProcessRuntimeContext context = ProcessContextHolder.getContext();
         Map<String, Object> variable = context.getVariable();
         Node node = getCurrentNode();
@@ -73,6 +60,19 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
                 outgoingNode.getBehavior().execution(executionEntity);
             }
         }
+    }
+
+    protected ExecutionEntity createChildExecution(ExecutionEntity parentEntity) {
+        NodeExecutionEntity executionEntity = new NodeExecutionEntity();
+        executionEntity.setParentId(parentEntity.getId());
+        executionEntity.setProcessInstanceId(parentEntity.getProcessInstanceId());
+        executionEntity.setDefinitionName(this.getCurrentNode().getName());
+        executionEntity.setNodeType(this.getCurrentNode().getType());
+        executionEntity.setDefinitionKey(this.getCurrentNode().getKey());
+        executionEntity.setCompleted(false);
+        executionEntity.setActive(true);
+        AdapterContextHolder.nodeExecutionAdapter.createExecutionEntity(executionEntity);
+        return executionEntity;
     }
 
     /**
