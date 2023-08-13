@@ -16,6 +16,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
 import org.springframework.util.Assert;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +32,8 @@ public class VariableTranslateUtils {
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
     @SneakyThrows
-    public static Map<String, Object> translate(List<ObjectModel> businessObjectModels, boolean response, String jsonData) {
+    public static Map<String, Object> translate(List<ObjectModel> businessObjectModels, boolean response,Map variable) {
+        String jsonData=JsonUtils.obj2Json(new HashMap<>(variable));
         JsonNode jsonNode = OBJECT_MAPPER.readTree(jsonData);
         ObjectNode targetNode = OBJECT_MAPPER.createObjectNode();
         for (ObjectModel businessObjectModel : businessObjectModels) {

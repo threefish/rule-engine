@@ -1,6 +1,6 @@
 package cn.xjbpm.rule.engine.runtime.context;
 
-import cn.xjbpm.rule.engine.adapter.persistence.po.ProcessDefinitionEntity;
+import cn.xjbpm.rule.engine.common.enums.ProcessStatusEnum;
 import cn.xjbpm.rule.engine.definition.model.ProcessModel;
 
 import java.util.Map;
@@ -13,10 +13,10 @@ public class ProcessContextHolder {
 
     private static final ThreadLocal<ProcessRuntimeContext> THREAD_LOCAL = new ThreadLocal<>();
 
-    public static ProcessRuntimeContext createContext(Long processIntanceId,String environment, ProcessDefinitionEntity processDefinition, ProcessModel processModel, Map<String, Object> variable) {
+    public static ProcessRuntimeContext createContext(Long processIntanceId, String environment, ProcessModel processModel, Map<String, Object> variable) {
         ProcessRuntimeContext processRuntimeContext = new ProcessRuntimeContext();
         processRuntimeContext.setProcessIntanceId(processIntanceId);
-        processRuntimeContext.setProcessDefinition(processDefinition);
+        processRuntimeContext.setProcessStatus(ProcessStatusEnum.UNDERWAY);
         processRuntimeContext.setVariable(variable);
         processRuntimeContext.setProcessModel(processModel);
         processRuntimeContext.setEnvironment(environment);

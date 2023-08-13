@@ -1,7 +1,9 @@
 package cn.xjbpm.rule.engine.runtime.behavior;
 
+import cn.xjbpm.rule.engine.common.enums.ProcessStatusEnum;
 import cn.xjbpm.rule.engine.definition.model.EndNode;
 import cn.xjbpm.rule.engine.definition.model.Node;
+import cn.xjbpm.rule.engine.runtime.context.ProcessContextHolder;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,6 +34,7 @@ public class EndNodeBehavior extends BaseNodeBehavior {
     @Override
     public void doExecution(ExecutionEntity executionEntity) {
         log.info("流程结束 {}", node.getKey());
+        ProcessContextHolder.getContext().setProcessStatus(ProcessStatusEnum.COMPLETED);
     }
 
     @Override

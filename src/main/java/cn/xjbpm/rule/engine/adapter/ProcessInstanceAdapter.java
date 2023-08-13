@@ -41,4 +41,8 @@ public class ProcessInstanceAdapter {
 
         return processInstanceEntity;
     }
+
+    public boolean updateProcessInstance(ProcessInstanceEntity processInstanceEntity) {
+        return processInstanceRepository.update(processInstanceEntity) > 0;
+    }
 }

@@ -1,6 +1,6 @@
 package cn.xjbpm.rule.engine.runtime.context;
 
-import cn.xjbpm.rule.engine.adapter.persistence.po.ProcessDefinitionEntity;
+import cn.xjbpm.rule.engine.common.enums.ProcessStatusEnum;
 import cn.xjbpm.rule.engine.definition.model.ProcessModel;
 import lombok.Data;
 
@@ -13,11 +13,12 @@ import java.util.Map;
 @Data
 public class ProcessRuntimeContext {
 
-    private  Long processIntanceId;
+    private Long processIntanceId;
 
-    private ProcessDefinitionEntity processDefinition;
 
-    private  Map<String, Object> variable;
+    private ProcessStatusEnum processStatus;
+
+    private Map<String, Object> variable;
 
     private ProcessModel processModel;
 

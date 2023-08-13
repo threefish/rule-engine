@@ -1,7 +1,6 @@
 package cn.xjbpm.rule.engine.adapter.persistence;
 
 import cn.xjbpm.rule.engine.adapter.persistence.po.NodeExecutionEntity;
-import cn.xjbpm.rule.engine.adapter.persistence.po.ProcessVariableEntity;
 import org.nutz.dao.enhance.annotation.Dao;
 import org.nutz.dao.enhance.dao.BaseDao;
 import org.springframework.stereotype.Repository;
