@@ -2,6 +2,7 @@ package cn.xjbpm.rule.engine.adapter;
 
 import cn.xjbpm.rule.engine.adapter.persistence.NodeExecutionRepository;
 import cn.xjbpm.rule.engine.adapter.persistence.po.NodeExecutionEntity;
+import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -17,5 +18,12 @@ public class NodeExecutionAdapter {
 
     public NodeExecutionEntity createExecutionEntity(NodeExecutionEntity executionEntity) {
         return nodeExecutionRepository.save(executionEntity);
+    }
+
+    public void updateExecution2Completed(ExecutionEntity executionEntity) {
+        executionEntity.setCompleted(true);
+        if (executionEntity instanceof NodeExecutionEntity) {
+            nodeExecutionRepository.update((NodeExecutionEntity) executionEntity);
+        }
     }
 }

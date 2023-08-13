@@ -1,5 +1,6 @@
 package cn.xjbpm.rule.engine.runtime.behavior;
 
+import cn.xjbpm.rule.engine.adapter.AdapterContextHolder;
 import cn.xjbpm.rule.engine.definition.model.Node;
 import cn.xjbpm.rule.engine.definition.model.SequenceConnNode;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
@@ -34,6 +35,7 @@ public class SequenceConnNodeBehavior extends BaseNodeBehavior {
     @Override
     public void doExecution(ExecutionEntity executionEntity) {
         log.info("[{}]执行处理逻辑", node.getKey());
+        AdapterContextHolder.nodeExecutionAdapter.updateExecution2Completed(executionEntity);
     }
 
     @Override

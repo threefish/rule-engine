@@ -1,5 +1,6 @@
 package cn.xjbpm.rule.engine.runtime.behavior;
 
+import cn.xjbpm.rule.engine.adapter.AdapterContextHolder;
 import cn.xjbpm.rule.engine.common.enums.ProcessStatusEnum;
 import cn.xjbpm.rule.engine.definition.model.EndNode;
 import cn.xjbpm.rule.engine.definition.model.Node;
@@ -35,6 +36,7 @@ public class EndNodeBehavior extends BaseNodeBehavior {
     public void doExecution(ExecutionEntity executionEntity) {
         log.info("流程结束 {}", node.getKey());
         ProcessContextHolder.getContext().setProcessStatus(ProcessStatusEnum.COMPLETED);
+        AdapterContextHolder.nodeExecutionAdapter.updateExecution2Completed(executionEntity);
     }
 
     @Override

@@ -42,17 +42,12 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
         Map<String, Object> variable = context.getVariable();
         Node node = getCurrentNode();
         log.info("执行 节点ID:{} TAG:{} 名称:{}", node.getKey(), node.getTag(), node.getName());
-        if (StrUtil.isNotBlank(node.getSkipExpression())) {
-            // 跳过表达式不为空，表示需要进行判断
-            if (ConditionUtil.resolve(node.getSkipExpression(), variable)) {
-                // 表示当前节点满足跳过规则，执行跳过
-                if (log.isDebugEnabled()) {
-                    log.debug("节点[{}]满足跳过条件", node.getKey());
-                }
-                this.leave(currentExecutionEntity);
-            } else {
-                this.doExecution(currentExecutionEntity);
+        if (StrUtil.isNotBlank(node.getSkipExpression()) && ConditionUtil.resolve(node.getSkipExpression(), variable)) {
+            // 跳过表达式不为空， 表示当前节点满足跳过规则，执行跳过
+            if (log.isDebugEnabled()) {
+                log.debug("节点[{}]满足跳过条件", node.getKey());
             }
+            this.leave(currentExecutionEntity);
         } else {
             //执行
             this.doExecution(currentExecutionEntity);
@@ -67,6 +62,7 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
 
     @Override
     public void leave(ExecutionEntity executionEntity) {
+        AdapterContextHolder.nodeExecutionAdapter.updateExecution2Completed(executionEntity);
         log.info("离开[{}:{}]节点", getCurrentNode().getName(), getCurrentNode().getKey());
         // 满足离开节点条件
         ProcessRuntimeContext context = ProcessContextHolder.getContext();
