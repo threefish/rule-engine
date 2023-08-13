@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.nutz.dao.enhance.incrementer.IdentifierGenerator;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.HashMap;
@@ -48,7 +47,7 @@ public class ProcessRunService {
      * @param createProcessRequest
      * @return
      */
-    @Transactional(rollbackFor = Exception.class)
+//    @Transactional(rollbackFor = Exception.class)
     public ProcessInstance start(CreateProcessRequest createProcessRequest) {
         try {
             Assert.isTrue(StrUtil.isNotBlank(createProcessRequest.getKey()));
@@ -59,7 +58,7 @@ public class ProcessRunService {
             Map<String, Object> runtimeVar = new HashMap<>();
             runtimeVar.put(ProcessConstant.BUSINESS_OBJECTS, VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), false, JsonUtils.obj2Json(new HashMap<>(createProcessRequest.getVariable()))));
 
-            ProcessContextHolder.createContext(snowflakeNextId, processDefinition, runtimeVar);
+            ProcessContextHolder.createContext(snowflakeNextId, createProcessRequest.getEnvironment(), processDefinition, processModel, runtimeVar);
 
             ProcessInstanceEntity processInstanceEntity = processInstanceAdapter.createProcessInstance(snowflakeNextId, processDefinition, runtimeVar);
 

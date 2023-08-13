@@ -1,6 +1,7 @@
 package cn.xjbpm.rule.engine.runtime.context;
 
 import cn.xjbpm.rule.engine.adapter.persistence.po.ProcessDefinitionEntity;
+import cn.xjbpm.rule.engine.definition.model.ProcessModel;
 import lombok.Data;
 
 import java.util.Map;
@@ -12,9 +13,16 @@ import java.util.Map;
 @Data
 public class ProcessRuntimeContext {
 
-    Long processIntanceId;
+    private  Long processIntanceId;
 
-    ProcessDefinitionEntity processDefinition;
+    private ProcessDefinitionEntity processDefinition;
 
-    Map<String, Object> variable;
+    private  Map<String, Object> variable;
+
+    private ProcessModel processModel;
+
+    /**
+     * 环境
+     */
+    private String environment;
 }

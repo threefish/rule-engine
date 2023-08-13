@@ -69,9 +69,13 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
     public void leave(ExecutionEntity executionEntity) {
         log.info("离开[{}:{}]节点", getCurrentNode().getName(), getCurrentNode().getKey());
         // 满足离开节点条件
+        ProcessRuntimeContext context = ProcessContextHolder.getContext();
+        Map<String, Object> variable = context.getVariable();
         List<SequenceConnNode> outgoingNodes = getCurrentNode().getOutgoingNodes();
         for (SequenceConnNode outgoingNode : outgoingNodes) {
-            outgoingNode.getBehavior().execution(executionEntity);
+            if (ConditionUtil.resolve(outgoingNode.getRule(), variable)) {
+                outgoingNode.getBehavior().execution(executionEntity);
+            }
         }
     }
 

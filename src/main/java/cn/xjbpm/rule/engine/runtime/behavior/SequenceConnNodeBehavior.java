@@ -16,31 +16,12 @@ import java.util.Map;
  * date: 2022/9/30
  */
 @Slf4j
-public class SequenceConnNodeBehavior implements NodeBehavior {
+public class SequenceConnNodeBehavior extends BaseNodeBehavior {
 
     private final SequenceConnNode node;
 
     public SequenceConnNodeBehavior(SequenceConnNode node) {
         this.node = node;
-    }
-
-    @Override
-    public void execution(ExecutionEntity executionEntity) {
-        log.info("[{}]执行处理逻辑", node.getKey());
-        ProcessRuntimeContext context = ProcessContextHolder.getContext();
-        Map<String, Object> variable = context.getVariable();
-        if (this.node.getRule() == null) {
-            this.leave(executionEntity);
-        } else {
-            String expression = this.node.getRule().getExpressionCacheString();
-            if (StrUtil.isBlank(expression) || ConditionUtil.resolve(expression, variable)) {
-                this.leave(executionEntity);
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("节点[{}]不满足通过条件", node.getKey());
-                }
-            }
-        }
     }
 
 
@@ -49,6 +30,21 @@ public class SequenceConnNodeBehavior implements NodeBehavior {
         log.info("离开[{}]节点", node.getKey());
         Node targetNode = node.getTargetNode();
         targetNode.getBehavior().execution(executionEntity);
+    }
+
+    @Override
+    public void unableToComplete(ExecutionEntity executionEntity) {
+
+    }
+
+    @Override
+    public void doExecution(ExecutionEntity executionEntity) {
+        log.info("[{}]执行处理逻辑", node.getKey());
+    }
+
+    @Override
+    public Node getCurrentNode() {
+        return node;
     }
 
 

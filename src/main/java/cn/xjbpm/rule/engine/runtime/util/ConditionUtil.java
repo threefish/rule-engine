@@ -3,6 +3,7 @@ package cn.xjbpm.rule.engine.runtime.util;
 import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.engine.aviator.AviatorContext;
 import cn.xjbpm.rule.engine.aviator.AviatorExecutor;
+import cn.xjbpm.rule.engine.rule.Rule;
 
 import java.util.Map;
 
@@ -20,10 +21,25 @@ public class ConditionUtil {
      * @return
      */
     public static boolean resolve(String expression, Map<String, Object> variables) {
-        AviatorContext aviatorContext = AviatorContext.create(expression, variables);
         if (StrUtil.isBlank(expression)) {
             return true;
         }
-        return AviatorExecutor.executeBoolean(aviatorContext);
+        return AviatorExecutor.executeBoolean(AviatorContext.create(expression, variables));
     }
+
+    /**
+     * 决定表达式
+     *
+     * @param rule
+     * @param variables
+     * @return
+     */
+    public static boolean resolve(Rule rule, Map<String, Object> variables) {
+        if (rule == null) {
+            return true;
+        }
+        String expressionCacheString = rule.getExpressionCacheString();
+        return resolve(expressionCacheString, variables);
+    }
+
 }
