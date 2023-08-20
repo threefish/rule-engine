@@ -1,7 +1,10 @@
 package cn.xjbpm.rule.engine.definition.model.activity;
 
 import cn.xjbpm.rule.engine.definition.model.NodeType;
+import cn.xjbpm.rule.engine.definition.model.activity.decisiontable.DecisionTablesRow;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -10,6 +13,8 @@ import lombok.Data;
 @Data
 public class DecisionTablesNode extends ActivityNode {
 
+
+    List<DecisionTablesRow> tableRows;
 
     @Override
     public NodeType getType() {

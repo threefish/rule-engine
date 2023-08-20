@@ -31,6 +31,12 @@ public class ProcessVariableEntity {
     @Column
     private Long processInstanceId;
 
+    @Column
+    private Long nodeExecutionId;
+
+    @Column
+    private String nodeKey;
+
     /**
      * 参数
      */

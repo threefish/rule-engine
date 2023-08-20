@@ -6,4 +6,12 @@ package cn.xjbpm.rule.engine.common.constant;
  */
 public interface ProcessConstant {
     String BUSINESS_OBJECTS = "业务对象";
+    /**
+     * 实例数
+     */
+    String numberOfInstances="numberOfInstances";
+    /**
+     * 完成实例数
+     */
+    String numberOfCompletedInstances="numberOfCompletedInstances";
 }

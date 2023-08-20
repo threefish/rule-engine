@@ -1,7 +1,7 @@
 {
   "key": "grsdsjs",
-  "name": "个人所得税计算",
-  "documentation": "个人所得税计算",
+  "name": "个人所得税计算123",
+  "documentation": "个人所得税计算123",
   "nodes": [
     {
       "id": "001",
@@ -180,15 +180,15 @@
     {
       "id": "002",
       "type": "StartNode",
-      "x": 520,
-      "y": 160,
+      "x": 360,
+      "y": 220,
       "properties": {
         "name": "开始",
         "tag": "A1"
       },
       "text": {
-        "x": 520,
-        "y": 160,
+        "x": 360,
+        "y": 220,
         "value": "开始"
       }
     },
@@ -196,14 +196,14 @@
       "id": "004",
       "type": "EndNode",
       "x": 1120,
-      "y": 160,
+      "y": 220,
       "properties": {
         "name": "结束",
         "tag": "A2"
       },
       "text": {
         "x": 1120,
-        "y": 160,
+        "y": 220,
         "value": "结束"
       }
     },
@@ -211,7 +211,7 @@
       "id": "009",
       "type": "ScoringCardNode",
       "x": 740,
-      "y": 240,
+      "y": 220,
       "properties": {
         "name": "评分卡",
         "tag": "A8",
@@ -682,58 +682,205 @@
       },
       "text": {
         "x": 740,
-        "y": 240,
+        "y": 220,
         "value": "评分卡"
+      }
+    },
+    {
+      "id": "007",
+      "type": "DecisionTablesNode",
+      "x": 740,
+      "y": 280,
+      "properties": {
+        "name": "决策表",
+        "tag": "A9",
+        "tableRows": [
+          {
+            "conditionColumns": [
+              {
+                "label": "年龄",
+                "rule": {
+                  "descript": "",
+                  "rules": [
+                    {
+                      "key": "rule_f4b3f612-f07d-4782-843a-b89e159d3354",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "业务对象.用户.年龄",
+                      "root": false,
+                      "field": "业务对象.用户.年龄",
+                      "varType": "number",
+                      "operator": "between",
+                      "valueStart": 0,
+                      "valueEnd": 18,
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "3fec400e-e7ff-4a57-82a1-ef6ab154e9bd",
+                  "assignmentType": "FIXED"
+                }
+              }
+            ],
+            "assignColumns": [
+              {
+                "label": "",
+                "name": "业务对象.用户.教育程度",
+                "expression": "高中"
+              }
+            ],
+            "score": 0,
+            "rowKey": "0b54de96-1b15-4334-8215-97e3b0ae3d34"
+          },
+          {
+            "conditionColumns": [
+              {
+                "label": "年龄",
+                "rule": {
+                  "descript": "",
+                  "rules": [
+                    {
+                      "key": "rule_0716e652-e92f-442c-bb56-55e0240d6e61",
+                      "assignmentType": "FIXED",
+                      "ruleType": "rule",
+                      "combinator": "AND",
+                      "name": "业务对象.用户.年龄",
+                      "root": false,
+                      "field": "业务对象.用户.年龄",
+                      "varType": "number",
+                      "operator": "between",
+                      "valueStart": 19,
+                      "valueEnd": 30,
+                      "descript": ""
+                    }
+                  ],
+                  "combinator": "AND",
+                  "ruleType": "rule",
+                  "root": true,
+                  "key": "ae4f257e-d5ee-4d17-b076-1af8f518a592",
+                  "assignmentType": "FIXED"
+                }
+              }
+            ],
+            "assignColumns": [
+              {
+                "label": "",
+                "name": "业务对象.用户.教育程度",
+                "expression": "本科"
+              }
+            ],
+            "score": 0,
+            "rowKey": "f92e3a81-c910-4871-9940-0c9438cf7e70"
+          }
+        ],
+        "conditionColumns": [
+          "年龄"
+        ],
+        "assignColumns": [
+          "业务对象.用户.教育程度"
+        ]
+      },
+      "text": {
+        "x": 740,
+        "y": 280,
+        "value": "决策表"
+      }
+    },
+    {
+      "id": "003",
+      "type": "ParallelGatewayNode",
+      "x": 500,
+      "y": 220,
+      "properties": {
+        "name": "并行网关",
+        "tag": "A4"
+      },
+      "text": {
+        "x": 500,
+        "y": 260,
+        "value": "并行网关"
+      }
+    },
+    {
+      "id": "011",
+      "type": "InclusiveGatewayNode",
+      "x": 960,
+      "y": 220,
+      "properties": {
+        "name": "包容网关",
+        "tag": "A5"
+      },
+      "text": {
+        "x": 960,
+        "y": 260,
+        "value": "包容网关"
       }
     }
   ],
   "edges": [
     {
-      "id": "003",
+      "id": "005",
       "type": "SequenceConnNode",
       "sourceNodeId": "002",
+      "targetNodeId": "003",
+      "startPoint": {
+        "x": 382,
+        "y": 220
+      },
+      "endPoint": {
+        "x": 475,
+        "y": 220
+      },
+      "properties": {},
+      "text": {
+        "x": 408.5,
+        "y": 220,
+        "value": "005"
+      },
+      "pointsList": [
+        {
+          "x": 382,
+          "y": 220
+        },
+        {
+          "x": 475,
+          "y": 220
+        }
+      ]
+    },
+    {
+      "id": "006",
+      "type": "SequenceConnNode",
+      "sourceNodeId": "003",
       "targetNodeId": "001",
       "startPoint": {
-        "x": 542,
-        "y": 160
+        "x": 525,
+        "y": 220
       },
       "endPoint": {
         "x": 675,
         "y": 160
       },
-      "properties": {
-        "rule": {
-          "rules": [
-            {
-              "key": "rule_ee67607b-8c3a-4918-b44b-5762a1cb0675",
-              "assignmentType": "FIXED",
-              "ruleType": "rule",
-              "combinator": "AND",
-              "name": "业务对象.月薪",
-              "root": false,
-              "field": "业务对象.月薪",
-              "varType": "list",
-              "operator": "isNotEmpty",
-              "descript": ""
-            }
-          ],
-          "combinator": "AND",
-          "ruleType": "rule",
-          "root": true,
-          "key": "5122e92a-699c-4d43-97c6-29c4da0da09c",
-          "assignmentType": "fixed"
-        },
-        "readonly": false,
-        "sortNum": 0
-      },
+      "properties": {},
       "text": {
-        "x": 608.5,
+        "x": 596,
         "y": 160,
-        "value": "连线条件3"
+        "value": "006"
       },
       "pointsList": [
         {
-          "x": 542,
+          "x": 525,
+          "y": 220
+        },
+        {
+          "x": 555,
+          "y": 220
+        },
+        {
+          "x": 555,
           "y": 160
         },
         {
@@ -745,122 +892,204 @@
     {
       "id": "008",
       "type": "SequenceConnNode",
-      "sourceNodeId": "001",
-      "targetNodeId": "004",
-      "startPoint": {
-        "x": 805,
-        "y": 160
-      },
-      "endPoint": {
-        "x": 1098,
-        "y": 160
-      },
-      "properties": {},
-      "text": {
-        "x": 951.5,
-        "y": 160,
-        "value": "连线条件8"
-      },
-      "pointsList": [
-        {
-          "x": 805,
-          "y": 160
-        },
-        {
-          "x": 1098,
-          "y": 160
-        }
-      ]
-    },
-    {
-      "id": "005",
-      "type": "SequenceConnNode",
-      "sourceNodeId": "002",
+      "sourceNodeId": "003",
       "targetNodeId": "009",
       "startPoint": {
-        "x": 520,
-        "y": 182
+        "x": 525,
+        "y": 220
       },
       "endPoint": {
         "x": 675,
-        "y": 240
+        "y": 220
       },
-      "properties": {
-        "rule": {
-          "rules": [
-            {
-              "key": "rule_b92d20bb-a52b-46b6-98ef-63c9bba59304",
-              "assignmentType": "FIXED",
-              "ruleType": "rule",
-              "combinator": "AND",
-              "name": "业务对象.用户",
-              "root": false,
-              "field": "业务对象.用户",
-              "varType": "object",
-              "operator": "isNotNull",
-              "descript": ""
-            }
-          ],
-          "combinator": "AND",
-          "ruleType": "rule",
-          "root": true,
-          "key": "c3194af9-5c08-4065-8b5a-c9e3ea215c72",
-          "assignmentType": "fixed"
-        },
-        "readonly": false,
-        "sortNum": 0
-      },
+      "properties": {},
       "text": {
-        "x": 520,
-        "y": 240,
-        "value": "连线条件5"
+        "x": 600,
+        "y": 220,
+        "value": "008"
       },
       "pointsList": [
         {
-          "x": 520,
-          "y": 182
-        },
-        {
-          "x": 520,
-          "y": 240
+          "x": 525,
+          "y": 220
         },
         {
           "x": 675,
-          "y": 240
+          "y": 220
         }
       ]
     },
     {
-      "id": "006",
+      "id": "010",
       "type": "SequenceConnNode",
-      "sourceNodeId": "009",
-      "targetNodeId": "004",
+      "sourceNodeId": "003",
+      "targetNodeId": "007",
       "startPoint": {
-        "x": 805,
-        "y": 240
+        "x": 525,
+        "y": 220
       },
       "endPoint": {
-        "x": 1120,
-        "y": 182
+        "x": 675,
+        "y": 280
       },
       "properties": {},
       "text": {
-        "x": 962.5,
-        "y": 240,
-        "value": "连线条件6"
+        "x": 645,
+        "y": 280,
+        "value": "010"
+      },
+      "pointsList": [
+        {
+          "x": 525,
+          "y": 220
+        },
+        {
+          "x": 555,
+          "y": 220
+        },
+        {
+          "x": 555,
+          "y": 280
+        },
+        {
+          "x": 675,
+          "y": 280
+        }
+      ]
+    },
+    {
+      "id": "012",
+      "type": "SequenceConnNode",
+      "sourceNodeId": "009",
+      "targetNodeId": "011",
+      "startPoint": {
+        "x": 805,
+        "y": 220
+      },
+      "endPoint": {
+        "x": 935,
+        "y": 220
+      },
+      "properties": {},
+      "text": {
+        "x": 870,
+        "y": 220,
+        "value": "012"
       },
       "pointsList": [
         {
           "x": 805,
-          "y": 240
+          "y": 220
         },
         {
-          "x": 1120,
-          "y": 240
+          "x": 935,
+          "y": 220
+        }
+      ]
+    },
+    {
+      "id": "013",
+      "type": "SequenceConnNode",
+      "sourceNodeId": "001",
+      "targetNodeId": "011",
+      "startPoint": {
+        "x": 805,
+        "y": 160
+      },
+      "endPoint": {
+        "x": 935,
+        "y": 220
+      },
+      "properties": {},
+      "text": {
+        "x": 855,
+        "y": 160,
+        "value": "013"
+      },
+      "pointsList": [
+        {
+          "x": 805,
+          "y": 160
         },
         {
-          "x": 1120,
-          "y": 182
+          "x": 905,
+          "y": 160
+        },
+        {
+          "x": 905,
+          "y": 220
+        },
+        {
+          "x": 935,
+          "y": 220
+        }
+      ]
+    },
+    {
+      "id": "014",
+      "type": "SequenceConnNode",
+      "sourceNodeId": "007",
+      "targetNodeId": "011",
+      "startPoint": {
+        "x": 805,
+        "y": 280
+      },
+      "endPoint": {
+        "x": 935,
+        "y": 220
+      },
+      "properties": {},
+      "text": {
+        "x": 854.5,
+        "y": 280,
+        "value": "014"
+      },
+      "pointsList": [
+        {
+          "x": 805,
+          "y": 280
+        },
+        {
+          "x": 904,
+          "y": 280
+        },
+        {
+          "x": 904,
+          "y": 220
+        },
+        {
+          "x": 935,
+          "y": 220
+        }
+      ]
+    },
+    {
+      "id": "015",
+      "type": "SequenceConnNode",
+      "sourceNodeId": "011",
+      "targetNodeId": "004",
+      "startPoint": {
+        "x": 985,
+        "y": 220
+      },
+      "endPoint": {
+        "x": 1098,
+        "y": 220
+      },
+      "properties": {},
+      "text": {
+        "x": 1041.5,
+        "y": 220,
+        "value": "015"
+      },
+      "pointsList": [
+        {
+          "x": 985,
+          "y": 220
+        },
+        {
+          "x": 1098,
+          "y": 220
         }
       ]
     }

@@ -2,6 +2,7 @@ package cn.xjbpm.rule.engine.runtime.behavior;
 
 import cn.xjbpm.rule.engine.definition.model.Node;
 import cn.xjbpm.rule.engine.definition.model.activity.FunctionActivityNode;
+import cn.xjbpm.rule.engine.runtime.context.ExecutionScope;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,7 +25,7 @@ public class FunctionActivityNodeBehavior extends BaseNodeBehavior {
     }
 
     @Override
-    public void doExecution(ExecutionEntity executionEntity) {
+    public void doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         log.info("开始执行函数:{}", node.getCode());
         log.info("函数执行完成");
     }

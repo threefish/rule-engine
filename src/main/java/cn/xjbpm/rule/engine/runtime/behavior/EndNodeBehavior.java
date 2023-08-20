@@ -4,6 +4,7 @@ import cn.xjbpm.rule.engine.adapter.AdapterContextHolder;
 import cn.xjbpm.rule.engine.common.enums.ProcessStatusEnum;
 import cn.xjbpm.rule.engine.definition.model.EndNode;
 import cn.xjbpm.rule.engine.definition.model.Node;
+import cn.xjbpm.rule.engine.runtime.context.ExecutionScope;
 import cn.xjbpm.rule.engine.runtime.context.ProcessContextHolder;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  * date: 2022/9/30
  */
 @Slf4j
-public class EndNodeBehavior extends BaseNodeBehavior {
+public class EndNodeBehavior implements NodeBehavior {
 
     private final EndNode node;
 
@@ -23,24 +24,25 @@ public class EndNodeBehavior extends BaseNodeBehavior {
 
 
     @Override
-    public void leave(ExecutionEntity executionEntity) {
-
+    public void execution(ExecutionEntity executionEntity) {
+        this.execution(executionEntity, null);
     }
 
     @Override
-    public void unableToComplete(ExecutionEntity executionEntity) {
-
-    }
-
-    @Override
-    public void doExecution(ExecutionEntity executionEntity) {
+    public void execution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         log.info("流程结束 {}", node.getKey());
         ProcessContextHolder.getContext().setProcessStatus(ProcessStatusEnum.COMPLETED);
         AdapterContextHolder.nodeExecutionAdapter.updateExecution2Completed(executionEntity);
     }
 
     @Override
-    public Node getCurrentNode() {
-        return this.node;
+    public void leave(ExecutionEntity executionEntity) {
+
     }
+
+    @Override
+    public void leave(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+
+    }
+
 }

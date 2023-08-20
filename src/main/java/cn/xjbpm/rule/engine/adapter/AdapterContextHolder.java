@@ -10,4 +10,5 @@ import cn.xjbpm.rule.engine.common.utils.BeanContextUtil;
 public abstract class AdapterContextHolder {
 
     public static final NodeExecutionAdapter nodeExecutionAdapter = BeanContextUtil.getBean(NodeExecutionAdapter.class);
+    public static final ProcessVariableAdapter processVariableAdapter = BeanContextUtil.getBean(ProcessVariableAdapter.class);
 }

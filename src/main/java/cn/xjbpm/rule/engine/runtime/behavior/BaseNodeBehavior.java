@@ -5,13 +5,15 @@ import cn.xjbpm.rule.engine.adapter.AdapterContextHolder;
 import cn.xjbpm.rule.engine.adapter.persistence.po.NodeExecutionEntity;
 import cn.xjbpm.rule.engine.definition.model.Node;
 import cn.xjbpm.rule.engine.definition.model.SequenceConnNode;
+import cn.xjbpm.rule.engine.runtime.context.ExecutionScope;
 import cn.xjbpm.rule.engine.runtime.context.ProcessContextHolder;
 import cn.xjbpm.rule.engine.runtime.context.ProcessRuntimeContext;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 import cn.xjbpm.rule.engine.runtime.util.ConditionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +26,13 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
 
     @Override
     public void execution(ExecutionEntity executionEntity) {
-        ExecutionEntity currentExecutionEntity = createChildExecution(executionEntity);
+        this.execution(executionEntity, null);
+    }
+
+
+    @Override
+    public void execution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+        ExecutionEntity currentExecutionEntity = createChildExecution(executionEntity, executionScope);
         ProcessRuntimeContext context = ProcessContextHolder.getContext();
         Map<String, Object> variable = context.getVariable();
         Node node = getCurrentNode();
@@ -34,37 +42,47 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
             if (log.isDebugEnabled()) {
                 log.debug("节点[{}]满足跳过条件", node.getKey());
             }
-            this.leave(currentExecutionEntity);
+            this.leave(currentExecutionEntity,executionScope);
         } else {
             //执行
-            this.doExecution(currentExecutionEntity);
+            this.doExecution(currentExecutionEntity,executionScope);
             // 执行后判断是否满足完成条件，为空表示则任务满足
             if (ConditionUtil.resolve(getCurrentNode().getCompletionExpression(), variable)) {
-                this.leave(currentExecutionEntity);
+                this.leave(currentExecutionEntity, executionScope);
             } else {
                 this.unableToComplete(currentExecutionEntity);
             }
         }
     }
 
+
     @Override
     public void leave(ExecutionEntity executionEntity) {
+        this.leave(executionEntity, null);
+    }
+
+    @Override
+    public void leave(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         AdapterContextHolder.nodeExecutionAdapter.updateExecution2Completed(executionEntity);
-        log.info("离开[{}:{}]节点", getCurrentNode().getName(), getCurrentNode().getKey());
+        log.info("离开 {}:{}:{} 节点", getCurrentNode().getType(), getCurrentNode().getName(), getCurrentNode().getKey());
         // 满足离开节点条件
         ProcessRuntimeContext context = ProcessContextHolder.getContext();
         Map<String, Object> variable = context.getVariable();
         List<SequenceConnNode> outgoingNodes = getCurrentNode().getOutgoingNodes();
+        List<NodeBehavior> behaviors = new ArrayList<>();
         for (SequenceConnNode outgoingNode : outgoingNodes) {
             if (ConditionUtil.resolve(outgoingNode.getRule(), variable)) {
-                outgoingNode.getBehavior().execution(executionEntity);
+                behaviors.add(outgoingNode.getBehavior());
             }
         }
+        Assert.notEmpty(behaviors, String.format("没有继续运行下去的路径!当前节点名:%s 节点key:%s", getCurrentNode().getName(), getCurrentNode().getKey()));
+        behaviors.stream().forEach(behavior -> behavior.execution(executionEntity, executionScope));
     }
 
-    protected ExecutionEntity createChildExecution(ExecutionEntity parentEntity) {
+    protected ExecutionEntity createChildExecution(ExecutionEntity parentEntity, ExecutionScope executionScope) {
         NodeExecutionEntity executionEntity = new NodeExecutionEntity();
-        executionEntity.setParentId(parentEntity.getId());
+        executionEntity.setParentId(executionScope != null ? executionScope.getParentNodeExecutionId() : null);
+        executionEntity.setScopeNodeKey(executionScope != null ? executionScope.getParentNodeKey() : null);
         executionEntity.setProcessInstanceId(parentEntity.getProcessInstanceId());
         executionEntity.setDefinitionName(this.getCurrentNode().getName());
         executionEntity.setNodeType(this.getCurrentNode().getType());
@@ -88,7 +106,7 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
      *
      * @param executionEntity
      */
-    public abstract void doExecution(ExecutionEntity executionEntity);
+    public abstract void doExecution(ExecutionEntity executionEntity,ExecutionScope executionScope);
 
     /**
      * 取得节点

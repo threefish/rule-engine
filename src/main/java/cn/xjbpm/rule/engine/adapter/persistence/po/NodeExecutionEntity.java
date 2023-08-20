@@ -37,6 +37,13 @@ public class NodeExecutionEntity implements ExecutionEntity {
     @Column
     @ColDefine(width = 9, type = ColType.INT)
     private Long parentId;
+
+    /**
+     * 执行范围的节点key
+     */
+    @Column
+    @ColDefine(width = 50)
+    private String scopeNodeKey;
     /**
      * 流程实例id
      */

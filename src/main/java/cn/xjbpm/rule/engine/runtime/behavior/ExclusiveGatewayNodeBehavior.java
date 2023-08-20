@@ -1,8 +1,10 @@
 package cn.xjbpm.rule.engine.runtime.behavior;
 
 import cn.hutool.core.util.StrUtil;
+import cn.xjbpm.rule.engine.definition.model.Node;
 import cn.xjbpm.rule.engine.definition.model.SequenceConnNode;
 import cn.xjbpm.rule.engine.definition.model.gateway.ExclusiveGatewayNode;
+import cn.xjbpm.rule.engine.runtime.context.ExecutionScope;
 import cn.xjbpm.rule.engine.runtime.context.ProcessContextHolder;
 import cn.xjbpm.rule.engine.runtime.context.ProcessRuntimeContext;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
@@ -19,7 +21,7 @@ import java.util.Map;
  * date: 2022/9/30
  */
 @Slf4j
-public class ExclusiveGatewayNodeBehavior implements NodeBehavior {
+public class ExclusiveGatewayNodeBehavior extends BaseNodeBehavior {
 
     private final ExclusiveGatewayNode node;
 
@@ -27,14 +29,20 @@ public class ExclusiveGatewayNodeBehavior implements NodeBehavior {
         this.node = node;
     }
 
+
     @Override
-    public void execution(ExecutionEntity executionEntity) {
-        log.info("执行排他网关");
-        this.leave(executionEntity);
+    public void unableToComplete(ExecutionEntity executionEntity) {
+
     }
 
     @Override
-    public void leave(ExecutionEntity executionEntity) {
+    public void doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+        log.info("执行排他网关");
+        this.leave(executionEntity,null);
+    }
+
+    @Override
+    public void leave(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         ProcessRuntimeContext context = ProcessContextHolder.getContext();
         Map<String, Object> variable = context.getVariable();
         // 满足离开节点条件
@@ -53,5 +61,11 @@ public class ExclusiveGatewayNodeBehavior implements NodeBehavior {
             }
         }
         throw new RuntimeException(String.format("节点[%s:%s]无满足条件的分支！无法继续执行下去！", node.getName(), node.getKey()));
+    }
+
+
+    @Override
+    public Node getCurrentNode() {
+        return this.node;
     }
 }

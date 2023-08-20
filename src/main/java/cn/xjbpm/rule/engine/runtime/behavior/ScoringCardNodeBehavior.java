@@ -8,6 +8,7 @@ import cn.xjbpm.rule.engine.definition.model.activity.scoringcard.ScoringCalcMet
 import cn.xjbpm.rule.engine.definition.model.activity.scoringcard.ScoringCardRow;
 import cn.xjbpm.rule.engine.definition.model.activity.scoringcard.ScoringCardWeight;
 import cn.xjbpm.rule.engine.rule.Rule;
+import cn.xjbpm.rule.engine.runtime.context.ExecutionScope;
 import cn.xjbpm.rule.engine.runtime.context.ProcessContextHolder;
 import cn.xjbpm.rule.engine.runtime.context.ProcessRuntimeContext;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
@@ -40,7 +41,7 @@ public class ScoringCardNodeBehavior extends BaseNodeBehavior {
     }
 
     @Override
-    public void doExecution(ExecutionEntity executionEntity) {
+    public void doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         log.info("开始执行评分卡");
         ProcessRuntimeContext context = ProcessContextHolder.getContext();
         Map<String, Object> variable = context.getVariable();

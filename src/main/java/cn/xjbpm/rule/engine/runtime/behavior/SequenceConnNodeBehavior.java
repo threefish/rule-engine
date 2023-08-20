@@ -3,6 +3,7 @@ package cn.xjbpm.rule.engine.runtime.behavior;
 import cn.xjbpm.rule.engine.adapter.AdapterContextHolder;
 import cn.xjbpm.rule.engine.definition.model.Node;
 import cn.xjbpm.rule.engine.definition.model.SequenceConnNode;
+import cn.xjbpm.rule.engine.runtime.context.ExecutionScope;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,10 +22,10 @@ public class SequenceConnNodeBehavior extends BaseNodeBehavior {
 
 
     @Override
-    public void leave(ExecutionEntity executionEntity) {
-        log.info("离开[{}]节点", node.getKey());
+    public void leave(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+        log.info("离开 {}:{}:{} 节点",getCurrentNode().getType(), getCurrentNode().getName(), getCurrentNode().getKey());
         Node targetNode = node.getTargetNode();
-        targetNode.getBehavior().execution(executionEntity);
+        targetNode.getBehavior().execution(executionEntity,executionScope);
     }
 
     @Override
@@ -33,7 +34,7 @@ public class SequenceConnNodeBehavior extends BaseNodeBehavior {
     }
 
     @Override
-    public void doExecution(ExecutionEntity executionEntity) {
+    public void doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         log.info("[{}]执行处理逻辑", node.getKey());
         AdapterContextHolder.nodeExecutionAdapter.updateExecution2Completed(executionEntity);
     }

@@ -2,6 +2,7 @@ package cn.xjbpm.rule.engine.runtime.behavior;
 
 import cn.xjbpm.rule.engine.definition.model.Node;
 import cn.xjbpm.rule.engine.definition.model.StartNode;
+import cn.xjbpm.rule.engine.runtime.context.ExecutionScope;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,7 +26,7 @@ public class StartNodeBehavior extends BaseNodeBehavior {
     }
 
     @Override
-    public void doExecution(ExecutionEntity executionEntity) {
+    public void doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         log.info("执行开始节点,流程编号:{}", executionEntity.getProcessInstanceId());
     }
 
