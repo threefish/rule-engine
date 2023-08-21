@@ -36,7 +36,7 @@ public class DecisionTablesNodeBehavior extends BaseNodeBehavior {
     }
 
     @Override
-    public void doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+    public boolean doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         ProcessRuntimeContext context = ProcessContextHolder.getContext();
         Map<String, Object> variable = context.getVariable();
         log.info("开始执行决策表");
@@ -57,6 +57,7 @@ public class DecisionTablesNodeBehavior extends BaseNodeBehavior {
                 }
             }
         }
+        return true;
     }
 
     @Override

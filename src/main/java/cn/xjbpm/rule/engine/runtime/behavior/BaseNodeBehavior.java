@@ -16,6 +16,7 @@ import org.springframework.util.Assert;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -32,7 +33,7 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
 
     @Override
     public void execution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
-        ExecutionEntity currentExecutionEntity = createChildExecution(executionEntity, executionScope);
+        ExecutionEntity currentExecutionEntity = createOrFindExecution(executionEntity, executionScope);
         ProcessRuntimeContext context = ProcessContextHolder.getContext();
         Map<String, Object> variable = context.getVariable();
         Node node = getCurrentNode();
@@ -42,13 +43,19 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
             if (log.isDebugEnabled()) {
                 log.debug("节点[{}]满足跳过条件", node.getKey());
             }
-            this.leave(currentExecutionEntity,executionScope);
+            this.leave(currentExecutionEntity, executionScope);
         } else {
             //执行
-            this.doExecution(currentExecutionEntity,executionScope);
-            // 执行后判断是否满足完成条件，为空表示则任务满足
-            if (ConditionUtil.resolve(getCurrentNode().getCompletionExpression(), variable)) {
-                this.leave(currentExecutionEntity, executionScope);
+            if (this.doExecution(currentExecutionEntity, executionScope)) {
+                if (Objects.nonNull(executionScope) && executionScope.isCleared()) {
+                    executionScope = null;
+                }
+                // 执行后判断是否满足完成条件，为空表示则任务满足
+                if (ConditionUtil.resolve(getCurrentNode().getCompletionExpression(), variable)) {
+                    this.leave(currentExecutionEntity, executionScope);
+                } else {
+                    this.unableToComplete(currentExecutionEntity);
+                }
             } else {
                 this.unableToComplete(currentExecutionEntity);
             }
@@ -79,10 +86,17 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
         behaviors.stream().forEach(behavior -> behavior.execution(executionEntity, executionScope));
     }
 
-    protected ExecutionEntity createChildExecution(ExecutionEntity parentEntity, ExecutionScope executionScope) {
+    protected ExecutionEntity createOrFindExecution(ExecutionEntity parentEntity, ExecutionScope executionScope) {
+        NodeExecutionEntity notCompletedExecution = AdapterContextHolder.nodeExecutionAdapter
+                .findNotCompletedExecution(parentEntity.getProcessInstanceId(), this.getCurrentNode().getKey());
+        if (notCompletedExecution != null) {
+            return notCompletedExecution;
+        }
         NodeExecutionEntity executionEntity = new NodeExecutionEntity();
-        executionEntity.setParentId(executionScope != null ? executionScope.getParentNodeExecutionId() : null);
-        executionEntity.setScopeNodeKey(executionScope != null ? executionScope.getParentNodeKey() : null);
+        if (executionScope != null) {
+            executionEntity.setParentId(executionScope.getParentNodeExecutionId());
+            executionEntity.setScopeNodeKey(executionScope.getParentNodeKey());
+        }
         executionEntity.setProcessInstanceId(parentEntity.getProcessInstanceId());
         executionEntity.setDefinitionName(this.getCurrentNode().getName());
         executionEntity.setNodeType(this.getCurrentNode().getType());
@@ -106,7 +120,7 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
      *
      * @param executionEntity
      */
-    public abstract void doExecution(ExecutionEntity executionEntity,ExecutionScope executionScope);
+    public abstract boolean doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope);
 
     /**
      * 取得节点

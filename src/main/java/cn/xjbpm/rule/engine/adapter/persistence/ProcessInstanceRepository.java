@@ -5,6 +5,8 @@ import org.nutz.dao.enhance.annotation.Dao;
 import org.nutz.dao.enhance.dao.BaseDao;
 import org.springframework.stereotype.Repository;
 
+import java.util.Map;
+
 /**
  * @author 黄川 huchuc@vip.qq.com
  * date: 2023/7/22
@@ -12,6 +14,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 @Dao
 public interface ProcessInstanceRepository extends BaseDao<ProcessInstanceEntity> {
-
 
 }

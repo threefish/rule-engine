@@ -10,7 +10,6 @@ import cn.xjbpm.rule.engine.runtime.context.ProcessRuntimeContext;
 import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -26,19 +25,22 @@ public class InclusiveGatewayNodeBehavior extends BaseNodeBehavior {
     }
 
     @Override
-    public void doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+    public boolean doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         ProcessRuntimeContext context = ProcessContextHolder.getContext();
-        Map<String, Object> scopeNodeVariable = new HashMap<>();
-        if (executionScope != null) {
-            scopeNodeVariable = AdapterContextHolder.processVariableAdapter.findScopeNodeVariable(executionScope.getParentNodeExecutionId(), executionScope.getParentNodeKey());
+        Map<String, Object> variable = context.getVariable();
+        Map<String, Integer> scopeNodeVariable = (Map<String, Integer>) variable.getOrDefault(executionScope.getParentNodeKey(), Collections.EMPTY_MAP);
+        int numberOfInstances = scopeNodeVariable.get(ProcessConstant.numberOfInstances);
+        int numberOfCompletedInstances = scopeNodeVariable.get(ProcessConstant.numberOfCompletedInstances) + 1;
+        scopeNodeVariable.put(ProcessConstant.numberOfCompletedInstances, numberOfCompletedInstances);
+        AdapterContextHolder.processVariableAdapter.updateByProcessInstanceId(context.getProcessIntanceId(), variable);
+        if (numberOfCompletedInstances >= numberOfInstances) {
+            // 完成
+            executionScope.setCleared(true);
+            return true;
+        } else {
+            // 未完成
+            return false;
         }
-//        // 获取完成数，并加1，在计算范围内完成数1
-//        Integer numberOfCompletedInstances=1;
-//        AdapterContextHolder.processVariableAdapter.getCreateNodeVariable(executionEntity.getId(),context.getProcessIntanceId(), this.node.getKey(),
-//                Collections.singletonMap(ProcessConstant.numberOfCompletedInstances, numberOfCompletedInstances));
-//
-//        Integer numberOfInstances = (Integer) scopeNodeVariable.get(ProcessConstant.numberOfInstances);
-
     }
 
     @Override

@@ -34,9 +34,10 @@ public class SequenceConnNodeBehavior extends BaseNodeBehavior {
     }
 
     @Override
-    public void doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+    public boolean doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         log.info("[{}]执行处理逻辑", node.getKey());
         AdapterContextHolder.nodeExecutionAdapter.updateExecution2Completed(executionEntity);
+        return true;
     }
 
     @Override

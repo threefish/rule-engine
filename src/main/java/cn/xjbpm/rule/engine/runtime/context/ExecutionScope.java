@@ -22,4 +22,8 @@ public class ExecutionScope {
      * 上级节点执行ID
      */
     Long parentNodeExecutionId;
+    /**
+     * 是清空的
+     */
+    boolean cleared;
 }

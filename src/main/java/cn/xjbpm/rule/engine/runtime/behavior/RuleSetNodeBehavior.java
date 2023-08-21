@@ -29,6 +29,7 @@ import java.util.Objects;
  * date: 2022/9/30
  */
 @Slf4j
+@SuppressWarnings("all")
 public class RuleSetNodeBehavior extends BaseNodeBehavior {
 
     private final static String LOOP_OBJECT_KEY = "循环对象";
@@ -45,7 +46,7 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
     }
 
     @Override
-    public void doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+    public boolean doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         log.info("开始执行规则集");
         ProcessRuntimeContext context = ProcessContextHolder.getContext();
         Map<String, Object> variable = context.getVariable();
@@ -108,6 +109,7 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
                 }
             }
         }
+        return true;
     }
 
     /**

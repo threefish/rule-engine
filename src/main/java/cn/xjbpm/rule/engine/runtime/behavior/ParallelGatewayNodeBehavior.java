@@ -12,6 +12,7 @@ import cn.xjbpm.rule.engine.runtime.entity.ExecutionEntity;
 import cn.xjbpm.rule.engine.runtime.util.ConditionUtil;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -36,7 +37,7 @@ public class ParallelGatewayNodeBehavior extends BaseNodeBehavior {
     public void leave(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         ProcessRuntimeContext context = ProcessContextHolder.getContext();
         Map<String, Object> variable = context.getVariable();
-        int numberOfInstances = 0;
+        int numberOfInstances = BigDecimal.ZERO.intValue();
         // 满足离开节点条件
         List<SequenceConnNode> outgoingNodes = node.getOutgoingNodes();
         Collections.sort(outgoingNodes, Comparator.comparing(SequenceConnNode::getSortNum));
@@ -51,17 +52,23 @@ public class ParallelGatewayNodeBehavior extends BaseNodeBehavior {
                 }
             }
         }
-        AdapterContextHolder.processVariableAdapter.createNodeVariable(executionEntity.getId(),context.getProcessIntanceId(), this.node.getKey(), Collections.singletonMap(ProcessConstant.numberOfInstances, numberOfInstances));
+        Map<String, Object> nodeVariable = new HashMap<>(2);
+        nodeVariable.put(ProcessConstant.numberOfInstances, numberOfInstances);
+        nodeVariable.put(ProcessConstant.numberOfCompletedInstances, BigDecimal.ZERO.intValue());
+
+        variable.put(getCurrentNode().getKey(), nodeVariable);
+        AdapterContextHolder.processVariableAdapter.updateByProcessInstanceId(context.getProcessIntanceId(), variable);
         nodeBehaviors.stream().forEach(behavior -> behavior.execution(executionEntity, createExecutionScope(executionEntity)));
         if (numberOfInstances == 0) {
             throw new RuntimeException(String.format("节点[%s:%s]无满足条件的分支！无法继续执行下去！", node.getName(), node.getKey()));
         }
+        AdapterContextHolder.nodeExecutionAdapter.updateExecution2Completed(executionEntity);
     }
 
     @Override
-    public void doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+    public boolean doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         log.info("执行并行网关");
-
+        return true;
     }
 
     @Override

@@ -34,4 +34,11 @@ public class ProcessVariableAdapter {
                 .eq(ProcessVariableEntity::getNodeKey, nodeKey).one();
         return one.getVariable();
     }
+
+    public boolean updateByProcessInstanceId(Long processIntanceId, Map<String, Object> variable) {
+        return processVariableRepository.lambdaUpdate()
+                .set(ProcessVariableEntity::getVariable, variable)
+                .eq(ProcessVariableEntity::getProcessInstanceId, processIntanceId)
+                .update() > 0;
+    }
 }

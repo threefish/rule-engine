@@ -41,7 +41,7 @@ public class ScoringCardNodeBehavior extends BaseNodeBehavior {
     }
 
     @Override
-    public void doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+    public boolean doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         log.info("开始执行评分卡");
         ProcessRuntimeContext context = ProcessContextHolder.getContext();
         Map<String, Object> variable = context.getVariable();
@@ -81,6 +81,7 @@ public class ScoringCardNodeBehavior extends BaseNodeBehavior {
         } else {
             throw new UnsupportedOperationException(String.format("评分卡不支持[%s]", scoringCalcMethod.getLabel()));
         }
+        return true;
     }
 
     @Override

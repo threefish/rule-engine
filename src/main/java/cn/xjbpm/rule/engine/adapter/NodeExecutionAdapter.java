@@ -26,4 +26,11 @@ public class NodeExecutionAdapter {
             nodeExecutionRepository.update((NodeExecutionEntity) executionEntity);
         }
     }
+
+    public NodeExecutionEntity findNotCompletedExecution(Long processInstanceId, String key) {
+        return nodeExecutionRepository.lambdaQuery()
+                .eq(NodeExecutionEntity::getProcessInstanceId, processInstanceId)
+                .eq(NodeExecutionEntity::getDefinitionKey, key)
+                .eq(NodeExecutionEntity::isCompleted, false).one();
+    }
 }

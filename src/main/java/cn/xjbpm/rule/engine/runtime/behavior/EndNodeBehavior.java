@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  * date: 2022/9/30
  */
 @Slf4j
-public class EndNodeBehavior implements NodeBehavior {
+public class EndNodeBehavior extends BaseNodeBehavior {
 
     private final EndNode node;
 
@@ -22,27 +22,26 @@ public class EndNodeBehavior implements NodeBehavior {
         this.node = node;
     }
 
-
     @Override
-    public void execution(ExecutionEntity executionEntity) {
-        this.execution(executionEntity, null);
-    }
-
-    @Override
-    public void execution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+    public void leave(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         log.info("流程结束 {}", node.getKey());
         ProcessContextHolder.getContext().setProcessStatus(ProcessStatusEnum.COMPLETED);
         AdapterContextHolder.nodeExecutionAdapter.updateExecution2Completed(executionEntity);
     }
 
     @Override
-    public void leave(ExecutionEntity executionEntity) {
+    public void unableToComplete(ExecutionEntity executionEntity) {
 
     }
 
     @Override
-    public void leave(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+    public boolean doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+        return true;
+    }
 
+    @Override
+    public Node getCurrentNode() {
+        return this.node;
     }
 
 }

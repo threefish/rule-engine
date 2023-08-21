@@ -26,8 +26,9 @@ public class StartNodeBehavior extends BaseNodeBehavior {
     }
 
     @Override
-    public void doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+    public boolean doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         log.info("执行开始节点,流程编号:{}", executionEntity.getProcessInstanceId());
+        return true;
     }
 
     @Override

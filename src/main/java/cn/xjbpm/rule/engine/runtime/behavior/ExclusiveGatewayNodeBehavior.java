@@ -36,9 +36,9 @@ public class ExclusiveGatewayNodeBehavior extends BaseNodeBehavior {
     }
 
     @Override
-    public void doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+    public boolean doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         log.info("执行排他网关");
-        this.leave(executionEntity,null);
+        return true;
     }
 
     @Override

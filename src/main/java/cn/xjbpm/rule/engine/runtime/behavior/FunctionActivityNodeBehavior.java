@@ -25,9 +25,10 @@ public class FunctionActivityNodeBehavior extends BaseNodeBehavior {
     }
 
     @Override
-    public void doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
+    public boolean doExecution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
         log.info("开始执行函数:{}", node.getCode());
         log.info("函数执行完成");
+        return true;
     }
 
     @Override
