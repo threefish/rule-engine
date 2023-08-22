@@ -57,12 +57,12 @@ public class ParallelGatewayNodeBehavior extends BaseNodeBehavior {
         nodeVariable.put(ProcessConstant.numberOfCompletedInstances, BigDecimal.ZERO.intValue());
 
         variable.put(getCurrentNode().getKey(), nodeVariable);
-        AdapterContextHolder.processVariableAdapter.updateByProcessInstanceId(context.getProcessIntanceId(), variable);
-        nodeBehaviors.stream().forEach(behavior -> behavior.execution(executionEntity, createExecutionScope(executionEntity)));
+        AdapterContextHolder.processVariableAdapter.updateByProcessInstanceId(context.getProcessInstanceId(), variable);
+        AdapterContextHolder.nodeExecutionAdapter.updateExecution2Completed(executionEntity);
         if (numberOfInstances == 0) {
             throw new RuntimeException(String.format("节点[%s:%s]无满足条件的分支！无法继续执行下去！", node.getName(), node.getKey()));
         }
-        AdapterContextHolder.nodeExecutionAdapter.updateExecution2Completed(executionEntity);
+        nodeBehaviors.stream().forEach(behavior -> behavior.execution(executionEntity, createExecutionScope(executionEntity)));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package cn.xjbpm.rule.engine.runtime.behavior;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.xjbpm.rule.engine.aviator.AviatorContext;
 import cn.xjbpm.rule.engine.aviator.AviatorExecutor;
 import cn.xjbpm.rule.engine.common.utils.ActionUtils;
@@ -51,6 +52,9 @@ public class RuleSetNodeBehavior extends BaseNodeBehavior {
         ProcessRuntimeContext context = ProcessContextHolder.getContext();
         Map<String, Object> variable = context.getVariable();
         List<RuleSet> ruleSets = node.getRuleSet();
+        if(CollUtil.isEmpty(ruleSets)){
+            return true;
+        }
         ruleSetTag:
         for (RuleSet ruleSet : ruleSets) {
             RuleSetType type = ruleSet.getType();

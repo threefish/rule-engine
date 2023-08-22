@@ -33,4 +33,10 @@ public class NodeExecutionAdapter {
                 .eq(NodeExecutionEntity::getDefinitionKey, key)
                 .eq(NodeExecutionEntity::isCompleted, false).one();
     }
+
+
+
+    public NodeExecutionEntity findById(Long parentNodeExecutionId) {
+        return nodeExecutionRepository.fetch(parentNodeExecutionId);
+    }
 }

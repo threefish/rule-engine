@@ -13,7 +13,7 @@ import java.util.Map;
 @Data
 public class ProcessRuntimeContext {
 
-    private Long processIntanceId;
+    private Long processInstanceId;
 
 
     private ProcessStatusEnum processStatus;

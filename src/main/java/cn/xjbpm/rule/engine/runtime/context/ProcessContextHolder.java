@@ -15,7 +15,7 @@ public class ProcessContextHolder {
 
     public static ProcessRuntimeContext createContext(Long processIntanceId, String environment, ProcessModel processModel, Map<String, Object> variable) {
         ProcessRuntimeContext processRuntimeContext = new ProcessRuntimeContext();
-        processRuntimeContext.setProcessIntanceId(processIntanceId);
+        processRuntimeContext.setProcessInstanceId(processIntanceId);
         processRuntimeContext.setProcessStatus(ProcessStatusEnum.UNDERWAY);
         processRuntimeContext.setVariable(variable);
         processRuntimeContext.setProcessModel(processModel);

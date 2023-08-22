@@ -48,7 +48,7 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
             //执行
             if (this.doExecution(currentExecutionEntity, executionScope)) {
                 if (Objects.nonNull(executionScope) && executionScope.isCleared()) {
-                    executionScope = null;
+                    executionScope = executionScope.getParentExecutionScope();
                 }
                 // 执行后判断是否满足完成条件，为空表示则任务满足
                 if (ConditionUtil.resolve(getCurrentNode().getCompletionExpression(), variable)) {

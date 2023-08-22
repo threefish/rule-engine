@@ -26,4 +26,9 @@ public class ExecutionScope {
      * 是清空的
      */
     boolean cleared;
+    /**
+     * 上级执行范围
+     * 嵌套时存在
+     */
+    ExecutionScope parentExecutionScope;
 }

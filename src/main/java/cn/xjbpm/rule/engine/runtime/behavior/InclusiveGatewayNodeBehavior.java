@@ -1,6 +1,7 @@
 package cn.xjbpm.rule.engine.runtime.behavior;
 
 import cn.xjbpm.rule.engine.adapter.AdapterContextHolder;
+import cn.xjbpm.rule.engine.adapter.persistence.po.NodeExecutionEntity;
 import cn.xjbpm.rule.engine.common.constant.ProcessConstant;
 import cn.xjbpm.rule.engine.definition.model.Node;
 import cn.xjbpm.rule.engine.definition.model.gateway.InclusiveGatewayNode;
@@ -15,6 +16,7 @@ import java.util.Map;
 /**
  * @author 黄川 huchuc@vip.qq.com
  * date: 2022/9/30
+ * 包容网关
  */
 public class InclusiveGatewayNodeBehavior extends BaseNodeBehavior {
 
@@ -32,10 +34,16 @@ public class InclusiveGatewayNodeBehavior extends BaseNodeBehavior {
         int numberOfInstances = scopeNodeVariable.get(ProcessConstant.numberOfInstances);
         int numberOfCompletedInstances = scopeNodeVariable.get(ProcessConstant.numberOfCompletedInstances) + 1;
         scopeNodeVariable.put(ProcessConstant.numberOfCompletedInstances, numberOfCompletedInstances);
-        AdapterContextHolder.processVariableAdapter.updateByProcessInstanceId(context.getProcessIntanceId(), variable);
+        AdapterContextHolder.processVariableAdapter.updateByProcessInstanceId(context.getProcessInstanceId(), variable);
         if (numberOfCompletedInstances >= numberOfInstances) {
             // 完成
             executionScope.setCleared(true);
+            NodeExecutionEntity parentNodeExecution = AdapterContextHolder.nodeExecutionAdapter.findById(executionScope.getParentNodeExecutionId());
+            executionScope.setParentExecutionScope(ExecutionScope.builder()
+                    .parentNodeKey(parentNodeExecution.getScopeNodeKey())
+                    .parentNodeExecutionId(parentNodeExecution.getParentId())
+                    .cleared(false)
+                    .build());
             return true;
         } else {
             // 未完成
