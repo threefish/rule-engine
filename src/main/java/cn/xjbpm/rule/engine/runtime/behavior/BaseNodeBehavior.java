@@ -33,32 +33,36 @@ public abstract class BaseNodeBehavior implements NodeBehavior {
 
     @Override
     public void execution(ExecutionEntity executionEntity, ExecutionScope executionScope) {
-        ExecutionEntity currentExecutionEntity = createOrFindExecution(executionEntity, executionScope);
-        ProcessRuntimeContext context = ProcessContextHolder.getContext();
-        Map<String, Object> variable = context.getVariable();
-        Node node = getCurrentNode();
-        log.info("执行 节点ID:{} TAG:{} 名称:{}", node.getKey(), node.getTag(), node.getName());
-        if (StrUtil.isNotBlank(node.getSkipExpression()) && ConditionUtil.resolve(node.getSkipExpression(), variable)) {
-            // 跳过表达式不为空， 表示当前节点满足跳过规则，执行跳过
-            if (log.isDebugEnabled()) {
-                log.debug("节点[{}]满足跳过条件", node.getKey());
-            }
-            this.leave(currentExecutionEntity, executionScope);
-        } else {
-            //执行
-            if (this.doExecution(currentExecutionEntity, executionScope)) {
-                if (Objects.nonNull(executionScope) && executionScope.isCleared()) {
-                    executionScope = executionScope.getParentExecutionScope();
+        try {
+            ExecutionEntity currentExecutionEntity = createOrFindExecution(executionEntity, executionScope);
+            ProcessRuntimeContext context = ProcessContextHolder.getContext();
+            Map<String, Object> variable = context.getVariable();
+            Node node = getCurrentNode();
+            log.info("执行 节点ID:{} TAG:{} 名称:{}", node.getKey(), node.getTag(), node.getName());
+            if (StrUtil.isNotBlank(node.getSkipExpression()) && ConditionUtil.resolve(node.getSkipExpression(), variable)) {
+                // 跳过表达式不为空， 表示当前节点满足跳过规则，执行跳过
+                if (log.isDebugEnabled()) {
+                    log.debug("节点[{}]满足跳过条件", node.getKey());
                 }
-                // 执行后判断是否满足完成条件，为空表示则任务满足
-                if (ConditionUtil.resolve(getCurrentNode().getCompletionExpression(), variable)) {
-                    this.leave(currentExecutionEntity, executionScope);
+                this.leave(currentExecutionEntity, executionScope);
+            } else {
+                //执行
+                if (this.doExecution(currentExecutionEntity, executionScope)) {
+                    if (Objects.nonNull(executionScope) && executionScope.isCleared()) {
+                        executionScope = executionScope.getParentExecutionScope();
+                    }
+                    // 执行后判断是否满足完成条件，为空表示则任务满足
+                    if (ConditionUtil.resolve(getCurrentNode().getCompletionExpression(), variable)) {
+                        this.leave(currentExecutionEntity, executionScope);
+                    } else {
+                        this.unableToComplete(currentExecutionEntity);
+                    }
                 } else {
                     this.unableToComplete(currentExecutionEntity);
                 }
-            } else {
-                this.unableToComplete(currentExecutionEntity);
             }
+        } catch (Exception e) {
+            log.error("执行失败", e);
         }
     }
 
