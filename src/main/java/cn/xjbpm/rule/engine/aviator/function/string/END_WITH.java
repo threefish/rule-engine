@@ -15,8 +15,8 @@ public class END_WITH extends AbstractBaseFunction {
 
     @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2) {
-        String var1 = arg1.getValue(env).toString();
-        String var2 = arg2.getValue(env).toString();
+        String var1 = arg1.stringValue(env);
+        String var2 = arg2.stringValue(env);
         return AviatorBoolean.valueOf(!(var1.indexOf(var2) > -1));
     }
 
