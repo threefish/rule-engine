@@ -52,9 +52,9 @@ public class AviatorExecutor {
     public static Object execute(AviatorContext context) {
         Object result = AviatorEvaluator.execute(context.getExpression(), context.getEnv(), context.isCached());
         if (log.isInfoEnabled()) {
-            log.info("表达式执行器 result:{} 表达式:{}", result, context.getExpression());
+            log.info("表达式执行器 计算结果:{} 表达式:{}", result, context.getExpression());
         } else if (log.isDebugEnabled()) {
-            log.debug("表达式执行器 result:{} 表达式:{} 上下文:{}", result, context.getExpression(), JsonUtils.obj2Json(context));
+            log.debug("表达式执行器 计算结果:{} 表达式:{} 上下文:{}", result, context.getExpression(), JsonUtils.obj2Json(context));
         }
         return result;
     }

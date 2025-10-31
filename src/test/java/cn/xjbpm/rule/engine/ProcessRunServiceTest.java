@@ -32,6 +32,13 @@ public class ProcessRunServiceTest {
     ProcessRunService processRunService;
 
     @Test
+    public void test() {
+        startTestGrsdsjs();
+        System.out.println("-----------" );
+        startTestGrsdsjs();
+    }
+
+    @Test
     public void startTestGrsdsjs() {
         String requestJson = IoUtil.readUtf8(ProcessRunServiceTest.class.getResourceAsStream("/process/个人所得税计算_request.json"));
         Map map = JsonUtils.json2Obj(requestJson, Map.class);

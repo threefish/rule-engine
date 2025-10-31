@@ -30,10 +30,6 @@ public class CreateProcessRequest {
      */
     private Integer version;
     /**
-     * 可重入,会持久化
-     */
-    private boolean reentrant;
-    /**
      * 流程变量
      */
     private Map<String, Object> variable;
