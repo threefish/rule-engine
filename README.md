@@ -2,7 +2,7 @@
 
 这是一个基于Java和Aviator表达式引擎构建的灵活、强大的规则引擎系统。该规则引擎支持复杂规则的定义、组合和执行，可用于业务规则管理、动态决策等场景。
 
-**前端项目地址**：<mcurl name="rule-engine-web" url="https://github.com/threefish/rule-engine-web"></mcurl>
+[前端项目地址](https://github.com/threefish/rule-engine-web)
 
 ## 项目特点
 
