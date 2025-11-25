@@ -1,0 +1,26 @@
+spring:
+  profiles:
+    active: dev
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: 123456
+    url: jdbc:mysql://127.0.0.1:3306/rule?useUnicode=true&characterEncoding=UTF-8
+    username: root
+    hikari:
+      autoCommit: true
+      maximumPoolSize: 500
+      maxLifetime: 1800000
+      idleTimeout: 60000
+      minimumIdle: 10
+      initializationFailTimeout: 10000
+      connectionTimeout: 3000
+      validationTimeout: 5000
+      connectionTestQuery: SELECT 1
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        show_sql: true
+    hibernate:
+      ddl-auto: update
