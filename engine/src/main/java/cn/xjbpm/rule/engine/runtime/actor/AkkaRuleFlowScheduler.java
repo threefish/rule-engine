@@ -77,9 +77,9 @@ public class AkkaRuleFlowScheduler {
             // 如果 Actor 回复 Status.Success，这里返回 null (因为 Success 内容是 null)
             // 如果 Actor 回复 Status.Failure，这里会抛出那个异常
             Await.result(future, timeout.duration());
-            log.info("流程执行成功完成: {}", ruleModel.getName());
+            log.info("流程执行成功完成: {}", ruleModel.getKey());
         } catch (TimeoutException e) {
-            log.error("流程执行超时: {}", ruleModel.getName());
+            log.error("流程执行超时: {}", ruleModel.getKey());
             // 超时后可以考虑停止那个 Actor，防止它还在后台跑
             actorSystem.stop(masterActor);
             throw e;

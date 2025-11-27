@@ -26,7 +26,6 @@ public class ResultVO<T> {
 
     private T data;
     private String message;
-    private boolean success;
     private Integer code;
 
     public static <T> ResultVO<T> success(T result) {

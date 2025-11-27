@@ -26,54 +26,60 @@ import java.time.LocalDateTime;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * 规则流程实体
+ * 规则流程执行日志
  */
 @Entity
 @Table(
-        name = "rule_flow",
+        name = "rule_flow_excute_log",
         indexes = {
-                @Index(name = "idx_rule_flow_key", columnList = "flow_key", unique = true)
+                @Index(name = "idx_rule_flow_excute_log_request_id", columnList = "request_id", unique = true),
+                @Index(name = "idx_rule_flow_key", columnList = "rule_flow_key")
         }
 )
-@Data
 @EntityListeners(AuditingEntityListener.class)
-public class RuleFlowEntity {
+@Data
+public class RuleFlowExcuteLogEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
     /**
+     * 规则流编码
+     */
+    @Column(name = "rule_flow_key", nullable = false, length = 20)
+    private String ruleFlowKey;
+
+    /**
      * 唯一标识
      */
-    @Column(name = "flow_key", nullable = false, unique = true, length = 20)
-    private String key;
+    @Column(name = "request_id", nullable = false, unique = true, length = 20)
+    private String requestId;
 
     /**
      * 名称
      */
-    @Column(name = "name", nullable = false, length = 20)
-    private String name;
+    @Column(name = "time_consuming", length = 10)
+    private Long timeConsuming;
 
     /**
      * 版本, 默认0
      */
-    @Column(name = "version", nullable = false)
-    private Integer version = 0;
+    @Column(name = "error_message", length = 100)
+    private String errorMessage;
 
     /**
-     * 描述（200字）
-     */
-    @Column(name = "description", length = 200)
-    private String description;
-
-    /**
-     * 规则流程内容（大文本字段）
+     * 执行记录(大文本字段）
      */
     @Lob
     @Column(name = "content", columnDefinition = "LONGTEXT")
     private String content;
+
+    /**
+     * 执行结果
+     */
+    @Column(name = "success")
+    private Boolean success;
 
     /**
      * 创建时间，自动填充
@@ -90,6 +96,5 @@ public class RuleFlowEntity {
     @LastModifiedDate
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime updateTime;
-
 
 }

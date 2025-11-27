@@ -18,8 +18,11 @@ package cn.xjbpm.rule.service;
 import cn.xjbpm.rule.repository.RuleFlowRepository;
 import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.NoSuchElementException;
 
@@ -68,6 +71,29 @@ public class RuleFlowService {
     public RuleFlowEntity findByKeyAndVerison(String key, Integer version) {
         return ruleFlowRepository.findByKeyAndVersion(key, version).orElse(null);
     }
+
+
+    /**
+     * 分页查询所有规则流程实体。
+     *
+     * @param pageable 分页信息 (页码、大小、排序等)
+     * @param key
+     * @param name
+     * @return 规则流程实体的分页结果
+     */
+    public Page<RuleFlowEntity> findPage(Pageable pageable, String key, String name) {
+            final boolean hasKey = StringUtils.hasText(key);
+            final boolean hasName = StringUtils.hasText(name);
+            if (hasKey && hasName) {
+                return ruleFlowRepository.findByKeyAndNameContaining(key, name, pageable);
+            } else if (hasKey) {
+                return ruleFlowRepository.findByKey(key, pageable);
+            } else if (hasName) {
+                return ruleFlowRepository.findByNameContaining(name, pageable);
+            } else {
+                return ruleFlowRepository.findAll(pageable);
+            }
+        }
 
     /**
      * 保存或更新规则流程实体，严格限制 Key 字段在更新时不可修改。

@@ -19,8 +19,11 @@ import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
 import cn.xjbpm.rule.service.RuleFlowService;
 import cn.xjbpm.rule.vo.IDRequestVO;
 import cn.xjbpm.rule.vo.ResultVO;
+import cn.xjbpm.rule.vo.RuleFlowPageQuery;
 import cn.xjbpm.rule.vo.RuleFlowVO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController()
 @RequestMapping("/manage/ruleflow")
 @RequiredArgsConstructor
-public class ProcessDefinitionApi {
+public class RuleFlowDefinitionApi {
 
     private final RuleFlowService ruleFlowService;
 
@@ -63,5 +66,10 @@ public class ProcessDefinitionApi {
         vo.setContent(entity.getContent());
         vo.setVersion(entity.getVersion());
         return ResultVO.success(vo);
+    }
+
+    @PostMapping("/page")
+    public ResultVO<Page<RuleFlowEntity>> findRuleFlowPage(Pageable pageable, @RequestBody RuleFlowPageQuery query) {
+        return ResultVO.success(ruleFlowService.findPage(pageable, query.getKey(), query.getName()));
     }
 }

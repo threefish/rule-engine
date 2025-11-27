@@ -16,6 +16,8 @@
 package cn.xjbpm.rule.repository;
 
 import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -47,9 +49,40 @@ public interface RuleFlowRepository extends JpaRepository<RuleFlowEntity, Long> 
 
     /**
      * 根据规则流程的唯一标识 key 和版本号 version 获取实体
+     *
      * @param key
      * @param version
      * @return
      */
-    Optional<RuleFlowEntity> findByKeyAndVersion(String key,Integer version);
+    Optional<RuleFlowEntity> findByKeyAndVersion(String key, Integer version);
+
+
+    /**
+     * 根据 key 进行精确匹配分页查询
+     *
+     * @param key      规则流程的唯一标识 (精确匹配)
+     * @param pageable 分页信息
+     * @return 分页结果
+     */
+    Page<RuleFlowEntity> findByKey(String key, Pageable pageable);
+
+    /**
+     * 仅根据 name 进行模糊匹配分页查询
+     * 使用 Containing 实现 LIKE %name% 模糊查询
+     *
+     * @param name     规则流程的名称 (模糊匹配)
+     * @param pageable 分页信息
+     * @return 分页结果
+     */
+    Page<RuleFlowEntity> findByNameContaining(String name, Pageable pageable);
+
+    /**
+     * 同时根据 key 精确匹配 AND name 模糊匹配进行分页查询
+     *
+     * @param key      规则流程的唯一标识 (精确匹配)
+     * @param name     规则流程的名称 (模糊匹配)
+     * @param pageable 分页信息
+     * @return 分页结果
+     */
+    Page<RuleFlowEntity> findByKeyAndNameContaining(String key, String name, Pageable pageable);
 }

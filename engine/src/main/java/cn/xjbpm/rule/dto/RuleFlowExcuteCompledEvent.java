@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule;
+package cn.xjbpm.rule.dto;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.context.ApplicationEvent;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
  */
-@EnableJpaAuditing
-@SpringBootApplication
-public class RuleEngineApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(RuleEngineApplication.class, args);
+public class RuleFlowExcuteCompledEvent extends ApplicationEvent {
+    public RuleFlowExcuteCompledEvent(Object source) {
+        super(source);
     }
 
+    public static RuleFlowExcuteCompledEvent create(ExcuteRuleFlowVO.Response data) {
+        return new RuleFlowExcuteCompledEvent(data);
+    }
+
+    public ExcuteRuleFlowVO.Response getData() {
+        return (ExcuteRuleFlowVO.Response) getSource();
+    }
 }

@@ -61,13 +61,13 @@ public class ExcuteRuleFlowVO {
 
         private String requestId;
 
-        private Long processDefinitionId;
-
-        private String processDefinitionKey;
+        private String ruleFlowKey;
 
         private Map<String, Object> response;
 
         private long timeConsuming;
+
+        private Boolean success;
 
         private String errorMessage;
 

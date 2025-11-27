@@ -16,17 +16,20 @@
 package cn.xjbpm.rule.engine.runtime;
 
 import akka.actor.ActorSystem;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.common.constant.ProcessConstant;
 import cn.xjbpm.rule.common.utils.VariableTranslateUtils;
 import cn.xjbpm.rule.custom.ProcessDefinitionService;
 import cn.xjbpm.rule.dto.ExcuteRuleFlowVO;
+import cn.xjbpm.rule.dto.RuleFlowExcuteCompledEvent;
 import cn.xjbpm.rule.engine.definition.model.ProcessModel;
 import cn.xjbpm.rule.engine.runtime.actor.AkkaRuleFlowScheduler;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -45,6 +48,7 @@ public class ProcessRunService implements DisposableBean {
 
 
     private final ProcessDefinitionService processDefinitionService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private final ActorSystem actorSystem = ActorSystem.create("rule-engine");
 
@@ -69,26 +73,31 @@ public class ProcessRunService implements DisposableBean {
     private ExcuteRuleFlowVO.Response doExcute(ProcessModel processModel, Map variables, String requestId) {
         ExcuteRuleFlowVO.Response processInstance = new ExcuteRuleFlowVO.Response();
         processInstance.setRequestId(requestId);
+        processInstance.setId(IdUtil.getSnowflakeNextId());
+        processInstance.setRuleFlowKey(processModel.getKey());
         Map<String, Object> runtimeVar = new HashMap<>();
         runtimeVar.put(ProcessConstant.BUSINESS_OBJECTS, VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), false, variables));
-        AkkaRuleFlowScheduler scheduler = new AkkaRuleFlowScheduler(actorSystem);
-        long startTime = System.currentTimeMillis();
         FlowContext flowContext = new FlowContext(runtimeVar);
+        long startTime = System.currentTimeMillis();
         try {
+            AkkaRuleFlowScheduler scheduler = new AkkaRuleFlowScheduler(actorSystem);
             scheduler.startFlow(processModel, flowContext);
-            Map businessVariables = (Map) flowContext.getVariable().get(ProcessConstant.BUSINESS_OBJECTS);
-            Map<String, Object> response = VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), true, businessVariables);
-            processInstance.setResponse(response);
+            processInstance.setSuccess(true);
         } catch (Exception e) {
-            processInstance.setErrorMessage(e.getMessage());
+            processInstance.setErrorMessage(StrUtil.subPre(e.getMessage(), 100));
+            processInstance.setSuccess(false);
             log.error("流程执行出错：{}", e.getMessage(), e);
         } finally {
             processInstance.setNodeExcutions(flowContext.getNodeExcutions());
             processInstance.setTimeConsuming((System.currentTimeMillis() - startTime));
             processInstance.setTraceLogs(flowContext.getTraceLogs());
         }
-        Map<String, Object> response = VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), true, (Map) runtimeVar.get(ProcessConstant.BUSINESS_OBJECTS));
+        Map businessVariables = (Map) flowContext.getVariable().get(ProcessConstant.BUSINESS_OBJECTS);
+        Map<String, Object> response = VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), true, businessVariables);
         processInstance.setResponse(response);
+        if (StrUtil.isNotBlank(processModel.getKey())) {
+            applicationEventPublisher.publishEvent(RuleFlowExcuteCompledEvent.create(processInstance));
+        }
         return processInstance;
     }
 

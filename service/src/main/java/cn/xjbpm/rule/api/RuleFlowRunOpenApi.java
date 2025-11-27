@@ -15,10 +15,13 @@
  */
 package cn.xjbpm.rule.api;
 
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.dto.ExcuteRuleFlowVO;
 import cn.xjbpm.rule.engine.runtime.ProcessRunService;
 import cn.xjbpm.rule.vo.ResultVO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,16 +33,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/open/ruleflow")
 @RequiredArgsConstructor
-public class ProcessRunOpenApi {
+@Slf4j
+public class RuleFlowRunOpenApi {
 
     private final ProcessRunService processRunService;
 
     @PostMapping("/excute")
     public ResultVO<ExcuteRuleFlowVO.Response> excute(@RequestBody ExcuteRuleFlowVO.Request request) {
         try {
+            if (StrUtil.isBlank(request.getRequestId())) {
+                request.setRequestId(IdUtil.getSnowflakeNextIdStr());
+            }
             ExcuteRuleFlowVO.Response result = processRunService.testExcute(request);
             return ResultVO.success(result);
         } catch (Exception e) {
+            log.error("执行出错：{}", e.getMessage(), e);
             return ResultVO.fail(e.getMessage());
         }
     }
