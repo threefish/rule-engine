@@ -22,6 +22,7 @@ import cn.xjbpm.rule.engine.runtime.ProcessRunService;
 import cn.xjbpm.rule.vo.ResultVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,7 +40,7 @@ public class RuleFlowRunOpenApi {
     private final ProcessRunService processRunService;
 
     @PostMapping("/excute")
-    public ResultVO<ExcuteRuleFlowVO.Response> excute(@RequestBody ExcuteRuleFlowVO.Request request) {
+    public ResultVO<ExcuteRuleFlowVO.Response> excute(@Validated @RequestBody ExcuteRuleFlowVO.Request request) {
         try {
             if (StrUtil.isBlank(request.getRequestId())) {
                 request.setRequestId(IdUtil.getSnowflakeNextIdStr());

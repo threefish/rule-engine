@@ -24,6 +24,7 @@ import cn.xjbpm.rule.vo.RuleFlowVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,7 +41,10 @@ public class RuleFlowDefinitionApi {
     private final RuleFlowService ruleFlowService;
 
     @PostMapping("/save")
-    public ResultVO<String> save(@RequestBody RuleFlowVO request) {
+    public ResultVO<String> save(@Validated @RequestBody RuleFlowVO request) {
+        if (request == null || request.getKey() == null) {
+            throw new IllegalArgumentException("规则编码不可为空！");
+        }
         RuleFlowEntity ruleFlowEntity = new RuleFlowEntity();
         ruleFlowEntity.setId(request.getId());
         ruleFlowEntity.setKey(request.getKey());
@@ -53,7 +57,7 @@ public class RuleFlowDefinitionApi {
     }
 
     @PostMapping("/get")
-    public ResultVO<RuleFlowVO> save(@RequestBody IDRequestVO request) {
+    public ResultVO<RuleFlowVO> save(@Validated @RequestBody IDRequestVO request) {
         RuleFlowEntity entity = ruleFlowService.findById(request.getId());
         if (entity == null) {
             return ResultVO.fail("未找到规则定义");

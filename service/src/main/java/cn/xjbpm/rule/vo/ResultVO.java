@@ -42,4 +42,12 @@ public class ResultVO<T> {
         resultVO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
         return resultVO;
     }
+
+    public static ResultVO fail(int value, String result) {
+        ResultVO resultVO = new ResultVO();
+        resultVO.setData(result);
+        resultVO.setMessage(result);
+        resultVO.setCode(value);
+        return resultVO;
+    }
 }

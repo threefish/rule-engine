@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -82,18 +83,18 @@ public class RuleFlowService {
      * @return 规则流程实体的分页结果
      */
     public Page<RuleFlowEntity> findPage(Pageable pageable, String key, String name) {
-            final boolean hasKey = StringUtils.hasText(key);
-            final boolean hasName = StringUtils.hasText(name);
-            if (hasKey && hasName) {
-                return ruleFlowRepository.findByKeyAndNameContaining(key, name, pageable);
-            } else if (hasKey) {
-                return ruleFlowRepository.findByKey(key, pageable);
-            } else if (hasName) {
-                return ruleFlowRepository.findByNameContaining(name, pageable);
-            } else {
-                return ruleFlowRepository.findAll(pageable);
-            }
+        final boolean hasKey = StringUtils.hasText(key);
+        final boolean hasName = StringUtils.hasText(name);
+        if (hasKey && hasName) {
+            return ruleFlowRepository.findByKeyAndNameContaining(key, name, pageable);
+        } else if (hasKey) {
+            return ruleFlowRepository.findByKey(key, pageable);
+        } else if (hasName) {
+            return ruleFlowRepository.findByNameContaining(name, pageable);
+        } else {
+            return ruleFlowRepository.findAll(pageable);
         }
+    }
 
     /**
      * 保存或更新规则流程实体，严格限制 Key 字段在更新时不可修改。
@@ -105,17 +106,18 @@ public class RuleFlowService {
      */
     @Transactional(rollbackFor = Exception.class)
     public RuleFlowEntity saveOrUpdate(RuleFlowEntity entity) {
-        if (entity == null || entity.getKey() == null) {
-            throw new IllegalArgumentException("RuleFlow entity and its key must not be null.");
-        }
         if (entity.getId() == null) {
             entity.setVersion(0);
+            Optional<RuleFlowEntity> old = ruleFlowRepository.findByKey(entity.getKey());
+            if (old.isPresent()) {
+                throw new IllegalArgumentException(String.format("规则编码[%s]已经存在！", entity.getKey()));
+            }
             return ruleFlowRepository.save(entity);
         } else {
             RuleFlowEntity existing = ruleFlowRepository.findById(entity.getId())
-                    .orElseThrow(() -> new NoSuchElementException("Cannot update: RuleFlow with ID " + entity.getId() + " not found."));
+                    .orElseThrow(() -> new NoSuchElementException(String.format("未找到ID为[%s]的数据！", entity.getKey())));
             if (!existing.getKey().equals(entity.getKey())) {
-                throw new IllegalArgumentException("RuleFlow key is immutable and cannot be changed from '" + existing.getKey() + "' to '" + entity.getKey() + "'.");
+                throw new IllegalArgumentException(String.format("规则编码[%s]是不可变的,不能修改为[%s]！", existing.getKey(), entity.getKey()));
             }
             existing.setName(entity.getName());
             existing.setDescription(entity.getDescription());

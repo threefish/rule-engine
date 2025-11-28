@@ -15,6 +15,7 @@
  */
 package cn.xjbpm.rule.vo;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -23,6 +24,7 @@ import lombok.Data;
 @Data
 public class IDRequestVO {
 
+    @NotNull
     private Long id;
 
 }

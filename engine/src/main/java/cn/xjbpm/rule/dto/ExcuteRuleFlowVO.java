@@ -17,6 +17,8 @@ package cn.xjbpm.rule.dto;
 
 import cn.xjbpm.rule.engine.runtime.model.NodeExcution;
 import cn.xjbpm.rule.engine.runtime.model.TraceLog;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -34,6 +36,7 @@ public class ExcuteRuleFlowVO {
         /**
          * 流程定义key
          */
+        @NotBlank
         private String key;
         /**
          * 请求ID
@@ -46,6 +49,7 @@ public class ExcuteRuleFlowVO {
         /**
          * 流程变量
          */
+        @NotNull
         private Map<String, Object> variables;
         /**
          * 流程定义内容

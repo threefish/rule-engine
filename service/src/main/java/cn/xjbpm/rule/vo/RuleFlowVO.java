@@ -16,6 +16,7 @@
 package cn.xjbpm.rule.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
@@ -28,13 +29,17 @@ public class RuleFlowVO {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
+    @NotBlank
     private String key;
 
+    @NotBlank
     private String name;
 
     private String description;
 
+    @NotBlank
     private String content;
+
     private Integer version;
 
 
