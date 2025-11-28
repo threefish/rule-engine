@@ -22,6 +22,7 @@ import cn.xjbpm.rule.common.constant.ProcessConstant;
 import cn.xjbpm.rule.common.utils.VariableTranslateUtils;
 import cn.xjbpm.rule.custom.ProcessDefinitionService;
 import cn.xjbpm.rule.dto.ExcuteRuleFlowVO;
+import cn.xjbpm.rule.dto.ExcutingHistoryLogVO;
 import cn.xjbpm.rule.dto.RuleFlowExcuteCompledEvent;
 import cn.xjbpm.rule.engine.definition.model.ProcessModel;
 import cn.xjbpm.rule.engine.runtime.actor.AkkaRuleFlowScheduler;
@@ -96,7 +97,7 @@ public class ProcessRunService implements DisposableBean {
         Map<String, Object> response = VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), true, businessVariables);
         processInstance.setResponse(response);
         if (StrUtil.isNotBlank(processModel.getKey())) {
-            applicationEventPublisher.publishEvent(RuleFlowExcuteCompledEvent.create(processInstance));
+            applicationEventPublisher.publishEvent(RuleFlowExcuteCompledEvent.create(ExcutingHistoryLogVO.create(processInstance, variables, processModel.getOriginalJson())));
         }
         return processInstance;
     }

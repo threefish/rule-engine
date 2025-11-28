@@ -18,6 +18,7 @@ package cn.xjbpm.rule.repository.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -38,10 +39,12 @@ import java.time.LocalDateTime;
 )
 @EntityListeners(AuditingEntityListener.class)
 @Data
+@NoArgsConstructor
 public class RuleFlowExcuteLogEntity {
 
     @Id
     @Column(name = "id")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
     /**
@@ -97,4 +100,13 @@ public class RuleFlowExcuteLogEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime updateTime;
 
+    public RuleFlowExcuteLogEntity(Long id, String ruleFlowKey, String requestId, Long timeConsuming, Boolean success, LocalDateTime createTime, LocalDateTime updateTime) {
+        this.id = id;
+        this.ruleFlowKey = ruleFlowKey;
+        this.requestId = requestId;
+        this.timeConsuming = timeConsuming;
+        this.success = success;
+        this.createTime = createTime;
+        this.updateTime = updateTime;
+    }
 }

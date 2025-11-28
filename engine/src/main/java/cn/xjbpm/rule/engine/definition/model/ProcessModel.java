@@ -60,6 +60,10 @@ public class ProcessModel implements java.io.Serializable {
     private StartNode startNode;
 
     private EndNode endNode;
+    /**
+     * 原始json
+     */
+    private String originalJson;
 
 
 }

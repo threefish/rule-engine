@@ -13,25 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule.dto;
+package cn.xjbpm.rule.vo;
 
-import org.springframework.context.ApplicationEvent;
+import lombok.Data;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
+ * date: 2025/11/27
  */
-public class RuleFlowExcuteCompledEvent extends ApplicationEvent {
+@Data
+public class RuleFlowExcuteLogsPageQuery {
 
-    public RuleFlowExcuteCompledEvent(Object source) {
-        super(source);
-    }
 
-    public static RuleFlowExcuteCompledEvent create(ExcutingHistoryLogVO vo) {
-        return new RuleFlowExcuteCompledEvent(vo);
-    }
-
-    public ExcutingHistoryLogVO getData() {
-        return (ExcutingHistoryLogVO) getSource();
-    }
-
+    private String ruleFlowKey;
+    private String requestId;
 }

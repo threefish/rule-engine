@@ -15,8 +15,12 @@
  */
 package cn.xjbpm.rule.event;
 
+import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.dto.ExcuteRuleFlowVO;
+import cn.xjbpm.rule.dto.ExcutingHistoryLogVO;
 import cn.xjbpm.rule.dto.RuleFlowExcuteCompledEvent;
+import cn.xjbpm.rule.engine.definition.model.ProcessModel;
+import cn.xjbpm.rule.repository.entity.RuleFlowExcuteLogEntity;
 import cn.xjbpm.rule.service.RuleFlowExcuteLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,9 +48,17 @@ public class RuleFlowExcuteCompledEventListener implements ApplicationListener<R
     @Async
     public void onApplicationEvent(RuleFlowExcuteCompledEvent event) {
         try {
-            ExcuteRuleFlowVO.Response data = event.getData();
+            ExcutingHistoryLogVO data = event.getData();
             log.info("存储执行日志 key:{} ID:{}", data.getRuleFlowKey(), data.getId());
-            ruleFlowExcuteLogService.save(data);
+            RuleFlowExcuteLogEntity log = new RuleFlowExcuteLogEntity();
+            log.setId(data.getId());
+            log.setRuleFlowKey(data.getRuleFlowKey());
+            log.setRequestId(data.getRequestId());
+            log.setTimeConsuming(data.getTimeConsuming());
+            log.setErrorMessage(data.getErrorMessage());
+            log.setSuccess(data.getSuccess());
+            log.setContent(JsonUtils.obj2Json(data));
+            ruleFlowExcuteLogService.save(log);
         } catch (Exception e) {
             log.error("存储执行日志出错：{}", e.getMessage(), e);
         }

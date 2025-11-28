@@ -45,13 +45,12 @@ public class ProcessModelParse {
             if (CollectionUtils.isEmpty(rootMap)) {
                 return new ProcessModel();
             }
-
             // 2. 转换 ProcessModel 属性 (使用高效的 convertValue)
             ProcessModel processModel = JsonUtils.convertValue(rootMap, ProcessModel.class);
+            processModel.setOriginalJson(json);
             if (processModel == null) {
                 processModel = new ProcessModel();
             }
-
             // 3. 转换 Business Object Models
             List<Map<String, Object>> businessObjectModelsMap = (List<Map<String, Object>>) rootMap.get("businessObjectModels");
             if (!CollectionUtils.isEmpty(businessObjectModelsMap)) {
