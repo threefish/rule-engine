@@ -17,6 +17,7 @@ package cn.xjbpm.rule.engine.runtime.actor;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import cn.xjbpm.rule.engine.definition.model.ProcessModel;
@@ -25,7 +26,9 @@ import lombok.extern.slf4j.Slf4j;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -50,27 +53,113 @@ public class AkkaRuleFlowScheduler {
     /**
      * 启动流程并同步等待结果
      *
+     * @param ruleModel   流程模型
+     * @param flowContext 流程上下文
      * @throws Exception 如果流程执行失败或超时
      */
     public void startFlow(ProcessModel ruleModel, FlowContext flowContext) throws Exception {
+        startFlow(ruleModel, flowContext, Collections.emptySet());
+    }
+
+    /**
+     * 恢复流程并同步等待结果
+     *
+     * @param ruleModel       流程模型
+     * @param flowContext     流程上下文
+     * @param executedNodeIds 已经执行完成的节点ID列表
+     * @throws Exception 如果流程执行失败或超时
+     */
+    public void resumeFlow(ProcessModel ruleModel, FlowContext flowContext, Set<String> executedNodeIds) throws Exception {
+        startFlow(ruleModel, flowContext, executedNodeIds);
+    }
+
+
+    /**
+     * 启动流程并同步等待结果
+     *
+     * @param ruleModel   流程模型
+     * @param flowContext 流程上下文
+     * @throws Exception 如果流程执行失败或超时
+     */
+    public void startFlowAsync(ProcessModel ruleModel, FlowContext flowContext, Runnable onCompletion) throws Exception {
+        startFlowAsync(ruleModel, flowContext, Collections.emptySet(), onCompletion);
+    }
+
+    /**
+     * 恢复流程并同步等待结果
+     *
+     * @param ruleModel       流程模型
+     * @param flowContext     流程上下文
+     * @param executedNodeIds 已经执行完成的节点ID列表
+     * @throws Exception 如果流程执行失败或超时
+     */
+    public void resumeFlowAsync(ProcessModel ruleModel, FlowContext flowContext, Set<String> executedNodeIds, Runnable onCompletion) throws Exception {
+        startFlowAsync(ruleModel, flowContext, executedNodeIds, onCompletion);
+    }
+
+    /**
+     * 异步启动流程，并在流程结束后（无论成功或失败）执行指定的回调函数。
+     *
+     * @param ruleModel       流程模型
+     * @param flowContext     流程上下文
+     * @param executedNodeIds 已执行节点列表 (恢复模式)
+     * @param onCompletion    流程结束时执行的回调（Runnable），不接收结果或异常，只表示流程已终止。
+     */
+    private void startFlowAsync(ProcessModel ruleModel, FlowContext flowContext, Set<String> executedNodeIds, Runnable onCompletion) {
         // 1. 构建依赖
-        NodeDependencyBuilder dependencyBuilder = new NodeDependencyBuilder();
-        dependencyBuilder.buildNodeDependency(ruleModel.getChildNodes());
+        NodeDependencyBuilder dependencyBuilder = new NodeDependencyBuilder(ruleModel.getChildNodes());
         // 2. 创建流程实例 Master Actor
         ActorRef masterActor = actorSystem.actorOf(WorkflowInstanceActor.props(dependencyBuilder));
-        Long timeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
-        if (Objects.nonNull(ruleModel.getTimeoutSeconds())) {
-            timeoutSeconds = Math.min(ruleModel.getTimeoutSeconds(), DEFAULT_TIMEOUT_SECONDS);
-        }
+        Timeout timeout = calculateTimeout(ruleModel);
+        // 3. 发送消息获取 Scala Future
+        Future<Object> scalaFuture = Patterns.ask(masterActor, new WorkflowProtocol.StartProcess(ruleModel, flowContext, executedNodeIds), timeout);
+        // 4. 附加回调
+        scalaFuture.onComplete(new OnComplete<Object>() {
+            @Override
+            public void onComplete(Throwable failure, Object success) {
+                // 1. 处理流程自身的日志和清理工作
+                if (failure != null) {
+                    log.error("流程异步执行异常: {}", ruleModel.getKey(), failure);
+                    // 如果是超时异常，需要手动停止 Actor (防止僵尸 Actor)
+                    if (failure instanceof TimeoutException) {
+                        actorSystem.stop(masterActor);
+                    }
+                } else {
+                    log.info("流程异步执行完成: {}", ruleModel.getKey());
+                }
+                // 2. 执行用户指定的回调方法
+                if (onCompletion != null) {
+                    try {
+                        // 回调方法将在 Akka Dispatcher 线程中执行
+                        onCompletion.run();
+                    } catch (Exception e) {
+                        // 捕获回调方法本身的异常，不影响主流程的日志
+                        log.error("流程完成回调执行异常: {}", ruleModel.getKey(), e);
+                    }
+                }
+            }
+        }, actorSystem.dispatcher());
+    }
+
+
+    /**
+     * 启动流程并同步等待结果
+     *
+     * @param ruleModel       流程模型
+     * @param flowContext     流程上下文
+     * @param executedNodeIds 已经执行完成的节点ID列表
+     * @throws Exception 如果流程执行失败或超时
+     */
+    private void startFlow(ProcessModel ruleModel, FlowContext flowContext, Set<String> executedNodeIds) throws Exception {
+        // 1. 构建依赖
+        NodeDependencyBuilder dependencyBuilder = new NodeDependencyBuilder(ruleModel.getChildNodes());
+        // 2. 创建流程实例 Master Actor
+        ActorRef masterActor = actorSystem.actorOf(WorkflowInstanceActor.props(dependencyBuilder));
         // 3. 总的超时设置
-        Timeout timeout = new Timeout(timeoutSeconds, TimeUnit.SECONDS);
+        Timeout timeout = calculateTimeout(ruleModel);
         // 4. 使用 Ask 模式发送消息
         // Patterns.ask 会返回一个 Scala Future
-        Future<Object> future = Patterns.ask(
-                masterActor,
-                new WorkflowProtocol.StartProcess(ruleModel, flowContext),
-                timeout
-        );
+        Future<Object> future = Patterns.ask(masterActor, new WorkflowProtocol.StartProcess(ruleModel, flowContext, executedNodeIds), timeout);
         try {
             // 5. 同步阻塞等待结果 (Block current thread)
             // Await.result 会等待 Future 完成。
@@ -87,5 +176,20 @@ public class AkkaRuleFlowScheduler {
             log.error("流程执行失败: {}", e.getMessage());
             throw e;
         }
+    }
+
+    /**
+     * 计算超时时间
+     *
+     * @param ruleModel
+     * @return
+     */
+
+    private Timeout calculateTimeout(ProcessModel ruleModel) {
+        Long timeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
+        if (Objects.nonNull(ruleModel.getTimeoutSeconds())) {
+            timeoutSeconds = Math.min(ruleModel.getTimeoutSeconds(), DEFAULT_TIMEOUT_SECONDS);
+        }
+        return new Timeout(timeoutSeconds, TimeUnit.SECONDS);
     }
 }

@@ -20,8 +20,12 @@ import cn.xjbpm.rule.engine.definition.model.ProcessModel;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
 import lombok.Value;
 
+import java.util.Collections;
+import java.util.Set;
+
 /**
  * Actor 消息协议定义
+ *
  * @author 黄川 huchuc@vip.qq.com
  */
 public interface WorkflowProtocol {
@@ -31,6 +35,13 @@ public interface WorkflowProtocol {
     class StartProcess {
         ProcessModel processModel;
         FlowContext flowContext;
+        Set<String> executedNodeIds;
+
+        public StartProcess(ProcessModel processModel, FlowContext flowContext, Set<String> executedNodeIds) {
+            this.processModel = processModel;
+            this.flowContext = flowContext;
+            this.executedNodeIds = executedNodeIds == null ? Collections.emptySet() : executedNodeIds;
+        }
     }
 
     // ================= Master -> Worker =================

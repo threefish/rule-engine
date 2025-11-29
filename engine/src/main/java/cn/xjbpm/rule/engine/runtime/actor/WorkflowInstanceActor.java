@@ -32,9 +32,7 @@ import cn.xjbpm.rule.engine.runtime.model.FlowContext;
 import cn.xjbpm.rule.engine.runtime.model.NodeExcution;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -51,6 +49,8 @@ public class WorkflowInstanceActor extends AbstractActor {
     private static final int WORKER_POOL_SIZE = 30;
     private final Map<String, List<Node>> nodeNextMap;
     private final Map<String, Integer> convergePendingCount;
+    // 恢复时用
+    private Set<String> executedNodeIds;
     // 路由池引用
     private ActorRef workerRouter;
     private FlowContext flowContext;
@@ -77,7 +77,8 @@ public class WorkflowInstanceActor extends AbstractActor {
     private void handleStart(WorkflowProtocol.StartProcess msg) {
         this.flowContext = msg.getFlowContext();
         this.originalRequester = getSender();
-
+        // 初始化已执行列表
+        this.executedNodeIds = new HashSet<>(msg.getExecutedNodeIds());
         // 初始化 Worker Pool  使用 RoundRobinPool 创建一组复用的 Worker
         // 这些 Worker 共享同一个 FlowContext (这是安全的，因为 FlowContext 是线程安全的且属于同一个流程实例)
         this.workerRouter = getContext().actorOf(
@@ -214,6 +215,16 @@ public class WorkflowInstanceActor extends AbstractActor {
     }
 
     private void scheduleNodeExecution(Node node) {
+        // 检查是否需要跳过
+        if (this.executedNodeIds.contains(node.getId())) {
+            log.info("节点 [{}] 处于已执行列表中，跳过实际执行，自动流转。", node.getId());
+            this.flowContext.addTraceLog(StringUtils.format("[{}] 历史节点-跳过执行 (恢复模式)", node.getId()));
+            // 记录一条虚拟的执行记录，标记为 SUCCESS
+            recordVirtualExecution(node, ExecutStatus.SUCCESS);
+            // 触发完成从而驱动流程继续向下
+            getSelf().tell(new WorkflowProtocol.NodeCompleted(node.getId(), node, true), getSelf());
+            return;
+        }
         // 不再 actorOf 创建新 Actor，而是直接 tell 路由池
         // 路由池会自动选择一个空闲的 Worker (或者轮询) 来处理
         workerRouter.tell(new WorkflowProtocol.ExecuteNode(node, 0, System.nanoTime()), getSelf());

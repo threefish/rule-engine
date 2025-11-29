@@ -35,15 +35,16 @@ public class NodeDependencyBuilder {
     private final Map<String, List<Node>> nodeNextMap;
     private final Map<String, Integer> convergePendingCount;
 
-    public NodeDependencyBuilder() {
+    public NodeDependencyBuilder(List<? extends Node> allNodes) {
         this.nodeNextMap = new ConcurrentHashMap<>();
         this.convergePendingCount = new ConcurrentHashMap<>();
+        this.buildNodeDependency(allNodes);
     }
 
     /**
      * 构建节点依赖关系：解析所有节点的连接器，建立from -> to映射
      */
-    public void buildNodeDependency(List<? extends Node> allNodes) {
+    private void buildNodeDependency(List<? extends Node> allNodes) {
         for (Node node : allNodes) {
             // 遍历节点的所有输出连接器
             List<SequenceConnNode> outgoingNodes = node.getOutgoingNodes();
