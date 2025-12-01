@@ -15,9 +15,13 @@
  */
 package cn.xjbpm.rule.engine.runtime.behavior;
 
+import cn.xjbpm.rule.engine.aviator.AviatorContext;
+import cn.xjbpm.rule.engine.aviator.AviatorExecutor;
 import cn.xjbpm.rule.engine.definition.model.activity.FunctionActivityNode;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Objects;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -34,6 +38,16 @@ public class FunctionActivityNodeBehavior implements NodeBehavior {
 
     @Override
     public void execution(FlowContext context) {
-        log.info("执行函数:{}", node.getCode());
+        log.info("执行函数");
+        if (Objects.equals(node.getScriptType(), "aviator")) {
+            AviatorContext aviatorContext = AviatorContext.builder()
+                    .cached(true)
+                    .expression(node.getScriptContent())
+                    .env(context.getVariable())
+                    .build();
+            AviatorExecutor.execute(aviatorContext);
+        } else {
+            log.info("未实现脚本类型:{}", node.getScriptType());
+        }
     }
 }

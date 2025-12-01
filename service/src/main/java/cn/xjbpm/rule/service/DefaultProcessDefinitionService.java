@@ -15,8 +15,8 @@
  */
 package cn.xjbpm.rule.service;
 
-import cn.xjbpm.rule.custom.ProcessDefinitionService;
-import cn.xjbpm.rule.engine.definition.model.ProcessModel;
+import cn.xjbpm.rule.custom.RuleFlowDefinitionService;
+import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
 import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,24 +29,27 @@ import java.util.Objects;
  */
 @Service
 @AllArgsConstructor
-public class DefaultProcessDefinitionService implements ProcessDefinitionService {
+public class DefaultProcessDefinitionService implements RuleFlowDefinitionService {
 
     private final RuleFlowService ruleFlowService;
 
     @Override
-    public ProcessModel getProcessModel(String key, Integer version) {
+    public RuleFlowModel getModel(String key, Integer version) {
         RuleFlowEntity entity;
         if (Objects.nonNull(version)) {
             entity = ruleFlowService.findByKeyAndVerison(key, version);
         } else {
             entity = ruleFlowService.findByKeyAndMaxVerison(key);
         }
-        ProcessModel processModel = convertToModel(entity.getContent());
+        RuleFlowModel processModel = convertToModel(entity.getContent());
+        processModel.setKey(entity.getKey());
+        processModel.setName(entity.getName());
+        processModel.setDescription(entity.getDescription());
         return processModel;
     }
 
     @Override
-    public ProcessModel convertToModel(String content) {
-        return ProcessDefinitionService.super.convertToModel(content);
+    public RuleFlowModel convertToModel(String content) {
+        return RuleFlowDefinitionService.super.convertToModel(content);
     }
 }

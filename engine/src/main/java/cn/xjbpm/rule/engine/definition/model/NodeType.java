@@ -44,6 +44,7 @@ public enum NodeType {
     ScoringCardNode(cn.xjbpm.rule.engine.definition.model.activity.ScoringCardNode.class, ScoringCardNodeValidator.class, ScoringCardNodeBehavior.class),
 
     DecisionTablesNode(cn.xjbpm.rule.engine.definition.model.activity.DecisionTablesNode.class, DecisionTablesNodeValidator.class, DecisionTablesNodeBehavior.class),
+    DelayWaitNode(DelayWaitNode.class, DelayWaitNodeValidator.class, DelayWaitNodeBehavior.class),
 
 
     ;

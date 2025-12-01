@@ -29,34 +29,37 @@ import java.util.stream.Collectors;
  * date: 2022/9/29
  */
 @Slf4j
-public class ProcessModelParse {
+public class RuleFlowModelParse {
 
     /**
      * 转换成模型
      *
      * @param json 流程定义的 JSON 字符串
-     * @return 转换后的 ProcessModel
+     * @return 转换后的 RuleFlowModel
      */
     @SuppressWarnings("unchecked")
-    public ProcessModel convertToModel(String json) {
+    public RuleFlowModel convertToModel(String json) {
         try {
             // 1. 解析根 Map
             Map<String, Object> rootMap = JsonUtils.json2Obj(json, Map.class);
             if (CollectionUtils.isEmpty(rootMap)) {
-                return new ProcessModel();
+                return new RuleFlowModel();
             }
             // 2. 转换 ProcessModel 属性 (使用高效的 convertValue)
-            ProcessModel processModel = JsonUtils.convertValue(rootMap, ProcessModel.class);
-            processModel.setOriginalJson(json);
-            if (processModel == null) {
-                processModel = new ProcessModel();
+            RuleFlowModel ruleFlowModel = JsonUtils.convertValue(rootMap, RuleFlowModel.class);
+            if (ruleFlowModel == null) {
+                ruleFlowModel = new RuleFlowModel();
             }
+            ruleFlowModel.setKey(getString(rootMap.get("key")));
+            ruleFlowModel.setName(getString(rootMap.get("name")));
+            ruleFlowModel.setDescription(getString(rootMap.get("description")));
+            ruleFlowModel.setOriginalJson(json);
             // 3. 转换 Business Object Models
             List<Map<String, Object>> businessObjectModelsMap = (List<Map<String, Object>>) rootMap.get("businessObjectModels");
             if (!CollectionUtils.isEmpty(businessObjectModelsMap)) {
                 // 使用高效的 convertValueToList
                 List<ObjectModel> objectModels = JsonUtils.convertValueToList(businessObjectModelsMap, ObjectModel.class);
-                processModel.setBusinessObjectModels(objectModels);
+                ruleFlowModel.setBusinessObjectModels(objectModels);
             }
 
             List<Node> nodes = new ArrayList<>();
@@ -90,9 +93,9 @@ public class ProcessModelParse {
                 node.setRetryDelay(getIntValueFromMap(properties, "retryDelay", 0));
 
                 if (type == NodeType.StartNode) {
-                    processModel.setStartNode((StartNode) node);
+                    ruleFlowModel.setStartNode((StartNode) node);
                 } else if (type == NodeType.EndNode) {
-                    processModel.setEndNode((EndNode) node);
+                    ruleFlowModel.setEndNode((EndNode) node);
                 }
                 nodes.add(node);
                 nodeMap.put(node.getId(), node);
@@ -146,9 +149,9 @@ public class ProcessModelParse {
                 }
             }
 
-            processModel.setChildNodes(nodes);
-            setBehavior(processModel);
-            return processModel;
+            ruleFlowModel.setChildNodes(nodes);
+            setBehavior(ruleFlowModel);
+            return ruleFlowModel;
         } catch (Exception e) {
             log.error("规则流图转换规则模型失败", e);
             throw new RuntimeException("规则流图转换规则模型失败", e);
@@ -179,8 +182,8 @@ public class ProcessModelParse {
     /**
      * 设置行为处理
      */
-    private void setBehavior(ProcessModel processModel) {
-        List<? extends Node> childNodes = processModel.getChildNodes();
+    private void setBehavior(RuleFlowModel ruleFlowModel) {
+        List<? extends Node> childNodes = ruleFlowModel.getChildNodes();
         if (!CollectionUtils.isEmpty(childNodes)) {
             for (Node childNode : childNodes) {
                 NodeType type = childNode.getType();
@@ -201,12 +204,12 @@ public class ProcessModelParse {
     /**
      * 转换成json
      *
-     * @param processModel
+     * @param ruleFlowModel
      * @return
      */
     @SuppressWarnings("unchecked")
-    public String convertToJson(ProcessModel processModel) {
-        Map<String, Object> stringObjectMap = JsonUtils.convertValue(processModel, Map.class);
+    public String convertToJson(RuleFlowModel ruleFlowModel) {
+        Map<String, Object> stringObjectMap = JsonUtils.convertValue(ruleFlowModel, Map.class);
 
         stringObjectMap.remove("childNodes");
         stringObjectMap.remove("startNode");
@@ -215,7 +218,7 @@ public class ProcessModelParse {
         List<Map> nodes = new ArrayList<>();
         List<Map> edges = new ArrayList<>();
 
-        List<? extends Node> childNodes = processModel.getChildNodes();
+        List<? extends Node> childNodes = ruleFlowModel.getChildNodes();
         if (!CollectionUtils.isEmpty(childNodes)) {
             for (Node node : childNodes) {
                 // 读取原始 JSON 字符串并解析为 Map

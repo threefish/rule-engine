@@ -19,10 +19,7 @@ import akka.actor.AbstractActor;
 import akka.actor.Props;
 import cn.xjbpm.rule.common.utils.StringUtils;
 import cn.xjbpm.rule.common.utils.TimeFormatUtil;
-import cn.xjbpm.rule.engine.definition.model.EndNode;
-import cn.xjbpm.rule.engine.definition.model.Node;
-import cn.xjbpm.rule.engine.definition.model.SequenceConnNode;
-import cn.xjbpm.rule.engine.definition.model.StartNode;
+import cn.xjbpm.rule.engine.definition.model.*;
 import cn.xjbpm.rule.engine.definition.model.gateway.ExclusiveGatewayNode;
 import cn.xjbpm.rule.engine.definition.model.gateway.InclusiveGatewayNode;
 import cn.xjbpm.rule.engine.definition.model.gateway.ParallelGatewayNode;
@@ -84,6 +81,8 @@ public class NodeWorkerActor extends AbstractActor {
         } catch (Exception e) {
             this.flowContext.addTraceLog(StringUtils.format("[{}] 执行异常: {}", node.getId(), e.getMessage()));
             handleFailure(msg, e);
+        } finally {
+            this.flowContext.addTraceLog(StringUtils.format("[{}] 节点执行完成", node.getId()));
         }
     }
 
@@ -133,6 +132,7 @@ public class NodeWorkerActor extends AbstractActor {
                 || node instanceof InclusiveGatewayNode
                 || node instanceof ExclusiveGatewayNode
                 || node instanceof ParallelGatewayNode
+                || node instanceof DelayWaitNode
                 || node instanceof EndNode;
     }
 

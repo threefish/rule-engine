@@ -19,6 +19,7 @@ package cn.xjbpm.rule.dto;
 import cn.xjbpm.rule.engine.runtime.model.NodeExcution;
 import cn.xjbpm.rule.engine.runtime.model.TraceLog;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import java.util.Map;
  * @author 黄川 huchuc@vip.qq.com
  */
 @Data
+@NoArgsConstructor
 public class ExcutingHistoryLogVO {
 
     private Long id;
@@ -39,7 +41,7 @@ public class ExcutingHistoryLogVO {
 
     private Map<String, Object> response;
 
-    private String processModelOriginalJson;
+    private String ruleFlowOriginalJson;
 
     private long timeConsuming;
 
@@ -51,19 +53,24 @@ public class ExcutingHistoryLogVO {
 
     private Map<String, NodeExcution> nodeExcutions;
 
-    public static ExcutingHistoryLogVO create(ExcuteRuleFlowVO.Response processInstance, Map variables, String originalJson) {
+
+    private Long retryOriginId;
+
+
+    public static ExcutingHistoryLogVO create(ExcuteRuleFlowVO.Response response, Map variables, String originalJson,Long retryOriginId) {
         ExcutingHistoryLogVO excutingHistoryLogVO = new ExcutingHistoryLogVO();
-        excutingHistoryLogVO.setProcessModelOriginalJson(originalJson);
+        excutingHistoryLogVO.setRuleFlowOriginalJson(originalJson);
         excutingHistoryLogVO.setRequest(variables);
-        excutingHistoryLogVO.setResponse(processInstance.getResponse());
-        excutingHistoryLogVO.setTimeConsuming(processInstance.getTimeConsuming());
-        excutingHistoryLogVO.setSuccess(processInstance.getSuccess());
-        excutingHistoryLogVO.setErrorMessage(processInstance.getErrorMessage());
-        excutingHistoryLogVO.setTraceLogs(processInstance.getTraceLogs());
-        excutingHistoryLogVO.setNodeExcutions(processInstance.getNodeExcutions());
-        excutingHistoryLogVO.setId(processInstance.getId());
-        excutingHistoryLogVO.setRequestId(processInstance.getRequestId());
-        excutingHistoryLogVO.setRuleFlowKey(processInstance.getRuleFlowKey());
+        excutingHistoryLogVO.setResponse(response.getResponse());
+        excutingHistoryLogVO.setTimeConsuming(response.getTimeConsuming());
+        excutingHistoryLogVO.setSuccess(response.getSuccess());
+        excutingHistoryLogVO.setErrorMessage(response.getErrorMessage());
+        excutingHistoryLogVO.setTraceLogs(response.getTraceLogs());
+        excutingHistoryLogVO.setNodeExcutions(response.getNodeExcutions());
+        excutingHistoryLogVO.setId(response.getId());
+        excutingHistoryLogVO.setRequestId(response.getRequestId());
+        excutingHistoryLogVO.setRuleFlowKey(response.getRuleFlowKey());
+        excutingHistoryLogVO.setRetryOriginId(retryOriginId);
         return excutingHistoryLogVO;
     }
 }

@@ -25,10 +25,10 @@ import lombok.Data;
 @Data
 public class FunctionActivityNode extends ActivityNode {
 
-    /**
-     * 函数编码
-     */
-    String code;
+
+    String scriptType;
+
+    String scriptContent;
 
 
     @Override

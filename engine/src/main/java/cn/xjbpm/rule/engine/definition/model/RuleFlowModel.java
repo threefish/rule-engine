@@ -26,7 +26,7 @@ import java.util.List;
  * date: 2022/9/28
  */
 @Data
-public class ProcessModel implements java.io.Serializable {
+public class RuleFlowModel implements java.io.Serializable {
 
     /**
      * key

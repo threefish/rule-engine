@@ -17,7 +17,7 @@ package cn.xjbpm.rule.engine.definition.validator;
 
 import cn.xjbpm.rule.engine.definition.model.Node;
 import cn.xjbpm.rule.engine.definition.model.NodeType;
-import cn.xjbpm.rule.engine.definition.model.ProcessModel;
+import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -27,17 +27,17 @@ import java.util.List;
  * @author 黄川 huchuc@vip.qq.com
  * date: 2022/9/30
  */
-public class ProcessModelValidator {
+public class RuleFlowModelValidator {
 
 
     /**
      * 校验
      *
-     * @param processModel
+     * @param ruleFlowModel
      * @return
      */
-    public List<ErrorNodeMsg> check(ProcessModel processModel) {
-        List<? extends Node> childNodes = processModel.getChildNodes();
+    public List<ErrorNodeMsg> check(RuleFlowModel ruleFlowModel) {
+        List<? extends Node> childNodes = ruleFlowModel.getChildNodes();
         List<ErrorNodeMsg> errorNodeMsgs = new ArrayList<>();
         if (!CollectionUtils.isEmpty(childNodes)) {
             for (Node childNode : childNodes) {

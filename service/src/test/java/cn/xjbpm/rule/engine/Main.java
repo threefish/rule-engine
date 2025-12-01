@@ -17,13 +17,12 @@ package cn.xjbpm.rule.engine;
 
 import akka.actor.ActorSystem;
 import cn.hutool.core.io.IoUtil;
-import cn.xjbpm.rule.common.constant.ProcessConstant;
+import cn.xjbpm.rule.common.constant.RuleFlowConstant;
 import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.common.utils.VariableTranslateUtils;
-import cn.xjbpm.rule.engine.definition.model.ProcessModel;
-import cn.xjbpm.rule.engine.definition.parse.ProcessModelParse;
+import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
+import cn.xjbpm.rule.engine.definition.parse.RuleFlowModelParse;
 import cn.xjbpm.rule.engine.runtime.actor.AkkaRuleFlowScheduler;
-import cn.xjbpm.rule.engine.runtime.actor.NodeDependencyBuilder;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,21 +37,19 @@ import java.util.Map;
  */
 @Slf4j
 public class Main {
-    private static final ProcessModelParse PROCESS_MODEL_JSON_CONVERTER = new ProcessModelParse();
+    private static final RuleFlowModelParse PROCESS_MODEL_JSON_CONVERTER = new RuleFlowModelParse();
 
     public static void main(String[] args) {
         InputStream resourceAsStream = Main.class.getResourceAsStream("/process/个人所得税计算.json");
         String processDefinitionContent = IoUtil.readUtf8(resourceAsStream);
-        ProcessModel processModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(processDefinitionContent);
-        NodeDependencyBuilder nodeDependencyBuilder = new NodeDependencyBuilder();
-        nodeDependencyBuilder.buildNodeDependency(processModel.getChildNodes());
+        RuleFlowModel processModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(processDefinitionContent);
         String requestJson = IoUtil.readUtf8(ProcessRunServiceTest.class.getResourceAsStream("/process/个人所得税计算_request.json"));
         ActorSystem actorSystem = ActorSystem.create("FlowSystem");
         AkkaRuleFlowScheduler scheduler = new AkkaRuleFlowScheduler(actorSystem);
         try {
             for (int i = 0; i < 3; i++) {
                 Map<String, Object> runtimeVar = new HashMap<>();
-                runtimeVar.put(ProcessConstant.BUSINESS_OBJECTS, VariableTranslateUtils.translate(processModel.getBusinessObjectModels(),
+                runtimeVar.put(RuleFlowConstant.BUSINESS_OBJECTS, VariableTranslateUtils.translate(processModel.getBusinessObjectModels(),
                         false, JsonUtils.json2Obj(requestJson, Map.class)));
                 long startTime = System.currentTimeMillis();
                 FlowContext flowContext = new FlowContext(runtimeVar);

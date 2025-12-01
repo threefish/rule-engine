@@ -13,28 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule.engine.runtime.model;
+package cn.xjbpm.rule.engine.definition.validator;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import cn.xjbpm.rule.engine.definition.model.DelayWaitNode;
+import org.springframework.util.Assert;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * date: 2025/11/21
+ * date: 2022/9/30
  */
-@Data
-@NoArgsConstructor
-public class TraceLog {
+public class DelayWaitNodeValidator extends BaseNodeValidator<DelayWaitNode> {
 
-    private long time;
-    private String message;
-
-    public TraceLog(long time, String message) {
-        this.time = time;
-        this.message = message;
-    }
-
-    public static TraceLog of(String message) {
-        return new TraceLog(System.nanoTime(), message);
+    @Override
+    public void check(DelayWaitNode node) {
+        super.check(node);
+        Assert.notNull(node.getDelayTime(), "延时时间不能为空");
+        Assert.notNull(node.getDelayTime() < 0, "延时时间不能小于0");
     }
 }

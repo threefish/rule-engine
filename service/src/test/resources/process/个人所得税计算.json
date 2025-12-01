@@ -3,8 +3,8 @@
     {
       "id": "001",
       "type": "RuleSetNode",
-      "x": 660,
-      "y": 73,
+      "x": 674,
+      "y": 86,
       "properties": {
         "name": "规则集",
         "tag": "A6",
@@ -167,12 +167,12 @@
             "key": "5bd7ab2d-8e60-4afc-8b2d-6c0ea38154ad"
           }
         ],
-        "width": 130,
+        "width": 150,
         "height": 50
       },
       "text": {
-        "x": 660,
-        "y": 73,
+        "x": 674,
+        "y": 86,
         "value": "计算个人所得税"
       }
     },
@@ -196,8 +196,8 @@
     {
       "id": "004",
       "type": "EndNode",
-      "x": 1351,
-      "y": 219,
+      "x": 1294,
+      "y": 217,
       "properties": {
         "name": "结束",
         "tag": "A2",
@@ -205,16 +205,16 @@
         "height": 44
       },
       "text": {
-        "x": 1351,
-        "y": 219,
+        "x": 1294,
+        "y": 217,
         "value": "结束"
       }
     },
     {
       "id": "009",
       "type": "ScoringCardNode",
-      "x": 663,
-      "y": 219,
+      "x": 681,
+      "y": 217,
       "properties": {
         "name": "评分卡",
         "tag": "A8",
@@ -682,20 +682,20 @@
         ],
         "scoringCalcMethod": "SUM_WEIGHT",
         "assignmentFiled": "业务对象.用户.评估结果",
-        "width": 130,
+        "width": 150,
         "height": 50
       },
       "text": {
-        "x": 663,
-        "y": 219,
+        "x": 681,
+        "y": 217,
         "value": "评分卡"
       }
     },
     {
       "id": "007",
       "type": "DecisionTablesNode",
-      "x": 661,
-      "y": 326,
+      "x": 686,
+      "y": 324,
       "properties": {
         "name": "决策表",
         "tag": "A9",
@@ -787,12 +787,12 @@
         "assignColumns": [
           "业务对象.用户.教育程度"
         ],
-        "width": 130,
+        "width": 150,
         "height": 50
       },
       "text": {
-        "x": 661,
-        "y": 326,
+        "x": 686,
+        "y": 324,
         "value": "决策表"
       }
     },
@@ -816,8 +816,8 @@
     {
       "id": "011",
       "type": "InclusiveGatewayNode",
-      "x": 1241,
-      "y": 219,
+      "x": 1180,
+      "y": 217,
       "properties": {
         "name": "包容网关",
         "tag": "A5",
@@ -825,15 +825,15 @@
         "height": 50
       },
       "text": {
-        "x": 1241,
-        "y": 259,
+        "x": 1180,
+        "y": 257,
         "value": "011"
       }
     },
     {
       "id": "013",
       "type": "ParallelGatewayNode",
-      "x": 848,
+      "x": 862,
       "y": 73,
       "properties": {
         "name": "并行网关",
@@ -842,7 +842,7 @@
         "height": 50
       },
       "text": {
-        "x": 848,
+        "x": 862,
         "y": 113,
         "value": "013"
       }
@@ -867,36 +867,73 @@
     {
       "id": "018",
       "type": "RuleSetNode",
-      "x": 998,
-      "y": 16,
+      "x": 1009,
+      "y": 18,
       "properties": {
         "name": "规则集",
         "tag": "A6",
         "ruleSet": [],
-        "width": 130,
+        "width": 150,
         "height": 50
       },
       "text": {
-        "x": 998,
-        "y": 16,
+        "x": 1009,
+        "y": 18,
         "value": "规则集"
       }
     },
     {
       "id": "019",
       "type": "RuleSetNode",
-      "x": 999,
-      "y": 139,
+      "x": 1016,
+      "y": 128,
       "properties": {
         "name": "规则集",
         "tag": "A6",
-        "width": 130,
+        "width": 150,
         "height": 50
       },
       "text": {
-        "x": 999,
-        "y": 139,
+        "x": 1016,
+        "y": 128,
         "value": "规则集"
+      }
+    },
+    {
+      "id": "026",
+      "type": "FunctionActivityNode",
+      "x": 962,
+      "y": 332,
+      "properties": {
+        "name": "脚本函数",
+        "tag": "A13",
+        "scriptType": "aviator",
+        "scriptContent": "1+1",
+        "width": 150,
+        "height": 50
+      },
+      "text": {
+        "x": 962,
+        "y": 332,
+        "value": "脚本函数"
+      }
+    },
+    {
+      "id": "012",
+      "type": "DelayWaitNode",
+      "x": 928,
+      "y": 226,
+      "properties": {
+        "name": "延时等待",
+        "tag": "A10",
+        "delayTime": 1,
+        "width": 150,
+        "height": 50
+      },
+      "text": {
+        "x": 928,
+        "y": 226,
+        "value": "延时等待"
       }
     }
   ],
@@ -904,8 +941,7 @@
     {
       "id": "005",
       "type": "SequenceConnNode",
-      "properties": {
-      },
+      "properties": {},
       "sourceNodeId": "002",
       "targetNodeId": "003",
       "startPoint": {
@@ -935,8 +971,7 @@
     {
       "id": "006",
       "type": "SequenceConnNode",
-      "properties": {
-      },
+      "properties": {},
       "sourceNodeId": "003",
       "targetNodeId": "001",
       "startPoint": {
@@ -944,12 +979,12 @@
         "y": 195
       },
       "endPoint": {
-        "x": 595,
-        "y": 73
+        "x": 599,
+        "y": 89
       },
       "text": {
         "x": 499,
-        "y": 73,
+        "y": 89,
         "value": "006"
       },
       "pointsList": [
@@ -959,50 +994,48 @@
         },
         {
           "x": 499,
-          "y": 73
+          "y": 89
         },
         {
-          "x": 595,
-          "y": 73
+          "x": 599,
+          "y": 89
         }
       ]
     },
     {
       "id": "008",
       "type": "SequenceConnNode",
-      "properties": {
-      },
+      "properties": {},
       "sourceNodeId": "003",
       "targetNodeId": "009",
       "startPoint": {
         "x": 525,
-        "y": 220
+        "y": 221
       },
       "endPoint": {
-        "x": 598,
-        "y": 220
+        "x": 606,
+        "y": 221
       },
       "text": {
-        "x": 561.5,
-        "y": 220,
+        "x": 565.5,
+        "y": 221,
         "value": "008"
       },
       "pointsList": [
         {
           "x": 525,
-          "y": 220
+          "y": 221
         },
         {
-          "x": 598,
-          "y": 220
+          "x": 606,
+          "y": 221
         }
       ]
     },
     {
       "id": "010",
       "type": "SequenceConnNode",
-      "properties": {
-      },
+      "properties": {},
       "sourceNodeId": "003",
       "targetNodeId": "007",
       "startPoint": {
@@ -1010,12 +1043,12 @@
         "y": 245
       },
       "endPoint": {
-        "x": 596,
-        "y": 326
+        "x": 611,
+        "y": 324
       },
       "text": {
-        "x": 548,
-        "y": 326,
+        "x": 555.5,
+        "y": 324,
         "value": "010"
       },
       "pointsList": [
@@ -1025,240 +1058,155 @@
         },
         {
           "x": 500,
-          "y": 326
+          "y": 324
         },
         {
-          "x": 596,
-          "y": 326
-        }
-      ]
-    },
-    {
-      "id": "012",
-      "type": "SequenceConnNode",
-      "properties": {
-      },
-      "sourceNodeId": "009",
-      "targetNodeId": "011",
-      "startPoint": {
-        "x": 728,
-        "y": 219
-      },
-      "endPoint": {
-        "x": 1216,
-        "y": 219
-      },
-      "text": {
-        "x": 894.5,
-        "y": 219,
-        "value": "012"
-      },
-      "pointsList": [
-        {
-          "x": 728,
-          "y": 219
-        },
-        {
-          "x": 1216,
-          "y": 219
-        }
-      ]
-    },
-    {
-      "id": "014",
-      "type": "SequenceConnNode",
-      "properties": {
-      },
-      "sourceNodeId": "007",
-      "targetNodeId": "011",
-      "startPoint": {
-        "x": 726,
-        "y": 326
-      },
-      "endPoint": {
-        "x": 1241,
-        "y": 244
-      },
-      "text": {
-        "x": 983.5,
-        "y": 326,
-        "value": "014"
-      },
-      "pointsList": [
-        {
-          "x": 726,
-          "y": 326
-        },
-        {
-          "x": 1241,
-          "y": 326
-        },
-        {
-          "x": 1241,
-          "y": 244
+          "x": 611,
+          "y": 324
         }
       ]
     },
     {
       "id": "015",
       "type": "SequenceConnNode",
-      "properties": {
-      },
+      "properties": {},
       "sourceNodeId": "011",
       "targetNodeId": "004",
       "startPoint": {
-        "x": 1266,
-        "y": 219
+        "x": 1205,
+        "y": 217
       },
       "endPoint": {
-        "x": 1329,
-        "y": 219
+        "x": 1272,
+        "y": 217
       },
       "text": {
-        "x": 1298.25,
-        "y": 219,
+        "x": 1239.25,
+        "y": 217,
         "value": "015"
       },
       "pointsList": [
         {
-          "x": 1266,
-          "y": 219
+          "x": 1205,
+          "y": 217
         },
         {
-          "x": 1329,
-          "y": 219
-        }
-      ]
-    },
-    {
-      "id": "016",
-      "type": "SequenceConnNode",
-      "properties": {
-      },
-      "sourceNodeId": "001",
-      "targetNodeId": "013",
-      "startPoint": {
-        "x": 725,
-        "y": 73
-      },
-      "endPoint": {
-        "x": 823,
-        "y": 73
-      },
-      "text": {
-        "x": 774,
-        "y": 73,
-        "value": "016"
-      },
-      "pointsList": [
-        {
-          "x": 725,
-          "y": 73
-        },
-        {
-          "x": 823,
-          "y": 73
+          "x": 1272,
+          "y": 217
         }
       ]
     },
     {
       "id": "020",
       "type": "SequenceConnNode",
-      "properties": {
-      },
+      "properties": {},
       "sourceNodeId": "013",
       "targetNodeId": "018",
       "startPoint": {
-        "x": 847,
+        "x": 861,
         "y": 48
       },
       "endPoint": {
-        "x": 933,
-        "y": 16
+        "x": 934,
+        "y": 18
       },
       "text": {
-        "x": 890,
-        "y": 16,
+        "x": 882.5,
+        "y": 18,
         "value": "020"
       },
       "pointsList": [
         {
-          "x": 847,
+          "x": 861,
           "y": 48
         },
         {
-          "x": 847,
-          "y": 16
+          "x": 861,
+          "y": 18
         },
         {
-          "x": 933,
-          "y": 16
+          "x": 904,
+          "y": 18
+        },
+        {
+          "x": 904,
+          "y": 18
+        },
+        {
+          "x": 934,
+          "y": 18
         }
       ]
     },
     {
       "id": "021",
       "type": "SequenceConnNode",
-      "properties": {
-      },
+      "properties": {},
       "sourceNodeId": "013",
       "targetNodeId": "019",
       "startPoint": {
-        "x": 849,
+        "x": 863,
         "y": 98
       },
       "endPoint": {
-        "x": 934,
-        "y": 139
+        "x": 941,
+        "y": 128
       },
       "text": {
-        "x": 891.5,
-        "y": 139,
+        "x": 887,
+        "y": 128,
         "value": "021"
       },
       "pointsList": [
         {
-          "x": 849,
+          "x": 863,
           "y": 98
         },
         {
-          "x": 849,
-          "y": 139
+          "x": 863,
+          "y": 128
         },
         {
-          "x": 934,
-          "y": 139
+          "x": 911,
+          "y": 128
+        },
+        {
+          "x": 911,
+          "y": 128
+        },
+        {
+          "x": 941,
+          "y": 128
         }
       ]
     },
     {
       "id": "022",
       "type": "SequenceConnNode",
-      "properties": {
-      },
+      "properties": {},
       "sourceNodeId": "018",
       "targetNodeId": "017",
       "startPoint": {
-        "x": 1063,
-        "y": 16
+        "x": 1074,
+        "y": 18
       },
       "endPoint": {
         "x": 1179,
         "y": 55
       },
       "text": {
-        "x": 1121,
-        "y": 16,
+        "x": 1126.5,
+        "y": 18,
         "value": "022"
       },
       "pointsList": [
         {
-          "x": 1063,
-          "y": 16
+          "x": 1074,
+          "y": 18
         },
         {
           "x": 1179,
-          "y": 16
+          "y": 18
         },
         {
           "x": 1179,
@@ -1269,31 +1217,38 @@
     {
       "id": "023",
       "type": "SequenceConnNode",
-      "properties": {
-      },
+      "properties": {},
       "sourceNodeId": "019",
       "targetNodeId": "017",
       "startPoint": {
-        "x": 1064,
-        "y": 139
+        "x": 1081,
+        "y": 128
       },
       "endPoint": {
         "x": 1179,
         "y": 105
       },
       "text": {
-        "x": 1121.5,
-        "y": 139,
+        "x": 1150,
+        "y": 135,
         "value": "023"
       },
       "pointsList": [
         {
-          "x": 1064,
-          "y": 139
+          "x": 1081,
+          "y": 128
+        },
+        {
+          "x": 1121,
+          "y": 128
+        },
+        {
+          "x": 1121,
+          "y": 135
         },
         {
           "x": 1179,
-          "y": 139
+          "y": 135
         },
         {
           "x": 1179,
@@ -1304,8 +1259,7 @@
     {
       "id": "024",
       "type": "SequenceConnNode",
-      "properties": {
-      },
+      "properties": {},
       "sourceNodeId": "017",
       "targetNodeId": "011",
       "startPoint": {
@@ -1313,11 +1267,11 @@
         "y": 80
       },
       "endPoint": {
-        "x": 1241,
-        "y": 194
+        "x": 1180,
+        "y": 192
       },
       "text": {
-        "x": 1210.5,
+        "x": 1219,
         "y": 80,
         "value": "024"
       },
@@ -1327,12 +1281,206 @@
           "y": 80
         },
         {
-          "x": 1241,
+          "x": 1234,
           "y": 80
         },
         {
-          "x": 1241,
-          "y": 194
+          "x": 1234,
+          "y": 162
+        },
+        {
+          "x": 1180,
+          "y": 162
+        },
+        {
+          "x": 1180,
+          "y": 192
+        }
+      ]
+    },
+    {
+      "id": "016",
+      "type": "SequenceConnNode",
+      "properties": {},
+      "sourceNodeId": "001",
+      "targetNodeId": "013",
+      "startPoint": {
+        "x": 749,
+        "y": 86
+      },
+      "endPoint": {
+        "x": 837,
+        "y": 73
+      },
+      "text": {
+        "x": 771,
+        "y": 86,
+        "value": "016"
+      },
+      "pointsList": [
+        {
+          "x": 749,
+          "y": 86
+        },
+        {
+          "x": 793,
+          "y": 86
+        },
+        {
+          "x": 793,
+          "y": 73
+        },
+        {
+          "x": 837,
+          "y": 73
+        }
+      ]
+    },
+    {
+      "id": "014",
+      "type": "SequenceConnNode",
+      "properties": {},
+      "sourceNodeId": "007",
+      "targetNodeId": "026",
+      "startPoint": {
+        "x": 761,
+        "y": 324
+      },
+      "endPoint": {
+        "x": 887,
+        "y": 332
+      },
+      "text": {
+        "x": 792.5,
+        "y": 324,
+        "value": "014"
+      },
+      "pointsList": [
+        {
+          "x": 761,
+          "y": 324
+        },
+        {
+          "x": 824,
+          "y": 324
+        },
+        {
+          "x": 824,
+          "y": 332
+        },
+        {
+          "x": 887,
+          "y": 332
+        }
+      ]
+    },
+    {
+      "id": "025",
+      "type": "SequenceConnNode",
+      "properties": {},
+      "sourceNodeId": "026",
+      "targetNodeId": "011",
+      "startPoint": {
+        "x": 1037,
+        "y": 332
+      },
+      "endPoint": {
+        "x": 1180,
+        "y": 242
+      },
+      "text": {
+        "x": 1108.5,
+        "y": 332,
+        "value": "025"
+      },
+      "pointsList": [
+        {
+          "x": 1037,
+          "y": 332
+        },
+        {
+          "x": 1180,
+          "y": 332
+        },
+        {
+          "x": 1180,
+          "y": 242
+        }
+      ]
+    },
+    {
+      "id": "027",
+      "type": "SequenceConnNode",
+      "properties": {},
+      "sourceNodeId": "009",
+      "targetNodeId": "012",
+      "startPoint": {
+        "x": 756,
+        "y": 217
+      },
+      "endPoint": {
+        "x": 853,
+        "y": 226
+      },
+      "text": {
+        "x": 780.25,
+        "y": 217,
+        "value": "027"
+      },
+      "pointsList": [
+        {
+          "x": 756,
+          "y": 217
+        },
+        {
+          "x": 804.5,
+          "y": 217
+        },
+        {
+          "x": 804.5,
+          "y": 226
+        },
+        {
+          "x": 853,
+          "y": 226
+        }
+      ]
+    },
+    {
+      "id": "028",
+      "type": "SequenceConnNode",
+      "properties": {},
+      "sourceNodeId": "012",
+      "targetNodeId": "011",
+      "startPoint": {
+        "x": 1003,
+        "y": 226
+      },
+      "endPoint": {
+        "x": 1155,
+        "y": 217
+      },
+      "text": {
+        "x": 1041,
+        "y": 226,
+        "value": "028"
+      },
+      "pointsList": [
+        {
+          "x": 1003,
+          "y": 226
+        },
+        {
+          "x": 1079,
+          "y": 226
+        },
+        {
+          "x": 1079,
+          "y": 217
+        },
+        {
+          "x": 1155,
+          "y": 217
         }
       ]
     }
@@ -1732,7 +1880,7 @@
       "response": true
     }
   ],
-  "key": "grsdsjs",
-  "name": "个人所得税计算123",
-  "description": "个人所得税计算123"
+  "key": "grsdsjs1",
+  "name": "个人所得税计算",
+  "description": "个人所得税计算"
 }

@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2025 threefish.
  *
@@ -16,10 +17,11 @@
 package cn.xjbpm.rule.api;
 
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.xjbpm.rule.custom.RuleFlowDefinitionService;
 import cn.xjbpm.rule.dto.ExcuteRuleFlowVO;
 import cn.xjbpm.rule.engine.runtime.RuleFlowExcuteService;
 import cn.xjbpm.rule.vo.ResultVO;
+import cn.xjbpm.rule.vo.RuleFlowTestExcuteVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -32,24 +34,33 @@ import org.springframework.web.bind.annotation.RestController;
  * @author 黄川 huchuc@vip.qq.com
  */
 @RestController
-@RequestMapping("/open/ruleflow")
+@RequestMapping("/manage/ruleflow/test")
 @RequiredArgsConstructor
 @Slf4j
-public class RuleFlowRunOpenApi {
+public class RuleFlowRunTestApi {
 
     private final RuleFlowExcuteService processRunService;
 
+    /**
+     * 测试执行
+     *
+     * @param request
+     * @return
+     */
     @PostMapping("/excute")
-    public ResultVO<ExcuteRuleFlowVO.Response> excute(@Validated @RequestBody ExcuteRuleFlowVO.Request request) {
+    public ResultVO<ExcuteRuleFlowVO.Response> testExcute(@Validated @RequestBody RuleFlowTestExcuteVO request) {
         try {
-            if (StrUtil.isBlank(request.getRequestId())) {
-                request.setRequestId(IdUtil.getSnowflakeNextIdStr());
-            }
-            return ResultVO.success(processRunService.startFlow(request));
+            ExcuteRuleFlowVO.Request createProcessRequest = new ExcuteRuleFlowVO.Request();
+            createProcessRequest.setRequestId(IdUtil.getSnowflakeNextIdStr());
+            createProcessRequest.setVariables(request.getVariables());
+            createProcessRequest.setKey(request.getKey());
+            createProcessRequest.setContent(request.getContent());
+            createProcessRequest.setSkipNodeIds(request.getSkipNodeIds());
+            createProcessRequest.setAsyncExcute(false);
+            return ResultVO.success(processRunService.startFlow(createProcessRequest));
         } catch (Exception e) {
             log.error("执行出错：{}", e.getMessage(), e);
             return ResultVO.fail(e.getMessage());
         }
     }
-
 }

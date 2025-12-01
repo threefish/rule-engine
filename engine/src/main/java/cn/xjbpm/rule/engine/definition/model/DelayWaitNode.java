@@ -13,24 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule.custom;
+package cn.xjbpm.rule.engine.definition.model;
 
-import cn.xjbpm.rule.engine.definition.model.ProcessModel;
-import cn.xjbpm.rule.engine.definition.parse.ProcessModelParse;
+import lombok.Data;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * date: 2025/11/22
+ * date: 2022/9/28
  */
-public interface ProcessDefinitionService {
+@Data
+public class DelayWaitNode extends Node {
 
-    ProcessModelParse PROCESS_MODEL_JSON_CONVERTER = new ProcessModelParse();
+    /**
+     * 延时时间(毫秒)
+     */
+    private Long delayTime;
 
-
-    ProcessModel getProcessModel(String key, Integer version);
-
-
-    default ProcessModel convertToModel(String content) {
-        return PROCESS_MODEL_JSON_CONVERTER.convertToModel(content);
+    @Override
+    public NodeType getType() {
+        return NodeType.DelayWaitNode;
     }
+
+
 }

@@ -15,6 +15,7 @@
  */
 package cn.xjbpm.rule.api;
 
+import cn.xjbpm.rule.custom.RuleFlowDefinitionService;
 import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
 import cn.xjbpm.rule.service.RuleFlowService;
 import cn.xjbpm.rule.vo.IDRequestVO;
@@ -40,11 +41,14 @@ public class RuleFlowDefinitionApi {
 
     private final RuleFlowService ruleFlowService;
 
+    private final RuleFlowDefinitionService processDefinitionService;
+
     @PostMapping("/save")
     public ResultVO<String> save(@Validated @RequestBody RuleFlowVO request) {
         if (request == null || request.getKey() == null) {
             throw new IllegalArgumentException("规则编码不可为空！");
         }
+        processDefinitionService.convertToModel(request.getContent());
         RuleFlowEntity ruleFlowEntity = new RuleFlowEntity();
         ruleFlowEntity.setId(request.getId());
         ruleFlowEntity.setKey(request.getKey());

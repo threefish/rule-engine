@@ -16,7 +16,7 @@
 package cn.xjbpm.rule.engine.runtime.actor;
 
 import cn.xjbpm.rule.engine.definition.model.Node;
-import cn.xjbpm.rule.engine.definition.model.ProcessModel;
+import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
 import lombok.Value;
 
@@ -33,14 +33,14 @@ public interface WorkflowProtocol {
     // ================= 外部 -> Master =================
     @Value
     class StartProcess {
-        ProcessModel processModel;
+        RuleFlowModel processModel;
         FlowContext flowContext;
-        Set<String> executedNodeIds;
+        Set<String> skipNodeIds;
 
-        public StartProcess(ProcessModel processModel, FlowContext flowContext, Set<String> executedNodeIds) {
+        public StartProcess(RuleFlowModel processModel, FlowContext flowContext, Set<String> skipNodeIds) {
             this.processModel = processModel;
             this.flowContext = flowContext;
-            this.executedNodeIds = executedNodeIds == null ? Collections.emptySet() : executedNodeIds;
+            this.skipNodeIds = skipNodeIds == null ? Collections.emptySet() : skipNodeIds;
         }
     }
 

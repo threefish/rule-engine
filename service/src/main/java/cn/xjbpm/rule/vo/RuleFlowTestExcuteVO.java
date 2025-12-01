@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2025 threefish.
  *
@@ -13,34 +14,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule.engine.runtime.model;
+package cn.xjbpm.rule.vo;
 
-import cn.xjbpm.rule.common.utils.TimeFormatUtil;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * date: 2025/11/21
+ * date: 2025/12/1
  */
 @Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class NodeExcution {
-    private String id;
-    private String name;
-    private String timeConsuming;
-    private long startTime;
-    private long endTime;
-    private Boolean conditionsMeet;
-    private ExecutStatus status;
-    private String errorMessage;
+public class RuleFlowTestExcuteVO {
 
-    public String getTimeConsuming() {
-        return TimeFormatUtil.formatNanosToMs(endTime - startTime);
-    }
+    /**
+     * 需要跳过的节点
+     */
+    private Set<String> skipNodeIds;
+    /**
+     * 流程定义key
+     */
+    @NotBlank
+    private String key;
+    /**
+     * 流程变量
+     */
+    @NotNull
+    private Map<String, Object> variables;
+    /**
+     * 流程定义内容
+     */
+    @NotBlank
+    private String content;
 
 }

@@ -19,7 +19,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.xjbpm.rule.RuleEngineApplication;
 import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.dto.ExcuteRuleFlowVO;
-import cn.xjbpm.rule.engine.runtime.ProcessRunService;
+import cn.xjbpm.rule.engine.runtime.RuleFlowExcuteService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.jupiter.api.MethodOrderer;
@@ -30,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StopWatch;
 
+import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -43,7 +44,7 @@ import java.util.Map;
 public class ProcessRunServiceTest {
 
     @Autowired
-    ProcessRunService processRunService;
+    RuleFlowExcuteService processRunService;
 
     @Test
     public void test() {
@@ -54,6 +55,8 @@ public class ProcessRunServiceTest {
 
     @Test
     public void startTestGrsdsjs() {
+        InputStream resourceAsStream = Main.class.getResourceAsStream("/process/个人所得税计算.json");
+        String processDefinitionContent = IoUtil.readUtf8(resourceAsStream);
         String requestJson = IoUtil.readUtf8(ProcessRunServiceTest.class.getResourceAsStream("/process/个人所得税计算_request.json"));
         Map map = JsonUtils.json2Obj(requestJson, Map.class);
         StopWatch sw = new StopWatch();
@@ -63,7 +66,8 @@ public class ProcessRunServiceTest {
                 ExcuteRuleFlowVO.Request createProcessRequest = new ExcuteRuleFlowVO.Request();
                 createProcessRequest.setKey("grsds");
                 createProcessRequest.setVariables(map);
-                ExcuteRuleFlowVO.Response result = processRunService.excute(createProcessRequest);
+                createProcessRequest.setContent(processDefinitionContent);
+                ExcuteRuleFlowVO.Response result = processRunService.startFlow(createProcessRequest);
                 System.out.println("返回：" + JsonUtils.obj2Json(result));
             } finally {
                 sw.stop();

@@ -28,6 +28,7 @@ public class FunctionActivityNodeValidator extends BaseNodeValidator<FunctionAct
     @Override
     public void check(FunctionActivityNode functionActivityNode) {
         super.check(functionActivityNode);
-        Assert.isTrue(StrUtil.isNotBlank(functionActivityNode.getCode()), "函数编码 不能为空");
+        Assert.isTrue(StrUtil.isNotBlank(functionActivityNode.getScriptType()), "脚本类型不能为空");
+        Assert.isTrue(StrUtil.isNotBlank(functionActivityNode.getScriptContent()), "脚本函数不能为空");
     }
 }

@@ -23,6 +23,7 @@ import lombok.Data;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -38,6 +39,7 @@ public class ExcuteRuleFlowVO {
          */
         @NotBlank
         private String key;
+
         /**
          * 请求ID
          */
@@ -55,6 +57,22 @@ public class ExcuteRuleFlowVO {
          * 流程定义内容
          */
         private String content;
+        /**
+         * 重试原始ID
+         */
+        private Long retryOriginId;
+        /**
+         * 重试模式
+         */
+        private boolean retryMode;
+        /**
+         * 异步执行
+         */
+        private boolean asyncExcute;
+        /**
+         * 跳过节点
+         */
+        private Set<String> skipNodeIds;
     }
 
 

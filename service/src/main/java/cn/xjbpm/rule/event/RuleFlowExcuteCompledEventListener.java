@@ -16,10 +16,8 @@
 package cn.xjbpm.rule.event;
 
 import cn.xjbpm.rule.common.utils.JsonUtils;
-import cn.xjbpm.rule.dto.ExcuteRuleFlowVO;
 import cn.xjbpm.rule.dto.ExcutingHistoryLogVO;
 import cn.xjbpm.rule.dto.RuleFlowExcuteCompledEvent;
-import cn.xjbpm.rule.engine.definition.model.ProcessModel;
 import cn.xjbpm.rule.repository.entity.RuleFlowExcuteLogEntity;
 import cn.xjbpm.rule.service.RuleFlowExcuteLogService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -49,16 +49,31 @@ public class RuleFlowExcuteCompledEventListener implements ApplicationListener<R
     public void onApplicationEvent(RuleFlowExcuteCompledEvent event) {
         try {
             ExcutingHistoryLogVO data = event.getData();
-            log.info("存储执行日志 key:{} ID:{}", data.getRuleFlowKey(), data.getId());
-            RuleFlowExcuteLogEntity log = new RuleFlowExcuteLogEntity();
-            log.setId(data.getId());
-            log.setRuleFlowKey(data.getRuleFlowKey());
-            log.setRequestId(data.getRequestId());
-            log.setTimeConsuming(data.getTimeConsuming());
-            log.setErrorMessage(data.getErrorMessage());
-            log.setSuccess(data.getSuccess());
-            log.setContent(JsonUtils.obj2Json(data));
-            ruleFlowExcuteLogService.save(log);
+            RuleFlowExcuteLogEntity logEntity = new RuleFlowExcuteLogEntity();
+            if (Objects.nonNull(data.getRetryOriginId())) {
+                logEntity = ruleFlowExcuteLogService.findById(data.getRetryOriginId());
+                if (Objects.nonNull(data.getRetryOriginId())) {
+                    log.info("更新执行日志 key:{} ID:{}", data.getRuleFlowKey(), data.getRetryOriginId());
+                    logEntity.setTimeConsuming(data.getTimeConsuming());
+                    logEntity.setErrorMessage(data.getErrorMessage());
+                    logEntity.setSuccess(data.getSuccess());
+                    logEntity.setContent(JsonUtils.obj2Json(data));
+                } else {
+                    logEntity.setId(data.getId());
+                    logEntity.setRuleFlowKey(data.getRuleFlowKey());
+                    logEntity.setRequestId(data.getRequestId());
+                }
+            } else {
+                log.info("存储执行日志 key:{} ID:{}", data.getRuleFlowKey(), data.getId());
+                logEntity.setId(data.getId());
+                logEntity.setRuleFlowKey(data.getRuleFlowKey());
+                logEntity.setRequestId(data.getRequestId());
+                logEntity.setTimeConsuming(data.getTimeConsuming());
+                logEntity.setErrorMessage(data.getErrorMessage());
+                logEntity.setSuccess(data.getSuccess());
+                logEntity.setContent(JsonUtils.obj2Json(data));
+            }
+            ruleFlowExcuteLogService.save(logEntity);
         } catch (Exception e) {
             log.error("存储执行日志出错：{}", e.getMessage(), e);
         }

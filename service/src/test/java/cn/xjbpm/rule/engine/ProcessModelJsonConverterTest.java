@@ -16,13 +16,13 @@
 package cn.xjbpm.rule.engine;
 
 import cn.xjbpm.rule.engine.definition.model.EndNode;
-import cn.xjbpm.rule.engine.definition.model.ProcessModel;
+import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
 import cn.xjbpm.rule.engine.definition.model.SequenceConnNode;
 import cn.xjbpm.rule.engine.definition.model.StartNode;
 import cn.xjbpm.rule.engine.definition.model.activity.FunctionActivityNode;
-import cn.xjbpm.rule.engine.definition.parse.ProcessModelParse;
+import cn.xjbpm.rule.engine.definition.parse.RuleFlowModelParse;
 import cn.xjbpm.rule.engine.definition.validator.ErrorNodeMsg;
-import cn.xjbpm.rule.engine.definition.validator.ProcessModelValidator;
+import cn.xjbpm.rule.engine.definition.validator.RuleFlowModelValidator;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -34,12 +34,12 @@ import java.util.List;
  */
 public class ProcessModelJsonConverterTest {
 
-    private static final ProcessModelParse PROCESS_MODEL_JSON_CONVERTER = new ProcessModelParse();
+    private static final RuleFlowModelParse PROCESS_MODEL_JSON_CONVERTER = new RuleFlowModelParse();
 
     @Test
     void convertToJson() {
 
-        ProcessModel processModel = new ProcessModel();
+        RuleFlowModel processModel = new RuleFlowModel();
         processModel.setKey("test");
         processModel.setName("测试流程");
         processModel.setDescription("测试流程");
@@ -203,9 +203,9 @@ public class ProcessModelJsonConverterTest {
                 "    ]\n" +
                 "}";
 
-        ProcessModel processModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(json);
+        RuleFlowModel processModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(json);
 
-        ProcessModelValidator processModelValidator = new ProcessModelValidator();
+        RuleFlowModelValidator processModelValidator = new RuleFlowModelValidator();
         List<ErrorNodeMsg> errorNodeMsgs = processModelValidator.check(processModel);
 
         String json2 = PROCESS_MODEL_JSON_CONVERTER.convertToJson(processModel);

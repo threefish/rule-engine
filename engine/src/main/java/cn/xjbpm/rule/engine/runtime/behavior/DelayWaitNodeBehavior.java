@@ -13,32 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule.engine.definition.model.event;
+package cn.xjbpm.rule.engine.runtime.behavior;
+
+import cn.xjbpm.rule.engine.definition.model.DelayWaitNode;
+import cn.xjbpm.rule.engine.definition.model.StartNode;
+import cn.xjbpm.rule.engine.runtime.model.FlowContext;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * date: 2022/9/29
+ * date: 2022/9/30
  */
-public enum NodeEvent {
-    /**
-     * 开始
-     */
-    START,
-    /**
-     * 完成
-     */
-    COMPLETE,
-    /**
-     * 开始重试
-     */
-    START_RETRY,
+@Slf4j
+public class DelayWaitNodeBehavior implements NodeBehavior {
 
-    /**
-     * 跳过
-     */
-    SKIP,
-    /**
-     * 失败
-     */
-    FAILED
+    private final DelayWaitNode node;
+
+    public DelayWaitNodeBehavior(DelayWaitNode node) {
+        this.node = node;
+    }
+
+    @Override
+    public void execution(FlowContext context) throws Exception {
+        Thread.sleep(node.getDelayTime());
+    }
 }

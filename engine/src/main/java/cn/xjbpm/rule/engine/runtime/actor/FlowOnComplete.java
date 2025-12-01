@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2025 threefish.
  *
@@ -13,20 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule.engine.definition.model.event;
+package cn.xjbpm.rule.engine.runtime.actor;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * date: 2022/9/29
+ * date: 2025/12/1
  */
-public enum ProcessEvent {
-    /**
-     * 开始
-     */
-    START,
-    /**
-     * 完成
-     */
-    COMPLETE,
+public interface FlowOnComplete {
 
+    void onComplete(Throwable failure);
 }
