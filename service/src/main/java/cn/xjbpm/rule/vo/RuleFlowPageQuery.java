@@ -1,5 +1,6 @@
 package cn.xjbpm.rule.vo;
 
+import cn.xjbpm.rule.repository.enums.RuleFlowStatus;
 import lombok.Data;
 
 /**
@@ -12,4 +13,5 @@ public class RuleFlowPageQuery {
 
     private String key;
     private String name;
+    private RuleFlowStatus status;
 }

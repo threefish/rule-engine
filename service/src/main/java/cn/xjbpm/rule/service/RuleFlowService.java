@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -53,18 +54,13 @@ public class RuleFlowService {
 
 
     /**
-     * 根据唯一标识 key 查找版本最高的规则流程实体。
+     * 根据Key获取规则流程实体的引用。
      *
-     * @param key 规则流程的唯一标识
-     * @return 匹配版本最高的 RuleFlowEntity，如果不存在则返回 null
+     * @param key
+     * @return
      */
-    public RuleFlowVO findByKeyAndMaxVerison(String key) {
-        RuleFlowEntity entity = ruleFlowRepository.findFirstByKeyOrderByVersionDesc(key).orElse(null);
-        return RuleFlowVO.create(entity);
-    }
-
-    public RuleFlowVO findByKeyAndVerison(String key, Integer version) {
-        RuleFlowEntity entity = ruleFlowRepository.findByKeyAndVersion(key, version).orElse(null);
+    public RuleFlowVO findByKeyAndDeployed(String key) {
+        RuleFlowEntity entity = ruleFlowRepository.findByKeyAndStatus(key, RuleFlowStatus.DEOPLOYED).orElse(null);
         return RuleFlowVO.create(entity);
     }
 
@@ -77,8 +73,8 @@ public class RuleFlowService {
      * @param name
      * @return 规则流程实体的分页结果
      */
-    public Page<RuleFlowEntity> findPage(Pageable pageable, String key, String name) {
-        return ruleFlowRepository.findLatestVersionsByFilters(key, name, pageable);
+    public Page<RuleFlowEntity> findPage(String key, String name, RuleFlowStatus status, Pageable pageable) {
+        return ruleFlowRepository.findLatestVersionsByFilters(key, name, status, pageable);
     }
 
     /**
@@ -128,8 +124,22 @@ public class RuleFlowService {
 
     @Transactional(rollbackFor = Exception.class)
     public boolean deploy(Long id) {
-        //TODO 其他已部署的低版本需要禁用或者删除
-        return ruleFlowRepository.deployById(id) > 0;
+        // 其他已部署的需要暂停
+        RuleFlowEntity baseEntity = ruleFlowRepository.findById(id).orElse(null);
+        Assert.notNull(baseEntity, "未找到ID为[" + id + "]的数据！");
+        List<RuleFlowEntity> allEntities = ruleFlowRepository.findAllByKey(baseEntity.getKey());
+        for (RuleFlowEntity entity : allEntities) {
+            if (entity.getId().equals(id)) {
+                entity.setStatus(RuleFlowStatus.DEOPLOYED);
+            } else {
+                if (entity.getStatus() == RuleFlowStatus.DEOPLOYED) {
+                    entity.setStatus(RuleFlowStatus.PAUSED);
+                }
+            }
+        }
+        ruleFlowRepository.saveAll(allEntities);
+        //TODO 事务后置处理定时启动节点
+        return true;
     }
 
     @Transactional(rollbackFor = Exception.class)

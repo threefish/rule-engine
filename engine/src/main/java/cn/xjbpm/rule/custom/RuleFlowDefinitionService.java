@@ -34,7 +34,7 @@ public interface RuleFlowDefinitionService {
     RuleFlowModelValidator RULE_FLOW_MODEL_VALIDATOR = new RuleFlowModelValidator();
 
 
-    RuleFlowModel getModel(String key, Integer version);
+    RuleFlowModel getModel(String key);
 
 
     default RuleFlowModel convertToModel(String content) {

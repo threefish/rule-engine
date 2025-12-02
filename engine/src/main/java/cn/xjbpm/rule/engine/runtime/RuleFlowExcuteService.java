@@ -72,7 +72,7 @@ public class RuleFlowExcuteService implements DisposableBean {
         if (StringUtils.hasText(request.getContent())) {
             processModel = processDefinitionService.convertToModel(request.getContent());
         } else {
-            processModel = processDefinitionService.getModel(request.getKey(), request.getVersion());
+            processModel = processDefinitionService.getModel(request.getKey());
         }
         ExcuteRuleFlowVO.Response processInstance = new ExcuteRuleFlowVO.Response();
         processInstance.setRequestId(request.getRequestId());

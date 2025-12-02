@@ -74,7 +74,7 @@ public class RuleFlowDefinitionApi {
 
     @PostMapping("/page")
     public ResultVO<PageVO<RuleFlowEntity>> findRuleFlowPage(Pageable pageable, @RequestBody RuleFlowPageQuery query) {
-        Page<RuleFlowEntity> page = ruleFlowService.findPage(pageable, query.getKey(), query.getName());
+        Page<RuleFlowEntity> page = ruleFlowService.findPage(query.getKey(), query.getName(), query.getStatus(), pageable);
         return ResultVO.success(PageVO.of(page));
     }
 }

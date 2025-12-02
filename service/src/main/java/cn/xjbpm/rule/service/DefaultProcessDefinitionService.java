@@ -17,12 +17,9 @@ package cn.xjbpm.rule.service;
 
 import cn.xjbpm.rule.custom.RuleFlowDefinitionService;
 import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
-import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
 import cn.xjbpm.rule.vo.RuleFlowVO;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -35,13 +32,8 @@ public class DefaultProcessDefinitionService implements RuleFlowDefinitionServic
     private final RuleFlowService ruleFlowService;
 
     @Override
-    public RuleFlowModel getModel(String key, Integer version) {
-        RuleFlowVO entity;
-        if (Objects.nonNull(version)) {
-            entity = ruleFlowService.findByKeyAndVerison(key, version);
-        } else {
-            entity = ruleFlowService.findByKeyAndMaxVerison(key);
-        }
+    public RuleFlowModel getModel(String key) {
+        RuleFlowVO entity = ruleFlowService.findByKeyAndDeployed(key);
         RuleFlowModel processModel = convertToModel(entity.getContent());
         processModel.setKey(entity.getKey());
         processModel.setName(entity.getName());
