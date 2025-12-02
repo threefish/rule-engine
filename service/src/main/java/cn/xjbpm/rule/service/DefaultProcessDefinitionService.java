@@ -18,6 +18,7 @@ package cn.xjbpm.rule.service;
 import cn.xjbpm.rule.custom.RuleFlowDefinitionService;
 import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
 import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
+import cn.xjbpm.rule.vo.RuleFlowVO;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +36,7 @@ public class DefaultProcessDefinitionService implements RuleFlowDefinitionServic
 
     @Override
     public RuleFlowModel getModel(String key, Integer version) {
-        RuleFlowEntity entity;
+        RuleFlowVO entity;
         if (Objects.nonNull(version)) {
             entity = ruleFlowService.findByKeyAndVerison(key, version);
         } else {

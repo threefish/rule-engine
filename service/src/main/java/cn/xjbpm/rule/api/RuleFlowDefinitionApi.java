@@ -18,13 +18,11 @@ package cn.xjbpm.rule.api;
 import cn.xjbpm.rule.custom.RuleFlowDefinitionService;
 import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
 import cn.xjbpm.rule.service.RuleFlowService;
-import cn.xjbpm.rule.vo.IDRequestVO;
-import cn.xjbpm.rule.vo.ResultVO;
-import cn.xjbpm.rule.vo.RuleFlowPageQuery;
-import cn.xjbpm.rule.vo.RuleFlowVO;
+import cn.xjbpm.rule.vo.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,40 +42,39 @@ public class RuleFlowDefinitionApi {
     private final RuleFlowDefinitionService processDefinitionService;
 
     @PostMapping("/save")
-    public ResultVO<String> save(@Validated @RequestBody RuleFlowVO request) {
+    public ResultVO<Long> save(@Validated @RequestBody RuleFlowVO request) {
         if (request == null || request.getKey() == null) {
             throw new IllegalArgumentException("规则编码不可为空！");
         }
         processDefinitionService.convertToModel(request.getContent());
-        RuleFlowEntity ruleFlowEntity = new RuleFlowEntity();
-        ruleFlowEntity.setId(request.getId());
-        ruleFlowEntity.setKey(request.getKey());
-        ruleFlowEntity.setName(request.getName());
-        ruleFlowEntity.setDescription(request.getDescription());
-        ruleFlowEntity.setContent(request.getContent());
-        ruleFlowEntity.setVersion(request.getVersion());
-        RuleFlowEntity entity = ruleFlowService.saveOrUpdate(ruleFlowEntity);
-        return ResultVO.success(String.valueOf(entity.getId()));
+        Long id;
+        if (request.getNewVersion() == true) {
+            Assert.notNull(request.getId(), "ID不能为空！");
+            id = ruleFlowService.saveNewVersion(request);
+        } else {
+            id = ruleFlowService.saveOrUpdateNoDeployed(request);
+        }
+        return ResultVO.success(id);
+    }
+
+    @PostMapping("/deploy")
+    public ResultVO<Boolean> deploy(@Validated @RequestBody IDRequestVO request) {
+        return ResultVO.success(ruleFlowService.deploy(request.getId()));
+    }
+
+    @PostMapping("/paused")
+    public ResultVO<Boolean> paused(@Validated @RequestBody IDRequestVO request) {
+        return ResultVO.success(ruleFlowService.paused(request.getId()));
     }
 
     @PostMapping("/get")
-    public ResultVO<RuleFlowVO> save(@Validated @RequestBody IDRequestVO request) {
-        RuleFlowEntity entity = ruleFlowService.findById(request.getId());
-        if (entity == null) {
-            return ResultVO.fail("未找到规则定义");
-        }
-        RuleFlowVO vo = new RuleFlowVO();
-        vo.setId(entity.getId());
-        vo.setKey(entity.getKey());
-        vo.setName(entity.getName());
-        vo.setDescription(entity.getDescription());
-        vo.setContent(entity.getContent());
-        vo.setVersion(entity.getVersion());
-        return ResultVO.success(vo);
+    public ResultVO<RuleFlowVO> get(@Validated @RequestBody IDRequestVO request) {
+        return ResultVO.success(ruleFlowService.findById(request.getId()));
     }
 
     @PostMapping("/page")
-    public ResultVO<Page<RuleFlowEntity>> findRuleFlowPage(Pageable pageable, @RequestBody RuleFlowPageQuery query) {
-        return ResultVO.success(ruleFlowService.findPage(pageable, query.getKey(), query.getName()));
+    public ResultVO<PageVO<RuleFlowEntity>> findRuleFlowPage(Pageable pageable, @RequestBody RuleFlowPageQuery query) {
+        Page<RuleFlowEntity> page = ruleFlowService.findPage(pageable, query.getKey(), query.getName());
+        return ResultVO.success(PageVO.of(page));
     }
 }

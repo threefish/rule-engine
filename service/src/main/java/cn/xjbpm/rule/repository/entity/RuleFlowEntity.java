@@ -15,6 +15,7 @@
  */
 package cn.xjbpm.rule.repository.entity;
 
+import cn.xjbpm.rule.repository.enums.RuleFlowStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -31,8 +32,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(
         name = "rule_flow",
-        indexes = {
-                @Index(name = "idx_rule_flow_key", columnList = "flow_key", unique = true)
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uc_flow_key_version", columnNames = {"flow_key", "version"})
         }
 )
 @Data
@@ -67,6 +68,13 @@ public class RuleFlowEntity {
      */
     @Column(name = "description", length = 200)
     private String description;
+
+    /**
+     * 状态
+     */
+    @Column(name = "status", columnDefinition = "varchar(10)  not null default 'UNDEPLOYED'")
+    @Enumerated(EnumType.STRING)
+    private RuleFlowStatus status;
 
     /**
      * 规则流程内容（大文本字段）

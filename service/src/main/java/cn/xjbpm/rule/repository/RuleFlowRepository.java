@@ -19,6 +19,9 @@ import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -58,31 +61,56 @@ public interface RuleFlowRepository extends JpaRepository<RuleFlowEntity, Long> 
 
 
     /**
-     * 根据 key 进行精确匹配分页查询
+     * 【分页查询 - 仅最新版本】
+     * 查找每个 key 下版本号最大的实体，并支持按 key (精确) 和 name (模糊) 过滤。
+     * 该查询用于列表展示，确保每个规则流仅显示其最新版本。
      *
-     * @param key      规则流程的唯一标识 (精确匹配)
+     * @param key      规则流程的唯一标识 (精确匹配，可选)
+     * @param name     规则流程的名称 (模糊匹配，可选)
      * @param pageable 分页信息
-     * @return 分页结果
+     * @return 仅包含最新版本规则流程实体的分页结果
      */
-    Page<RuleFlowEntity> findByKey(String key, Pageable pageable);
+    @Query("SELECT l FROM RuleFlowEntity l WHERE l.version = (" +
+            "  SELECT MAX(sub.version) FROM RuleFlowEntity sub WHERE sub.key = l.key" +
+            ") AND (:key IS NULL OR :key = '' OR l.key = :key) " +
+            "  AND (:name IS NULL OR :name = '' OR l.name LIKE CONCAT('%', :name, '%'))")
+    Page<RuleFlowEntity> findLatestVersionsByFilters(
+            @Param("key") String key,
+            @Param("name") String name,
+            Pageable pageable
+    );
 
     /**
-     * 仅根据 name 进行模糊匹配分页查询
-     * 使用 Containing 实现 LIKE %name% 模糊查询
+     * 部署规则流程
      *
-     * @param name     规则流程的名称 (模糊匹配)
-     * @param pageable 分页信息
-     * @return 分页结果
+     * @param id
+     * @return
      */
-    Page<RuleFlowEntity> findByNameContaining(String name, Pageable pageable);
+    @Modifying
+    @Query("UPDATE RuleFlowEntity l SET l.status = 'DEOPLOYED' " +
+            "WHERE l.id = :id")
+    int deployById(@Param("id") Long id);
+
 
     /**
-     * 同时根据 key 精确匹配 AND name 模糊匹配进行分页查询
+     * 部署规则流程
      *
-     * @param key      规则流程的唯一标识 (精确匹配)
-     * @param name     规则流程的名称 (模糊匹配)
-     * @param pageable 分页信息
-     * @return 分页结果
+     * @param id
+     * @return
      */
-    Page<RuleFlowEntity> findByKeyAndNameContaining(String key, String name, Pageable pageable);
+    @Modifying
+    @Query("UPDATE RuleFlowEntity l SET l.status = 'PAUSED' " +
+            "WHERE l.id = :id")
+    int pausedById(@Param("id") Long id);
+
+
+    /**
+     * 根据规则流程的唯一标识 key 查找最大版本号。
+     * 使用 JPQL 的 MAX() 聚合函数。
+     *
+     * @param key 规则流程的唯一标识
+     * @return 最大版本号
+     */
+    @Query("SELECT MAX(l.version) FROM RuleFlowEntity l WHERE l.key = :key")
+    Integer findMaxVersionByKey(@Param("key") String key);
 }

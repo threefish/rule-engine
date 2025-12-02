@@ -15,6 +15,8 @@
  */
 package cn.xjbpm.rule.vo;
 
+import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
+import cn.xjbpm.rule.repository.enums.RuleFlowStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -41,6 +43,26 @@ public class RuleFlowVO {
     private String content;
 
     private Integer version;
+
+    private RuleFlowStatus status;
+
+    private Boolean newVersion;
+
+
+    public static RuleFlowVO create(RuleFlowEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        RuleFlowVO vo = new RuleFlowVO();
+        vo.setId(entity.getId());
+        vo.setKey(entity.getKey());
+        vo.setName(entity.getName());
+        vo.setDescription(entity.getDescription());
+        vo.setContent(entity.getContent());
+        vo.setVersion(entity.getVersion());
+        vo.setStatus(entity.getStatus());
+        return vo;
+    }
 
 
 }

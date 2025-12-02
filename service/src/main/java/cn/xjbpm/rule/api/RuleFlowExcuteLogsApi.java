@@ -24,10 +24,7 @@ import cn.xjbpm.rule.engine.runtime.model.ExecutStatus;
 import cn.xjbpm.rule.engine.runtime.model.NodeExcution;
 import cn.xjbpm.rule.repository.entity.RuleFlowExcuteLogEntity;
 import cn.xjbpm.rule.service.RuleFlowExcuteLogService;
-import cn.xjbpm.rule.vo.IDRequestVO;
-import cn.xjbpm.rule.vo.ResultVO;
-import cn.xjbpm.rule.vo.RetryRuleFlowVO;
-import cn.xjbpm.rule.vo.RuleFlowExcuteLogsPageQuery;
+import cn.xjbpm.rule.vo.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -54,8 +51,9 @@ public class RuleFlowExcuteLogsApi {
 
 
     @PostMapping("/page")
-    public ResultVO<Page<RuleFlowExcuteLogEntity>> findRuleFlowPage(Pageable pageable, @RequestBody RuleFlowExcuteLogsPageQuery query) {
-        return ResultVO.success(ruleFlowExcuteLogService.findPage(pageable, query.getRuleFlowKey(), query.getRequestId()));
+    public ResultVO<PageVO<RuleFlowExcuteLogEntity>> findRuleFlowPage(Pageable pageable, @RequestBody RuleFlowExcuteLogsPageQuery query) {
+        Page<RuleFlowExcuteLogEntity> page = ruleFlowExcuteLogService.findPage(pageable, query.getRuleFlowKey(), query.getRequestId());
+        return ResultVO.success(PageVO.of(page));
     }
 
     @PostMapping("/detail")
