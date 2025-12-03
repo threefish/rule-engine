@@ -15,17 +15,24 @@
  */
 package cn.xjbpm.rule.service;
 
+import cn.xjbpm.rule.listenner.event.RemoveRuleFlowCacheEvent;
 import cn.xjbpm.rule.repository.RuleFlowRepository;
 import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
 import cn.xjbpm.rule.repository.enums.RuleFlowStatus;
+import cn.xjbpm.rule.utils.JpaUtil;
+import cn.xjbpm.rule.utils.TransactionOptDelayerHolder;
 import cn.xjbpm.rule.vo.RuleFlowVO;
+import jakarta.persistence.criteria.Predicate;
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -39,6 +46,7 @@ import java.util.Objects;
 public class RuleFlowService {
 
     private final RuleFlowRepository ruleFlowRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
 
     /**
@@ -74,8 +82,22 @@ public class RuleFlowService {
      * @return 规则流程实体的分页结果
      */
     public Page<RuleFlowEntity> findPage(String key, String name, RuleFlowStatus status, Pageable pageable) {
-        return ruleFlowRepository.findLatestVersionsByFilters(key, name, status, pageable);
+        Specification<RuleFlowEntity> specification = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (StringUtils.hasText(key)) {
+                predicates.add(criteriaBuilder.equal(JpaUtil.field(root, RuleFlowEntity::getKey), key));
+            }
+            if (StringUtils.hasText(name)) {
+                predicates.add(criteriaBuilder.like(JpaUtil.field(root, RuleFlowEntity::getName), "%" + name + "%"));
+            }
+            if (status != null) {
+                predicates.add(criteriaBuilder.equal(JpaUtil.field(root, RuleFlowEntity::getStatus), status));
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+        return ruleFlowRepository.findAll(specification, pageable);
     }
+
 
     /**
      * @param request 待保存或更新的 RuleFlowEntity
@@ -88,16 +110,15 @@ public class RuleFlowService {
         Long id;
         if (request.getId() == null) {
             // 必须检查版本0是否已存在，以避免联合唯一约束冲突。
-            RuleFlowEntity existingV0 = ruleFlowRepository.findByKeyAndVersion(request.getKey(), 0).orElse(null);
-            if (existingV0 != null) {
+            RuleFlowEntity flowEntity = ruleFlowRepository.findByKey(request.getKey()).orElse(null);
+            if (flowEntity != null) {
                 throw new IllegalArgumentException(String.format("规则流编码[%s]已存在！", request.getKey()));
             }
             RuleFlowEntity entity = new RuleFlowEntity();
             entity.setKey(request.getKey());
             entity.setName(request.getName());
             entity.setDescription(request.getDescription());
-            entity.setContent(request.getContent());
-            entity.setVersion(0); // 版本强制从0开始
+            entity.setDraftContent(request.getDraftContent());
             entity.setStatus(RuleFlowStatus.UNDEPLOYED);
             ruleFlowRepository.save(entity);
             id = entity.getId();
@@ -109,13 +130,9 @@ public class RuleFlowService {
             if (!oldEntity.getKey().equals(request.getKey())) {
                 throw new IllegalArgumentException(String.format("规则流编码[%s]是不可变的,不能修改为[%s]！", oldEntity.getKey(), request.getKey()));
             }
-            // 检查状态是否允许修改
-            if (oldEntity.getStatus() == RuleFlowStatus.DEOPLOYED || oldEntity.getStatus() == RuleFlowStatus.PAUSED) {
-                throw new IllegalArgumentException("当前规则流已部署或暂停！不允许直接修改此版本！");
-            }
             oldEntity.setName(request.getName());
             oldEntity.setDescription(request.getDescription());
-            oldEntity.setContent(request.getContent());
+            oldEntity.setDraftContent(request.getDraftContent());
             ruleFlowRepository.save(oldEntity);
             id = oldEntity.getId();
         }
@@ -123,51 +140,28 @@ public class RuleFlowService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public boolean deploy(Long id) {
-        // 其他已部署的需要暂停
+    public boolean deployById(Long id) {
         RuleFlowEntity baseEntity = ruleFlowRepository.findById(id).orElse(null);
-        Assert.notNull(baseEntity, "未找到ID为[" + id + "]的数据！");
-        List<RuleFlowEntity> allEntities = ruleFlowRepository.findAllByKey(baseEntity.getKey());
-        for (RuleFlowEntity entity : allEntities) {
-            if (entity.getId().equals(id)) {
-                entity.setStatus(RuleFlowStatus.DEOPLOYED);
-            } else {
-                if (entity.getStatus() == RuleFlowStatus.DEOPLOYED) {
-                    entity.setStatus(RuleFlowStatus.PAUSED);
-                }
-            }
+        if (Objects.nonNull(baseEntity)) {
+            baseEntity.setContent(baseEntity.getDraftContent());
+            baseEntity.setStatus(RuleFlowStatus.DEOPLOYED);
+            ruleFlowRepository.save(baseEntity);
+            // TODO 处理定时启动节点
+            TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> applicationEventPublisher.publishEvent(RemoveRuleFlowCacheEvent.create(baseEntity.getKey())));
         }
-        ruleFlowRepository.saveAll(allEntities);
-        //TODO 事务后置处理定时启动节点
         return true;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public boolean paused(Long id) {
-        return ruleFlowRepository.pausedById(id) > 0;
+    public boolean disableById(Long id) {
+        RuleFlowEntity baseEntity = ruleFlowRepository.findById(id).orElse(null);
+        if (Objects.nonNull(baseEntity)) {
+            TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> applicationEventPublisher.publishEvent(RemoveRuleFlowCacheEvent.create(baseEntity.getKey())));
+            baseEntity.setStatus(RuleFlowStatus.DISABLED);
+            ruleFlowRepository.save(baseEntity);
+            return true;
+        }
+        return false;
     }
 
-    /**
-     * @param request 包含要复制的版本ID和新版本内容的请求
-     * @return 新创建的实体ID
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public Long saveNewVersion(RuleFlowVO request) {
-        RuleFlowEntity baseEntity = ruleFlowRepository.findById(request.getId()).orElse(null);
-        Assert.notNull(baseEntity, "未找到ID为[" + request.getId() + "]的数据！");
-        Integer version = ruleFlowRepository.findMaxVersionByKey(baseEntity.getKey());
-        RuleFlowEntity maxEntity = ruleFlowRepository.findByKeyAndVersion(baseEntity.getKey(), version).orElse(null);
-        if (Objects.nonNull(maxEntity) && maxEntity.getStatus() == RuleFlowStatus.UNDEPLOYED) {
-            throw new IllegalArgumentException(String.format("当前不是[%s]的最新版本，请返回首页重新进入页面进行规则流编辑！", baseEntity.getKey()));
-        }
-        RuleFlowEntity entity = new RuleFlowEntity();
-        entity.setKey(baseEntity.getKey());
-        entity.setName(request.getName());
-        entity.setDescription(request.getDescription());
-        entity.setContent(request.getContent());
-        entity.setVersion(version + 1);
-        entity.setStatus(RuleFlowStatus.UNDEPLOYED);
-        ruleFlowRepository.save(entity);
-        return entity.getId();
-    }
 }

@@ -39,15 +39,12 @@ public class RuleFlowVO {
 
     private String description;
 
-    @NotBlank
     private String content;
 
-    private Integer version;
+    @NotBlank
+    private String draftContent;
 
     private RuleFlowStatus status;
-
-    private Boolean newVersion;
-
 
     public static RuleFlowVO create(RuleFlowEntity entity) {
         if (entity == null) {
@@ -59,7 +56,7 @@ public class RuleFlowVO {
         vo.setName(entity.getName());
         vo.setDescription(entity.getDescription());
         vo.setContent(entity.getContent());
-        vo.setVersion(entity.getVersion());
+        vo.setDraftContent(entity.getDraftContent() == null ? entity.getContent() : entity.getDraftContent());
         vo.setStatus(entity.getStatus());
         return vo;
     }

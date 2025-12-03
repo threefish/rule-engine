@@ -81,7 +81,7 @@ public class RuleFlowExcuteLogsApi {
         request.setRetryOriginId(entity.getId());
         request.setAsyncExcute(true);
         request.setContent(vo.getRuleFlowOriginalJson());
-        if (query.getUseLatest() == true) {
+        if (query.getUseLatest()) {
             request.setContent(null);
         }
         return ResultVO.success(processRunService.startFlow(request));

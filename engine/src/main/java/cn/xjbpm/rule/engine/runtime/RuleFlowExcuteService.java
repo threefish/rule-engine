@@ -20,7 +20,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.common.constant.RuleFlowConstant;
 import cn.xjbpm.rule.common.utils.VariableTranslateUtils;
-import cn.xjbpm.rule.custom.RuleFlowDefinitionService;
+import cn.xjbpm.rule.custom.RuleFlowModelCacheService;
 import cn.xjbpm.rule.dto.ExcuteRuleFlowVO;
 import cn.xjbpm.rule.dto.ExcutingHistoryLogVO;
 import cn.xjbpm.rule.dto.RuleFlowExcuteCompledEvent;
@@ -49,7 +49,7 @@ import java.util.Objects;
 public class RuleFlowExcuteService implements DisposableBean {
 
 
-    private final RuleFlowDefinitionService processDefinitionService;
+    private final RuleFlowModelCacheService ruleFlowModelCacheService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     private final ActorSystem actorSystem = ActorSystem.create("rule-engine");
@@ -70,9 +70,9 @@ public class RuleFlowExcuteService implements DisposableBean {
         Assert.isTrue(StrUtil.isNotBlank(request.getKey()), "规则编码不能为空");
         RuleFlowModel processModel;
         if (StringUtils.hasText(request.getContent())) {
-            processModel = processDefinitionService.convertToModel(request.getContent());
+            processModel = ruleFlowModelCacheService.convertToModel(request.getContent());
         } else {
-            processModel = processDefinitionService.getModel(request.getKey());
+            processModel = ruleFlowModelCacheService.getModel(request.getKey());
         }
         ExcuteRuleFlowVO.Response processInstance = new ExcuteRuleFlowVO.Response();
         processInstance.setRequestId(request.getRequestId());

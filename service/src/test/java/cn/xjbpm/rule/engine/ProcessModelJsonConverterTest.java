@@ -52,7 +52,7 @@ public class ProcessModelJsonConverterTest {
         FunctionActivityNode fun1 = new FunctionActivityNode();
         fun1.setId("f1");
         fun1.setName("函数1节点");
-        fun1.setCode("FUN001");
+        fun1.setId("FUN001");
 
 
         EndNode endNode = new EndNode();

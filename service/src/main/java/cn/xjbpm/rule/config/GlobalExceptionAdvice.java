@@ -63,38 +63,6 @@ public class GlobalExceptionAdvice {
         return ResultVO.fail(getErrorMsg(ex));
     }
 
-
-    /**
-     * 方法参数校验失败异常
-     */
-    @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    @ResponseBody
-    public ResultVO methodArgumentNotValidException(MethodArgumentNotValidException ex) {
-        List<ObjectError> errors = ex.getBindingResult().getAllErrors();
-        List<String> errorMessage = new ArrayList<>();
-        for (ObjectError error : errors) {
-            if (error instanceof FieldError) {
-                FieldError fillerError = (FieldError) error;
-                String field = fillerError.getField();
-                errorMessage.add(String.format("[%s]%s", field, fillerError.getDefaultMessage()));
-            } else {
-                errorMessage.add(String.format("%s", error.getDefaultMessage()));
-            }
-        }
-        return ResultVO.fail(HttpStatus.BAD_REQUEST.value(), String.join("!", errorMessage));
-    }
-
-
-    /**
-     * 方法参数校验失败异常
-     */
-    @ExceptionHandler(value = IllegalArgumentException.class)
-    @ResponseBody
-    public ResultVO methodArgumentNotValidException(IllegalArgumentException ex) {
-        return ResultVO.fail(ex.getMessage());
-    }
-
-
     /**
      * 取得异常message
      *
@@ -123,5 +91,34 @@ public class GlobalExceptionAdvice {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * 方法参数校验失败异常
+     */
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    @ResponseBody
+    public ResultVO methodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        List<ObjectError> errors = ex.getBindingResult().getAllErrors();
+        List<String> errorMessage = new ArrayList<>();
+        for (ObjectError error : errors) {
+            if (error instanceof FieldError) {
+                FieldError fillerError = (FieldError) error;
+                String field = fillerError.getField();
+                errorMessage.add(String.format("[%s]%s", field, fillerError.getDefaultMessage()));
+            } else {
+                errorMessage.add(String.format("%s", error.getDefaultMessage()));
+            }
+        }
+        return ResultVO.fail(HttpStatus.BAD_REQUEST.value(), String.join("!", errorMessage));
+    }
+
+    /**
+     * 方法参数校验失败异常
+     */
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    @ResponseBody
+    public ResultVO methodArgumentNotValidException(IllegalArgumentException ex) {
+        return ResultVO.fail(ex.getMessage());
     }
 }

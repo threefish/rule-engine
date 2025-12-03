@@ -15,14 +15,13 @@
  */
 package cn.xjbpm.rule.api;
 
-import cn.xjbpm.rule.custom.RuleFlowDefinitionService;
+import cn.xjbpm.rule.custom.RuleFlowModelCacheService;
 import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
 import cn.xjbpm.rule.service.RuleFlowService;
 import cn.xjbpm.rule.vo.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,32 +38,25 @@ public class RuleFlowDefinitionApi {
 
     private final RuleFlowService ruleFlowService;
 
-    private final RuleFlowDefinitionService processDefinitionService;
+    private final RuleFlowModelCacheService ruleFlowModelCacheService;
 
     @PostMapping("/save")
     public ResultVO<Long> save(@Validated @RequestBody RuleFlowVO request) {
         if (request == null || request.getKey() == null) {
             throw new IllegalArgumentException("规则编码不可为空！");
         }
-        processDefinitionService.convertToModel(request.getContent());
-        Long id;
-        if (request.getNewVersion() == true) {
-            Assert.notNull(request.getId(), "ID不能为空！");
-            id = ruleFlowService.saveNewVersion(request);
-        } else {
-            id = ruleFlowService.saveOrUpdateNoDeployed(request);
-        }
-        return ResultVO.success(id);
+        ruleFlowModelCacheService.convertToModel(request.getDraftContent());
+        return ResultVO.success(ruleFlowService.saveOrUpdateNoDeployed(request));
     }
 
     @PostMapping("/deploy")
     public ResultVO<Boolean> deploy(@Validated @RequestBody IDRequestVO request) {
-        return ResultVO.success(ruleFlowService.deploy(request.getId()));
+        return ResultVO.success(ruleFlowService.deployById(request.getId()));
     }
 
-    @PostMapping("/paused")
-    public ResultVO<Boolean> paused(@Validated @RequestBody IDRequestVO request) {
-        return ResultVO.success(ruleFlowService.paused(request.getId()));
+    @PostMapping("/disable")
+    public ResultVO<Boolean> disable(@Validated @RequestBody IDRequestVO request) {
+        return ResultVO.success(ruleFlowService.disableById(request.getId()));
     }
 
     @PostMapping("/get")

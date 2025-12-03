@@ -19,6 +19,7 @@ import cn.xjbpm.rule.repository.enums.RuleFlowStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -37,6 +38,7 @@ import java.time.LocalDateTime;
         }
 )
 @Data
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class RuleFlowEntity {
 
@@ -56,12 +58,6 @@ public class RuleFlowEntity {
      */
     @Column(name = "name", nullable = false, length = 20)
     private String name;
-
-    /**
-     * 版本, 默认0
-     */
-    @Column(name = "version", nullable = false)
-    private Integer version = 0;
 
     /**
      * 描述（200字）
@@ -84,6 +80,13 @@ public class RuleFlowEntity {
     private String content;
 
     /**
+     * 规则流程内容（草稿大文本字段）
+     */
+    @Lob
+    @Column(name = "draft_content", columnDefinition = "LONGTEXT")
+    private String draftContent;
+
+    /**
      * 创建时间，自动填充
      */
     @Column(name = "create_time", nullable = false)
@@ -100,4 +103,13 @@ public class RuleFlowEntity {
     private LocalDateTime updateTime;
 
 
+    public RuleFlowEntity(Long id, String key, String name, String description, RuleFlowStatus status, LocalDateTime createTime, LocalDateTime updateTime) {
+        this.id = id;
+        this.key = key;
+        this.name = name;
+        this.description = description;
+        this.status = status;
+        this.createTime = createTime;
+        this.updateTime = updateTime;
+    }
 }

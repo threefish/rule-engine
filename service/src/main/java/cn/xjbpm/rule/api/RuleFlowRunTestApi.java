@@ -17,7 +17,6 @@
 package cn.xjbpm.rule.api;
 
 import cn.hutool.core.util.IdUtil;
-import cn.xjbpm.rule.custom.RuleFlowDefinitionService;
 import cn.xjbpm.rule.dto.ExcuteRuleFlowVO;
 import cn.xjbpm.rule.engine.runtime.RuleFlowExcuteService;
 import cn.xjbpm.rule.vo.ResultVO;

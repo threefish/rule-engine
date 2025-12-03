@@ -11,11 +11,11 @@ import lombok.Getter;
 @Getter
 public enum RuleFlowStatus {
 
-    DEOPLOYED("已发布"),
+    DEOPLOYED("已部署"),
 
-    UNDEPLOYED("未发布"),
+    UNDEPLOYED("未部署"),
 
-    PAUSED("暂停");
+    DISABLED("已禁用");
 
     String name;
 }

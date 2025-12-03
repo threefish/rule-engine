@@ -19,6 +19,7 @@ import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
 import cn.xjbpm.rule.engine.definition.parse.RuleFlowModelParse;
 import cn.xjbpm.rule.engine.definition.validator.ErrorNodeMsg;
 import cn.xjbpm.rule.engine.definition.validator.RuleFlowModelValidator;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ import java.util.List;
  * @author 黄川 huchuc@vip.qq.com
  * date: 2025/11/22
  */
-public interface RuleFlowDefinitionService {
+public interface RuleFlowModelCacheService {
 
     RuleFlowModelParse RULE_FLOW_MODEL_PARSE = new RuleFlowModelParse();
     RuleFlowModelValidator RULE_FLOW_MODEL_VALIDATOR = new RuleFlowModelValidator();
@@ -47,6 +48,7 @@ public interface RuleFlowDefinitionService {
             }
             throw new RuntimeException(String.join("\n", errors));
         }
+        Assert.notNull(ruleFlowMode.getStartNode(), "开始节点不可为空！");
         return ruleFlowMode;
     }
 }
