@@ -17,14 +17,19 @@ package cn.xjbpm.rule.api;
 
 import cn.hutool.core.util.IdUtil;
 import cn.xjbpm.rule.common.utils.JsonUtils;
-import cn.xjbpm.rule.dto.ExcuteRuleFlowVO;
+import cn.xjbpm.rule.dto.ExcuteRuleFlow;
+import cn.xjbpm.rule.dto.ExcuteRuleFlowResult;
 import cn.xjbpm.rule.dto.ExcutingHistoryLogVO;
 import cn.xjbpm.rule.engine.runtime.RuleFlowExcuteService;
 import cn.xjbpm.rule.engine.runtime.model.ExecutStatus;
 import cn.xjbpm.rule.engine.runtime.model.NodeExcution;
 import cn.xjbpm.rule.repository.entity.RuleFlowExcuteLogEntity;
 import cn.xjbpm.rule.service.RuleFlowExcuteLogService;
-import cn.xjbpm.rule.vo.*;
+import cn.xjbpm.rule.vo.common.IDRequestVO;
+import cn.xjbpm.rule.vo.common.PageVO;
+import cn.xjbpm.rule.vo.common.ResultVO;
+import cn.xjbpm.rule.vo.log.RetryRuleFlowVO;
+import cn.xjbpm.rule.vo.query.RuleFlowExcuteLogsPageQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -44,36 +50,33 @@ import java.util.Set;
 @RestController()
 @RequestMapping("/manage/ruleflow/logs")
 @RequiredArgsConstructor
-public class RuleFlowExcuteLogsApi {
+public class RuleFlowExcuteLogsManageApi {
 
     private final RuleFlowExcuteService processRunService;
     private final RuleFlowExcuteLogService ruleFlowExcuteLogService;
 
 
     @PostMapping("/page")
-    public ResultVO<PageVO<RuleFlowExcuteLogEntity>> findRuleFlowPage(Pageable pageable, @RequestBody RuleFlowExcuteLogsPageQuery query) {
+    public ResultVO<PageVO<RuleFlowExcuteLogEntity>> page(Pageable pageable, @RequestBody RuleFlowExcuteLogsPageQuery query) {
         Page<RuleFlowExcuteLogEntity> page = ruleFlowExcuteLogService.findPage(pageable, query.getRuleFlowKey(), query.getRequestId());
         return ResultVO.success(PageVO.of(page));
     }
 
     @PostMapping("/detail")
-    public ResultVO<RuleFlowExcuteLogEntity> findRuleFlowDetail(@Validated @RequestBody IDRequestVO query) {
+    public ResultVO<RuleFlowExcuteLogEntity> detail(@Validated @RequestBody IDRequestVO query) {
         return ResultVO.success(ruleFlowExcuteLogService.findById(query.getId()));
     }
 
     @PostMapping("/retryFlowAsync")
-    public ResultVO<ExcuteRuleFlowVO.Response> retryFlowAsync(@Validated @RequestBody RetryRuleFlowVO query) {
+    public ResultVO<ExcuteRuleFlowResult> retryFlowAsync(@Validated @RequestBody RetryRuleFlowVO query) {
         RuleFlowExcuteLogEntity entity = ruleFlowExcuteLogService.findById(query.getId());
         String content = entity.getContent();
         ExcutingHistoryLogVO vo = JsonUtils.json2Obj(content, ExcutingHistoryLogVO.class);
-        Map<String, NodeExcution> nodeExcutions = vo.getNodeExcutions();
-        Set<String> nodes = new HashSet<>();
-        nodeExcutions.forEach((id, nodeExcution) -> {
-            if (nodeExcution.getStatus() == ExecutStatus.SUCCESS) {
-                nodes.add(id);
-            }
-        });
-        ExcuteRuleFlowVO.Request request = new ExcuteRuleFlowVO.Request();
+        Set<String> nodes = vo.getNodeExcutions().entrySet().stream()
+                .filter(entry -> entry.getValue().getStatus() == ExecutStatus.SUCCESS)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+        ExcuteRuleFlow request = new ExcuteRuleFlow();
         request.setRequestId(IdUtil.getSnowflakeNextIdStr());
         request.setVariables(vo.getRequest());
         request.setKey(vo.getRuleFlowKey());

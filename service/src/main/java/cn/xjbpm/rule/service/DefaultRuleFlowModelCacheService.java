@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author 黄川 huchuc@vip.qq.com
  * date: 2025/11/22
+ * 规则流缓存服务（集群部署时请使用分布式缓存）
  */
 @Service
 @AllArgsConstructor

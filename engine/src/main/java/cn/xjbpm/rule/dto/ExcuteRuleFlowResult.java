@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cn.xjbpm.rule.dto;
 
 import cn.xjbpm.rule.engine.runtime.model.NodeExcution;
@@ -27,30 +28,26 @@ import java.util.Set;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * date: 2025/11/20
+ * date: 2025/12/5
  */
-public class ExcuteRuleFlowVO {
+@Data
+public class ExcuteRuleFlowResult {
 
+    private Long id;
 
-    @Data
-    public static class Response {
+    private String requestId;
 
-        private Long id;
+    private String ruleFlowKey;
 
-        private String requestId;
+    private Map<String, Object> response;
 
-        private String ruleFlowKey;
+    private long timeConsuming;
 
-        private Map<String, Object> response;
+    private Boolean success;
 
-        private long timeConsuming;
+    private String errorMessage;
 
-        private Boolean success;
+    private List<TraceLog> traceLogs;
 
-        private String errorMessage;
-
-        private List<TraceLog> traceLogs;
-
-        private Map<String, NodeExcution> nodeExcutions;
-    }
+    private Map<String, NodeExcution> nodeExcutions;
 }

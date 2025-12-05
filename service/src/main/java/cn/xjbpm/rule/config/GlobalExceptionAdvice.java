@@ -16,7 +16,7 @@
 package cn.xjbpm.rule.config;
 
 import cn.hutool.core.util.StrUtil;
-import cn.xjbpm.rule.vo.ResultVO;
+import cn.xjbpm.rule.vo.common.ResultVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;

@@ -125,10 +125,10 @@
 
 ProcessRunService processRunService = ...; // 获取服务实例
 Map<String, Object> variables = new HashMap<>(); // 设置输入变量
-ExcuteRuleFlowVO.Request createProcessRequest = new ExcuteRuleFlowVO.Request();  
+ExcuteRuleFlow createProcessRequest = new ExcuteRuleFlow();  
 createProcessRequest.setKey("myRuleKey");  
 createProcessRequest.setVariables(map);  
-ExcuteRuleFlowVO.Response result = processRunService.excute(createProcessRequest);
+ExcuteRuleFlowResult result = processRunService.excute(createProcessRequest);
 
 ```
 

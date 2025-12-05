@@ -17,10 +17,11 @@
 package cn.xjbpm.rule.api;
 
 import cn.hutool.core.util.IdUtil;
-import cn.xjbpm.rule.dto.ExcuteRuleFlowVO;
+import cn.xjbpm.rule.dto.ExcuteRuleFlow;
+import cn.xjbpm.rule.dto.ExcuteRuleFlowResult;
 import cn.xjbpm.rule.engine.runtime.RuleFlowExcuteService;
-import cn.xjbpm.rule.vo.ResultVO;
-import cn.xjbpm.rule.vo.RuleFlowTestExcuteVO;
+import cn.xjbpm.rule.vo.common.ResultVO;
+import cn.xjbpm.rule.vo.excute.RuleFlowTestExcuteVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -36,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/manage/ruleflow/test")
 @RequiredArgsConstructor
 @Slf4j
-public class RuleFlowRunTestApi {
+public class RuleFlowRunTestManageApi {
 
     private final RuleFlowExcuteService processRunService;
 
@@ -47,9 +48,9 @@ public class RuleFlowRunTestApi {
      * @return
      */
     @PostMapping("/excute")
-    public ResultVO<ExcuteRuleFlowVO.Response> testExcute(@Validated @RequestBody RuleFlowTestExcuteVO request) {
+    public ResultVO<ExcuteRuleFlowResult> testExcute(@Validated @RequestBody RuleFlowTestExcuteVO request) {
         try {
-            ExcuteRuleFlowVO.Request createProcessRequest = new ExcuteRuleFlowVO.Request();
+            ExcuteRuleFlow createProcessRequest = new ExcuteRuleFlow();
             createProcessRequest.setRequestId(IdUtil.getSnowflakeNextIdStr());
             createProcessRequest.setVariables(request.getVariables());
             createProcessRequest.setKey(request.getKey());

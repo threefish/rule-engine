@@ -15,41 +15,70 @@
  */
 package cn.xjbpm.rule.api;
 
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.xjbpm.rule.dto.ExcuteRuleFlowVO;
+import cn.xjbpm.rule.common.utils.JsonUtils;
+import cn.xjbpm.rule.dto.ExcuteRuleFlow;
+import cn.xjbpm.rule.dto.ExcutingHistoryLogVO;
 import cn.xjbpm.rule.engine.runtime.RuleFlowExcuteService;
-import cn.xjbpm.rule.vo.ResultVO;
+import cn.xjbpm.rule.engine.runtime.model.ExecutStatus;
+import cn.xjbpm.rule.repository.entity.RuleFlowExcuteLogEntity;
+import cn.xjbpm.rule.service.AuthoriztionService;
+import cn.xjbpm.rule.service.RuleFlowExcuteLogService;
+import cn.xjbpm.rule.vo.common.ResultVO;
+import cn.xjbpm.rule.vo.excute.ExcuteRuleFlowRequest;
+import cn.xjbpm.rule.vo.excute.ExcuteRuleFlowResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
  */
 @RestController
-@RequestMapping("/open/ruleflow")
+@RequestMapping("/openapi/v1/ruleflow")
 @RequiredArgsConstructor
 @Slf4j
 public class RuleFlowRunOpenApi {
 
-    private final RuleFlowExcuteService processRunService;
+    private final RuleFlowExcuteService ruleFlowExcuteService;
+    private final AuthoriztionService authoriztionService;
+    private final RuleFlowExcuteLogService ruleFlowExcuteLogService;
 
     @PostMapping("/excute")
-    public ResultVO<ExcuteRuleFlowVO.Response> excute(@Validated @RequestBody ExcuteRuleFlowVO.Request request) {
-        try {
-            if (StrUtil.isBlank(request.getRequestId())) {
-                request.setRequestId(IdUtil.getSnowflakeNextIdStr());
-            }
-            return ResultVO.success(processRunService.startFlow(request));
-        } catch (Exception e) {
-            log.error("执行出错：{}", e.getMessage(), e);
-            return ResultVO.fail(e.getMessage());
+    public ResultVO<ExcuteRuleFlowResponse> excute(@Validated
+                                                   @RequestBody ExcuteRuleFlowRequest request,
+                                                   @RequestHeader(value = "token") String token) {
+        if (authoriztionService.validateToken(request.getAppCode(), token) == false) {
+            return ResultVO.fail("接口验证：Token无效");
         }
+        if (authoriztionService.validateRuleFlowKey(request.getAppCode(), request.getKey()) == false) {
+            return ResultVO.fail("授权验证：权限不足！");
+        }
+        ExcuteRuleFlow excuteRuleFlowRequest = new ExcuteRuleFlow();
+        if (Objects.nonNull(request.getRetryOriginId())) {
+            RuleFlowExcuteLogEntity entity = ruleFlowExcuteLogService.findById(request.getRetryOriginId());
+            if (Objects.isNull(entity)) {
+                return ResultVO.fail("重试失败，当前 ID:%s 的规则流尚未执行完成或者不存在！");
+            }
+            ExcutingHistoryLogVO vo = JsonUtils.json2Obj(entity.getContent(), ExcutingHistoryLogVO.class);
+            Set<String> nodes = vo.getNodeExcutions().entrySet().stream()
+                    .filter(entry -> entry.getValue().getStatus() == ExecutStatus.SUCCESS)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toSet());
+            excuteRuleFlowRequest.setSkipNodeIds(nodes);
+            excuteRuleFlowRequest.setContent(vo.getRuleFlowOriginalJson());
+        }
+        excuteRuleFlowRequest.setKey(request.getKey());
+        excuteRuleFlowRequest.setVariables(request.getVariables());
+        excuteRuleFlowRequest.setRequestId(request.getRequestId());
+        excuteRuleFlowRequest.setRetryOriginId(request.getRetryOriginId());
+        excuteRuleFlowRequest.setAsyncExcute(request.isAsyncExcute());
+        return ResultVO.success(ExcuteRuleFlowResponse.create(ruleFlowExcuteService.startFlow(excuteRuleFlowRequest)));
     }
 
 }

@@ -1,4 +1,4 @@
-package cn.xjbpm.rule.vo;
+package cn.xjbpm.rule.vo.common;
 
 import lombok.Data;
 import org.springframework.data.domain.Page;

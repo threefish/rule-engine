@@ -21,9 +21,10 @@ import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.common.constant.RuleFlowConstant;
 import cn.xjbpm.rule.common.utils.VariableTranslateUtils;
 import cn.xjbpm.rule.custom.RuleFlowModelCacheService;
-import cn.xjbpm.rule.dto.ExcuteRuleFlowVO;
+import cn.xjbpm.rule.dto.ExcuteRuleFlow;
+import cn.xjbpm.rule.dto.ExcuteRuleFlowResult;
 import cn.xjbpm.rule.dto.ExcutingHistoryLogVO;
-import cn.xjbpm.rule.dto.RuleFlowExcuteCompledEvent;
+import cn.xjbpm.rule.event.RuleFlowExcuteCompledEvent;
 import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
 import cn.xjbpm.rule.engine.runtime.actor.AkkaRuleFlowScheduler;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
@@ -66,7 +67,7 @@ public class RuleFlowExcuteService implements DisposableBean {
      * @param request
      * @return
      */
-    public ExcuteRuleFlowVO.Response startFlow(ExcuteRuleFlowVO.Request request) {
+    public ExcuteRuleFlowResult startFlow(ExcuteRuleFlow request) {
         Assert.isTrue(StrUtil.isNotBlank(request.getKey()), "规则编码不能为空");
         RuleFlowModel processModel;
         if (StringUtils.hasText(request.getContent())) {
@@ -74,7 +75,7 @@ public class RuleFlowExcuteService implements DisposableBean {
         } else {
             processModel = ruleFlowModelCacheService.getModel(request.getKey());
         }
-        ExcuteRuleFlowVO.Response processInstance = new ExcuteRuleFlowVO.Response();
+        ExcuteRuleFlowResult processInstance = new ExcuteRuleFlowResult();
         processInstance.setRequestId(request.getRequestId());
         processInstance.setId(IdUtil.getSnowflakeNextId());
         processInstance.setRuleFlowKey(processModel.getKey());
@@ -115,7 +116,7 @@ public class RuleFlowExcuteService implements DisposableBean {
         return processInstance;
     }
 
-    private void doComplete(FlowContext flowContext, RuleFlowModel processModel, ExcuteRuleFlowVO.Response processInstance, ExcuteRuleFlowVO.Request request) {
+    private void doComplete(FlowContext flowContext, RuleFlowModel processModel, ExcuteRuleFlowResult processInstance, ExcuteRuleFlow request) {
         Map businessVariables = (Map) flowContext.getVariable().get(RuleFlowConstant.BUSINESS_OBJECTS);
         Map<String, Object> response = VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), true, businessVariables);
         processInstance.setResponse(response);

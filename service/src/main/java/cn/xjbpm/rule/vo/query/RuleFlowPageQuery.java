@@ -1,4 +1,4 @@
-package cn.xjbpm.rule.vo;
+package cn.xjbpm.rule.vo.query;
 
 import cn.xjbpm.rule.repository.enums.RuleFlowStatus;
 import lombok.Data;

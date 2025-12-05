@@ -1,4 +1,4 @@
-package cn.xjbpm.rule.vo;
+package cn.xjbpm.rule.vo.log;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

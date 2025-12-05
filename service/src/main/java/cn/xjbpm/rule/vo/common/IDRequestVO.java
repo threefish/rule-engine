@@ -13,25 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule.dto;
+package cn.xjbpm.rule.vo.common;
 
-import org.springframework.context.ApplicationEvent;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
  */
-public class RuleFlowExcuteCompledEvent extends ApplicationEvent {
+@Data
+public class IDRequestVO {
 
-    public RuleFlowExcuteCompledEvent(Object source) {
-        super(source);
-    }
-
-    public static RuleFlowExcuteCompledEvent create(ExcutingHistoryLogVO vo) {
-        return new RuleFlowExcuteCompledEvent(vo);
-    }
-
-    public ExcutingHistoryLogVO getData() {
-        return (ExcutingHistoryLogVO) getSource();
-    }
+    @NotNull
+    private Long id;
 
 }

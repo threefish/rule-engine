@@ -109,7 +109,6 @@ public class RuleFlowService {
     public Long saveOrUpdateNoDeployed(RuleFlowVO request) {
         Long id;
         if (request.getId() == null) {
-            // 必须检查版本0是否已存在，以避免联合唯一约束冲突。
             RuleFlowEntity flowEntity = ruleFlowRepository.findByKey(request.getKey()).orElse(null);
             if (flowEntity != null) {
                 throw new IllegalArgumentException(String.format("规则流编码[%s]已存在！", request.getKey()));
@@ -123,7 +122,6 @@ public class RuleFlowService {
             ruleFlowRepository.save(entity);
             id = entity.getId();
         } else {
-            // 更新现有规则流的指定版本
             RuleFlowEntity oldEntity = ruleFlowRepository.findById(request.getId())
                     .orElseThrow(() -> new NoSuchElementException(String.format("未找到ID为[%s]的数据！", request.getId())));
             // 检查 Key 是否被修改 (Key是不可变的)

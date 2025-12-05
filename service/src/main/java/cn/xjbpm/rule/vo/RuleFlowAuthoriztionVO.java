@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2025 threefish.
  *
@@ -16,38 +15,41 @@
  */
 package cn.xjbpm.rule.vo;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * date: 2025/12/1
+ * date: 2025/12/4
  */
-@Data
-public class RuleFlowTestExcuteVO {
+public class RuleFlowAuthoriztionVO {
 
-    /**
-     * 需要跳过的节点
-     */
-    private Set<String> skipNodeIds;
-    /**
-     * 流程定义key
-     */
-    @NotBlank
-    private String key;
-    /**
-     * 流程变量
-     */
-    @NotNull
-    private Map<String, Object> variables;
-    /**
-     * 流程定义内容
-     */
-    @NotBlank
-    private String content;
+    @Data
+    public static class SaveRequest {
+        @NotBlank
+        @Length(max = 20, min = 1)
+        String appCode;
+        @NotBlank
+        @Length(max = 20, min = 1)
+        String name;
+        @NotBlank
+        @Length(max = 20, min = 1)
+        String description;
+        @NotBlank
+        String authoriztion;
+    }
 
+    @Data
+    public static class AddResponse {
+        String appCode;
+        String secretKey;
+    }
 }

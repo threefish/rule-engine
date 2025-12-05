@@ -17,7 +17,7 @@ package cn.xjbpm.rule.listenner;
 
 import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.dto.ExcutingHistoryLogVO;
-import cn.xjbpm.rule.dto.RuleFlowExcuteCompledEvent;
+import cn.xjbpm.rule.event.RuleFlowExcuteCompledEvent;
 import cn.xjbpm.rule.repository.entity.RuleFlowExcuteLogEntity;
 import cn.xjbpm.rule.service.RuleFlowExcuteLogService;
 import lombok.RequiredArgsConstructor;

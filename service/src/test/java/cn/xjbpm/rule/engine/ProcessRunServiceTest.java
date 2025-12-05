@@ -18,7 +18,8 @@ package cn.xjbpm.rule.engine;
 import cn.hutool.core.io.IoUtil;
 import cn.xjbpm.rule.RuleEngineApplication;
 import cn.xjbpm.rule.common.utils.JsonUtils;
-import cn.xjbpm.rule.dto.ExcuteRuleFlowVO;
+import cn.xjbpm.rule.dto.ExcuteRuleFlow;
+import cn.xjbpm.rule.dto.ExcuteRuleFlowResult;
 import cn.xjbpm.rule.engine.runtime.RuleFlowExcuteService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -63,11 +64,11 @@ public class ProcessRunServiceTest {
         for (int i = 0; i < 1; i++) {
             sw.start("task_" + i);
             try {
-                ExcuteRuleFlowVO.Request createProcessRequest = new ExcuteRuleFlowVO.Request();
+                ExcuteRuleFlow createProcessRequest = new ExcuteRuleFlow();
                 createProcessRequest.setKey("grsds");
                 createProcessRequest.setVariables(map);
                 createProcessRequest.setContent(processDefinitionContent);
-                ExcuteRuleFlowVO.Response result = processRunService.startFlow(createProcessRequest);
+                ExcuteRuleFlowResult result = processRunService.startFlow(createProcessRequest);
                 System.out.println("返回：" + JsonUtils.obj2Json(result));
             } finally {
                 sw.stop();

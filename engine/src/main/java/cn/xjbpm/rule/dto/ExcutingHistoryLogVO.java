@@ -57,7 +57,7 @@ public class ExcutingHistoryLogVO {
     private Long retryOriginId;
 
 
-    public static ExcutingHistoryLogVO create(ExcuteRuleFlowVO.Response response, Map variables, String originalJson,Long retryOriginId) {
+    public static ExcutingHistoryLogVO create(ExcuteRuleFlowResult response, Map variables, String originalJson,Long retryOriginId) {
         ExcutingHistoryLogVO excutingHistoryLogVO = new ExcutingHistoryLogVO();
         excutingHistoryLogVO.setRuleFlowOriginalJson(originalJson);
         excutingHistoryLogVO.setRequest(variables);

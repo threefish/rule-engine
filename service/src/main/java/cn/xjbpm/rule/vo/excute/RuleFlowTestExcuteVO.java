@@ -13,44 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule.dto;
+package cn.xjbpm.rule.vo.excute;
 
-import cn.xjbpm.rule.engine.runtime.model.NodeExcution;
-import cn.xjbpm.rule.engine.runtime.model.TraceLog;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * date: 2025/11/20
+ * date: 2025/12/1
  */
-public class ExcuteRuleFlowVO {
+@Data
+public class RuleFlowTestExcuteVO {
 
+    /**
+     * 需要跳过的节点
+     */
+    private Set<String> skipNodeIds;
+    /**
+     * 流程定义key
+     */
+    @NotBlank
+    private String key;
+    /**
+     * 流程变量
+     */
+    @NotNull
+    private Map<String, Object> variables;
+    /**
+     * 流程定义内容
+     */
+    @NotBlank
+    private String content;
 
-    @Data
-    public static class Response {
-
-        private Long id;
-
-        private String requestId;
-
-        private String ruleFlowKey;
-
-        private Map<String, Object> response;
-
-        private long timeConsuming;
-
-        private Boolean success;
-
-        private String errorMessage;
-
-        private List<TraceLog> traceLogs;
-
-        private Map<String, NodeExcution> nodeExcutions;
-    }
 }

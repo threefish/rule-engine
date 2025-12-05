@@ -27,60 +27,57 @@ import java.time.LocalDateTime;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * 规则流程执行日志
+ * 规则流程实体
  */
 @Entity
 @Table(
-        name = "rule_flow_excute_log",
-        indexes = {
-                @Index(name = "idx_rule_flow_excute_log_request_id", columnList = "request_id", unique = true),
-                @Index(name = "idx_rule_flow_key", columnList = "rule_flow_key")
-        }
+        name = "rule_flow_authoriztion"
 )
-@EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
-public class RuleFlowExcuteLogEntity {
+@EntityListeners(AuditingEntityListener.class)
+public class RuleFlowAuthoriztionEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
-
-    /**
-     * 规则流编码
-     */
-    @Column(name = "rule_flow_key", nullable = false, length = 20)
-    private String ruleFlowKey;
-
-    /**
-     * 唯一标识
-     */
-    @Column(name = "request_id", nullable = false, unique = true, length = 20)
-    private String requestId;
 
     /**
      * 名称
      */
-    @Column(name = "time_consuming", length = 10)
-    private Long timeConsuming;
-
-
-    @Column(name = "error_message", length = 100)
-    private String errorMessage;
+    @Column(name = "name", nullable = false, length = 20)
+    private String name;
 
     /**
-     * 执行记录(大文本字段）
+     * app编码
      */
-    @Lob
-    @Column(name = "content", columnDefinition = "LONGTEXT")
-    private String content;
+    @Column(name = "app_code", nullable = false, unique = true, length = 20)
+    private String appCode;
 
     /**
-     * 执行结果
+     * 授权密钥
      */
-    @Column(name = "success")
-    private Boolean success;
+    @Column(name = "secret_key", nullable = false, length = 40)
+    private String secretKey;
+
+    /**
+     * 用途描述
+     */
+    @Column(name = "description", length = 200)
+    private String description;
+
+    /**
+     * 已启用
+     */
+    @Column(name = "enabled")
+    private Boolean enabled;
+
+    /**
+     * 授权详情
+     */
+    @Column(name = "authoriztion", length = 300)
+    private String authoriztion;
 
     /**
      * 创建时间，自动填充
@@ -98,13 +95,4 @@ public class RuleFlowExcuteLogEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime updateTime;
 
-    public RuleFlowExcuteLogEntity(Long id, String ruleFlowKey, String requestId, Long timeConsuming, Boolean success, LocalDateTime createTime, LocalDateTime updateTime) {
-        this.id = id;
-        this.ruleFlowKey = ruleFlowKey;
-        this.requestId = requestId;
-        this.timeConsuming = timeConsuming;
-        this.success = success;
-        this.createTime = createTime;
-        this.updateTime = updateTime;
-    }
 }
