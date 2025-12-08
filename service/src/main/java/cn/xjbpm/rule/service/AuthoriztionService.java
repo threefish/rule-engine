@@ -16,6 +16,7 @@
 package cn.xjbpm.rule.service;
 
 import cn.xjbpm.rule.common.utils.JsonUtils;
+import cn.xjbpm.rule.error.AuthoriztionConstant;
 import cn.xjbpm.rule.repository.entity.RuleFlowAuthoriztionEntity;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -68,7 +69,7 @@ public class AuthoriztionService {
                     tokenAuth.setRules(JsonUtils.json2List(entity.getAuthoriztion(), String.class));
                     return tokenAuth;
                 }
-                return null;
+                throw new RuntimeException(AuthoriztionConstant.TOKEN_ERROR);
             });
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
