@@ -48,15 +48,19 @@ public class RuleFlowExcuteLogService {
 
     public Page<RuleFlowExcuteLogEntity> findPage(Pageable pageable, String key, String requestId) {
         if (StringUtils.hasText(requestId)) {
-            return ruleFlowExcuteLogRepository.findByRequestId(requestId, pageable);
+            return ruleFlowExcuteLogRepository.findAllByRequestId(requestId, pageable);
         }
         if (StringUtils.hasText(key)) {
-            return ruleFlowExcuteLogRepository.findByRuleFlowKey(key, pageable);
+            return ruleFlowExcuteLogRepository.findAllByRuleFlowKey(key, pageable);
         }
         return new PageImpl<>(Collections.emptyList());
     }
 
     public RuleFlowExcuteLogEntity findById(Long id) {
         return ruleFlowExcuteLogRepository.findById(id).orElse(null);
+    }
+
+    public RuleFlowExcuteLogEntity findByRequestId(String id) {
+        return ruleFlowExcuteLogRepository.findByRequestId(id).orElse(null);
     }
 }

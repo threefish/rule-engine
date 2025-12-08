@@ -22,7 +22,6 @@ import cn.xjbpm.rule.dto.ExcuteRuleFlowResult;
 import cn.xjbpm.rule.dto.ExcutingHistoryLogVO;
 import cn.xjbpm.rule.engine.runtime.RuleFlowExcuteService;
 import cn.xjbpm.rule.engine.runtime.model.ExecutStatus;
-import cn.xjbpm.rule.engine.runtime.model.NodeExcution;
 import cn.xjbpm.rule.repository.entity.RuleFlowExcuteLogEntity;
 import cn.xjbpm.rule.service.RuleFlowExcuteLogService;
 import cn.xjbpm.rule.vo.common.IDRequestVO;
@@ -39,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,7 +50,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RuleFlowExcuteLogsManageApi {
 
-    private final RuleFlowExcuteService processRunService;
+    private final RuleFlowExcuteService ruleFlowExcuteService;
     private final RuleFlowExcuteLogService ruleFlowExcuteLogService;
 
 
@@ -87,6 +85,6 @@ public class RuleFlowExcuteLogsManageApi {
         if (query.getUseLatest()) {
             request.setContent(null);
         }
-        return ResultVO.success(processRunService.startFlow(request));
+        return ResultVO.success(ruleFlowExcuteService.startFlow(request));
     }
 }

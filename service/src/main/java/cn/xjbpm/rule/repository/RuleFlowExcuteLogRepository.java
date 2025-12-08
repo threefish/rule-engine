@@ -23,6 +23,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 /**
  * @author 黄川 huchuc@vip.qq.com
  */
@@ -39,10 +41,15 @@ public interface RuleFlowExcuteLogRepository extends JpaRepository<RuleFlowExcut
     @Query("SELECT " +
             " new cn.xjbpm.rule.repository.entity.RuleFlowExcuteLogEntity(l.id, l.ruleFlowKey, l.requestId, l.timeConsuming, l.success, l.createTime, l.updateTime)" +
             " FROM RuleFlowExcuteLogEntity l WHERE l.requestId = :requestId")
-    Page<RuleFlowExcuteLogEntity> findByRequestId(@Param("requestId") String requestId, Pageable pageable);
+    Page<RuleFlowExcuteLogEntity> findAllByRequestId(@Param("requestId") String requestId, Pageable pageable);
 
     @Query("SELECT " +
             " new cn.xjbpm.rule.repository.entity.RuleFlowExcuteLogEntity(l.id, l.ruleFlowKey, l.requestId, l.timeConsuming, l.success, l.createTime, l.updateTime)" +
             " FROM RuleFlowExcuteLogEntity l WHERE l.ruleFlowKey = :key")
-    Page<RuleFlowExcuteLogEntity> findByRuleFlowKey(String key, Pageable pageable);
+    Page<RuleFlowExcuteLogEntity> findAllByRuleFlowKey(String key, Pageable pageable);
+
+
+    Optional<RuleFlowExcuteLogEntity> findByRequestId(@Param("requestId") String requestId);
+
+
 }

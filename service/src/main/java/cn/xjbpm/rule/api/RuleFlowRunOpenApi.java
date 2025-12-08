@@ -20,12 +20,14 @@ import cn.xjbpm.rule.dto.ExcuteRuleFlow;
 import cn.xjbpm.rule.dto.ExcutingHistoryLogVO;
 import cn.xjbpm.rule.engine.runtime.RuleFlowExcuteService;
 import cn.xjbpm.rule.engine.runtime.model.ExecutStatus;
+import cn.xjbpm.rule.error.AuthoriztionConstant;
 import cn.xjbpm.rule.repository.entity.RuleFlowExcuteLogEntity;
 import cn.xjbpm.rule.service.AuthoriztionService;
 import cn.xjbpm.rule.service.RuleFlowExcuteLogService;
 import cn.xjbpm.rule.vo.common.ResultVO;
 import cn.xjbpm.rule.vo.excute.ExcuteRuleFlowRequest;
 import cn.xjbpm.rule.vo.excute.ExcuteRuleFlowResponse;
+import cn.xjbpm.rule.vo.excute.QueryExcuteRuleFlowRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -53,11 +55,11 @@ public class RuleFlowRunOpenApi {
     public ResultVO<ExcuteRuleFlowResponse> excute(@Validated
                                                    @RequestBody ExcuteRuleFlowRequest request,
                                                    @RequestHeader(value = "token") String token) {
-        if (authoriztionService.validateToken(request.getAppCode(), token) == false) {
-            return ResultVO.fail("接口验证：Token无效");
+        if (!authoriztionService.validateToken(request.getAppCode(), token)) {
+            return ResultVO.fail(AuthoriztionConstant.TOKEN_ERROR);
         }
-        if (authoriztionService.validateRuleFlowKey(request.getAppCode(), request.getKey()) == false) {
-            return ResultVO.fail("授权验证：权限不足！");
+        if (!authoriztionService.validateRuleFlowKey(request.getAppCode(), request.getKey())) {
+            return ResultVO.fail(AuthoriztionConstant.AUTHORIZTION_ERROR);
         }
         ExcuteRuleFlow excuteRuleFlowRequest = new ExcuteRuleFlow();
         if (Objects.nonNull(request.getRetryOriginId())) {
@@ -79,6 +81,41 @@ public class RuleFlowRunOpenApi {
         excuteRuleFlowRequest.setRetryOriginId(request.getRetryOriginId());
         excuteRuleFlowRequest.setAsyncExcute(request.isAsyncExcute());
         return ResultVO.success(ExcuteRuleFlowResponse.create(ruleFlowExcuteService.startFlow(excuteRuleFlowRequest)));
+    }
+
+    @PostMapping("/query")
+    @SuppressWarnings("all")
+    public ResultVO<ExcuteRuleFlowResponse> query(@Validated
+                                                   @RequestBody QueryExcuteRuleFlowRequest request,
+                                                   @RequestHeader(value = "token") String token) {
+
+        RuleFlowExcuteLogEntity entity;
+        if (Objects.nonNull(request.getRequestId())) {
+            entity = ruleFlowExcuteLogService.findByRequestId(request.getRequestId());
+        } else if (Objects.nonNull(request.getId())) {
+            entity = ruleFlowExcuteLogService.findById(request.getId());
+        } else {
+            return ResultVO.fail("requestId 和 id 不能同时为空！");
+        }
+        if (Objects.isNull(entity)) {
+            return ResultVO.fail("记录不存在或者未执行完成，请稍后再试");
+        }
+        if (authoriztionService.validateToken(request.getAppCode(), token) == false) {
+            return ResultVO.fail(AuthoriztionConstant.TOKEN_ERROR);
+        }
+        if (authoriztionService.validateRuleFlowKey(request.getAppCode(), entity.getRuleFlowKey()) == false) {
+            return ResultVO.fail(AuthoriztionConstant.AUTHORIZTION_ERROR);
+        }
+        ExcutingHistoryLogVO vo = JsonUtils.json2Obj(entity.getContent(), ExcutingHistoryLogVO.class);
+        ExcuteRuleFlowResponse excuteRuleFlowResponse = new ExcuteRuleFlowResponse();
+        excuteRuleFlowResponse.setId(entity.getId());
+        excuteRuleFlowResponse.setRequestId(entity.getRequestId());
+        excuteRuleFlowResponse.setRuleFlowKey(entity.getRuleFlowKey());
+        excuteRuleFlowResponse.setResponse(vo.getResponse());
+        excuteRuleFlowResponse.setTimeConsuming(entity.getTimeConsuming());
+        excuteRuleFlowResponse.setSuccess(entity.getSuccess());
+        excuteRuleFlowResponse.setErrorMessage(entity.getErrorMessage());
+        return ResultVO.success(excuteRuleFlowResponse);
     }
 
 }

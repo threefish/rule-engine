@@ -97,6 +97,10 @@ public class AuthoriztionService {
         return true;
     }
 
+    public void invalidate(String appCode) {
+        cache.invalidate(appCode);
+    }
+
     @Data
     public class TokenAuth {
         private String secretKey;

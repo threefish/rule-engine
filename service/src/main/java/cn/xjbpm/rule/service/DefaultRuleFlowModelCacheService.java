@@ -49,7 +49,7 @@ public class DefaultRuleFlowModelCacheService implements RuleFlowModelCacheServi
             return cache.get(key, () -> {
                 RuleFlowVO entity = ruleFlowService.findByKeyAndDeployed(key);
                 if (Objects.isNull(entity)) {
-                    return null;
+                    throw new RuntimeException("未找到规则流：" + key);
                 }
                 RuleFlowModel processModel = convertToModel(entity.getContent());
                 processModel.setKey(entity.getKey());

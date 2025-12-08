@@ -13,36 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule.vo;
+package cn.xjbpm.rule.vo.excute;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.hibernate.validator.constraints.Length;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * date: 2025/12/4
+ * date: 2025/12/5
  */
-public class RuleFlowAuthoriztionVO {
+@Data
+public class QueryExcuteRuleFlowRequest {
+    /**
+     * 应用编码
+     */
+    @NotBlank
+    private String appCode;
+    /**
+     * 请求ID
+     */
+    private String requestId;
+    /**
+     * 重试原始ID
+     */
+    private Long id;
 
-    @Data
-    public static class SaveRequest {
-        @NotBlank
-        @Length(max = 20, min = 1)
-        String appCode;
-        @NotBlank
-        @Length(max = 20, min = 1)
-        String name;
-        @NotBlank
-        @Length(max = 20, min = 1)
-        String description;
-        @NotBlank
-        String authoriztion;
-    }
-
-    @Data
-    public static class AddResponse {
-        String appCode;
-        String secretKey;
-    }
 }

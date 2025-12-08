@@ -30,6 +30,7 @@ public class ExcuteRuleFlowRequest {
     /**
      * 应用编码
      */
+    @NotBlank
     private String appCode;
     /**
      * 规则流key

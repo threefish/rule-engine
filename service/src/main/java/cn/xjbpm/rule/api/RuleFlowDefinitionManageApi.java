@@ -18,7 +18,7 @@ package cn.xjbpm.rule.api;
 import cn.xjbpm.rule.custom.RuleFlowModelCacheService;
 import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
 import cn.xjbpm.rule.service.RuleFlowService;
-import cn.xjbpm.rule.vo.*;
+import cn.xjbpm.rule.vo.RuleFlowVO;
 import cn.xjbpm.rule.vo.common.IDRequestVO;
 import cn.xjbpm.rule.vo.common.PageVO;
 import cn.xjbpm.rule.vo.common.ResultVO;

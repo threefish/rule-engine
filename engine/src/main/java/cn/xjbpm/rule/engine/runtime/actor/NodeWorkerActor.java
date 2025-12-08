@@ -61,7 +61,7 @@ public class NodeWorkerActor extends AbstractActor {
         Node node = msg.getNode();
         try {
             if (!(node instanceof SequenceConnNode) && msg.getAttempt() > 0) {
-                this.flowContext.addTraceLog(StringUtils.format("[{}] 开始第 {} 次重试执行", node.getName(), msg.getAttempt()));
+                this.flowContext.addTraceLog(StringUtils.format("[{}] 开始第 {} 次重试执行", node.getId(), msg.getAttempt()));
             }
 
             NodeBehavior behavior = node.getBehavior();
@@ -79,27 +79,23 @@ public class NodeWorkerActor extends AbstractActor {
             getSender().tell(new WorkflowProtocol.NodeCompleted(node.getId(), node, true), getSelf());
 
         } catch (Exception e) {
-            this.flowContext.addTraceLog(StringUtils.format("[{}] 执行异常: {}", node.getId(), e.getMessage()));
             handleFailure(msg, e);
         }
-//        finally {
-//            this.flowContext.addTraceLog(StringUtils.format("[{}] 节点执行完成", node.getId()));
-//        }
     }
 
     private void handleFailure(WorkflowProtocol.ExecuteNode msg, Exception e) {
         Node node = msg.getNode();
         int currentAttempt = msg.getAttempt();
-
-        if (!isExcludeRetryNode(node)) {
+        if (isExcludeRetryNode(node)) {
+            this.flowContext.addTraceLog(StringUtils.format("[{}] 执行异常: {}", node.getId(), e.getMessage()));
+        } else {
             int maxRetries = getRetryCount(node);
             long delaySeconds = getRetryDelay(node);
 
             if (currentAttempt < maxRetries) {
                 int nextAttempt = currentAttempt + 1;
-                this.flowContext.addTraceLog(StringUtils.format("[{}] [{}] 启用重试机制: 最大重试{}次, 延迟 {}ms",
-                        node.getId(), node.getName(), maxRetries, delaySeconds));
-                this.flowContext.addTraceLog(StringUtils.format("[{}] 准备第{}次重试", node.getId(), nextAttempt));
+                this.flowContext.addTraceLog(StringUtils.format("[{}] 执行异常 启用重试 准备第{}次重试 最大重试{}次 延迟{}ms",
+                        node.getId(), nextAttempt, maxRetries, delaySeconds));
                 // 重试消息发给 Router (Parent)
                 // getContext().parent() 在 Router 模式下指向的是 Router Actor
                 // 这样重试任务会被重新负载均衡，不一定由当前 Worker 执行，效率更高
@@ -112,18 +108,14 @@ public class NodeWorkerActor extends AbstractActor {
                 );
                 return;
             }
+            // 重试耗尽
+            long endTime = System.nanoTime();
+            this.flowContext.addTraceLog(StringUtils.format("[{}] 执行失败 耗时{} 异常描述: {}",
+                    node.getId(), TimeFormatUtil.formatNanosToMs(endTime - msg.getStartTotalTime()), e.getMessage()));
+            recordExecution(node, msg.getStartTotalTime(), endTime, ExecutStatus.FAILURE, e.getMessage());
         }
-
-        // 重试耗尽
-        long endTime = System.nanoTime();
-        this.flowContext.addTraceLog(StringUtils.format("[{}] 节点 最终失败 耗时{} 异常原因: {}",
-                node.getId(), TimeFormatUtil.formatNanosToMs(endTime - msg.getStartTotalTime()), e.getMessage()));
-
-        recordExecution(node, msg.getStartTotalTime(), endTime, ExecutStatus.FAILURE, e.getMessage());
-
         // 通知 Master 失败
         getSender().tell(new WorkflowProtocol.NodeFailed(node.getId(), node, e), getSelf());
-
 
     }
 

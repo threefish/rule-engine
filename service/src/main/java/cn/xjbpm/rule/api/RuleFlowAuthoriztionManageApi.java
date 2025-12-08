@@ -17,6 +17,7 @@ package cn.xjbpm.rule.api;
 
 import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.repository.entity.RuleFlowAuthoriztionEntity;
+import cn.xjbpm.rule.service.AuthoriztionService;
 import cn.xjbpm.rule.service.RuleFlowAuthoriztionService;
 import cn.xjbpm.rule.vo.RuleFlowAuthoriztionVO;
 import cn.xjbpm.rule.vo.common.IDRequestVO;
@@ -43,11 +44,12 @@ import java.util.List;
 public class RuleFlowAuthoriztionManageApi {
 
     private final RuleFlowAuthoriztionService ruleFlowAuthoriztionService;
+    private final AuthoriztionService authoriztionService;
 
     @PostMapping("/page")
     public ResultVO<PageVO<RuleFlowAuthoriztionEntity>> page(Pageable pageable, @RequestBody RuleFlowAuthoriztionPageQuery query) {
         Page<RuleFlowAuthoriztionEntity> page = ruleFlowAuthoriztionService.findPage(query.getAppCode(), pageable);
-        page.getContent().forEach(entity -> entity.setSecretKey( null));
+        page.getContent().forEach(entity -> entity.setSecretKey(null));
         return ResultVO.success(PageVO.of(page));
     }
 
@@ -65,7 +67,9 @@ public class RuleFlowAuthoriztionManageApi {
 
     @PostMapping("/resetKey")
     public ResultVO<RuleFlowAuthoriztionVO.AddResponse> resetKey(@Validated @RequestBody IDRequestVO request) {
-        return ResultVO.success(ruleFlowAuthoriztionService.resetKey(request.getId()));
+        RuleFlowAuthoriztionVO.AddResponse response = ruleFlowAuthoriztionService.resetKey(request.getId());
+        authoriztionService.invalidate(response.getAppCode());
+        return ResultVO.success(response);
     }
 
     @PostMapping("/disable")

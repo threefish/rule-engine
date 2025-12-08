@@ -24,10 +24,12 @@ import cn.xjbpm.rule.custom.RuleFlowModelCacheService;
 import cn.xjbpm.rule.dto.ExcuteRuleFlow;
 import cn.xjbpm.rule.dto.ExcuteRuleFlowResult;
 import cn.xjbpm.rule.dto.ExcutingHistoryLogVO;
-import cn.xjbpm.rule.event.RuleFlowExcuteCompledEvent;
 import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
 import cn.xjbpm.rule.engine.runtime.actor.AkkaRuleFlowScheduler;
+import cn.xjbpm.rule.engine.runtime.model.ExecutStatus;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
+import cn.xjbpm.rule.engine.runtime.model.NodeExcution;
+import cn.xjbpm.rule.event.RuleFlowExcuteCompledEvent;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
@@ -37,8 +39,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -89,9 +93,7 @@ public class RuleFlowExcuteService implements DisposableBean {
                 if (Objects.isNull(failure)) {
                     processInstance.setSuccess(true);
                 } else {
-                    processInstance.setErrorMessage(StrUtil.subPre(failure.getMessage(), 100));
-                    processInstance.setSuccess(false);
-                    log.error("流程执行出错：{}", failure.getMessage(), failure);
+                    handFailure(processInstance, flowContext, failure);
                 }
                 processInstance.setNodeExcutions(flowContext.getNodeExcutions());
                 processInstance.setTimeConsuming((System.currentTimeMillis() - startTime));
@@ -103,9 +105,7 @@ public class RuleFlowExcuteService implements DisposableBean {
                 scheduler.startFlow(processModel, flowContext, request.getSkipNodeIds());
                 processInstance.setSuccess(true);
             } catch (Exception e) {
-                processInstance.setErrorMessage(StrUtil.subPre(e.getMessage(), 100));
-                processInstance.setSuccess(false);
-                log.error("流程执行出错：{}", e.getMessage(), e);
+                handFailure(processInstance, flowContext, e);
             } finally {
                 processInstance.setNodeExcutions(flowContext.getNodeExcutions());
                 processInstance.setTimeConsuming((System.currentTimeMillis() - startTime));
@@ -116,6 +116,35 @@ public class RuleFlowExcuteService implements DisposableBean {
         return processInstance;
     }
 
+    /**
+     * 处理失败
+     *
+     * @param excuteRuleFlowResult
+     * @param flowContext
+     * @param failure
+     */
+    private void handFailure(ExcuteRuleFlowResult excuteRuleFlowResult, FlowContext flowContext, Throwable failure) {
+        List<NodeExcution> failedExecutions = flowContext.getNodeExcutions().values().stream()
+                .filter(node -> node.getStatus() == ExecutStatus.FAILURE)
+                .collect(Collectors.toList());
+        if (!failedExecutions.isEmpty()) {
+            NodeExcution nodeExcution = failedExecutions.get(0);
+            excuteRuleFlowResult.setErrorMessage(StrUtil.subPre(String.format("节点:[%s] 异常描述:%s", nodeExcution.getId(), nodeExcution.getErrorMessage()), 100));
+        } else {
+            excuteRuleFlowResult.setErrorMessage(StrUtil.subPre(failure.getMessage(), 100));
+        }
+        excuteRuleFlowResult.setSuccess(false);
+        log.error("流程执行出错：{}", failure.getMessage(), failure);
+    }
+
+    /**
+     * 完成
+     *
+     * @param flowContext
+     * @param processModel
+     * @param processInstance
+     * @param request
+     */
     private void doComplete(FlowContext flowContext, RuleFlowModel processModel, ExcuteRuleFlowResult processInstance, ExcuteRuleFlow request) {
         Map businessVariables = (Map) flowContext.getVariable().get(RuleFlowConstant.BUSINESS_OBJECTS);
         Map<String, Object> response = VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), true, businessVariables);
