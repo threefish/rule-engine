@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule.listenner;
+package cn.xjbpm.rule.listener;
 
 import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.dto.ExcutingHistoryLogVO;

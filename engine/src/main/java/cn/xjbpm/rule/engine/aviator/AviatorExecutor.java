@@ -26,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Modifier;
 import java.math.MathContext;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -34,6 +36,8 @@ import java.util.Set;
 @Slf4j
 public class AviatorExecutor {
 
+
+    private static final Pattern FUNCTION_PATTERN = Pattern.compile("\\$\\{(.+?)\\}");
 
     static {
         AviatorEvaluator.setOption(Options.ALWAYS_PARSE_FLOATING_POINT_NUMBER_INTO_DECIMAL, true);
@@ -81,5 +85,30 @@ public class AviatorExecutor {
             log.debug("表达式执行器 计算结果:{} 表达式:{} 上下文:{}", result, context.getExpression(), JsonUtils.obj2Json(context));
         }
         return result;
+    }
+
+    public static void main(String[] args) {
+        String expression = "year: ${NOW('yyyy-MM-dd HH:mm:ss')}";
+        System.out.println("----------");
+        System.out.println(evaluateAndReplace(AviatorContext.create(expression, null)));
+        System.out.println("----------");
+    }
+
+    public static String evaluateAndReplace(AviatorContext context) {
+        StringBuffer sb = new StringBuffer();
+        Matcher matcher = FUNCTION_PATTERN.matcher(context.getExpression());
+        while (matcher.find()) {
+            String expressionContent = matcher.group(1);
+            String resultValue;
+            try {
+                Object result = AviatorEvaluator.compile(expressionContent, true).execute(context.getEnv());
+                resultValue = JsonUtils.escapeJsonString(result.toString());
+            } catch (Exception e) {
+                throw new RuntimeException(String.format("表达式:%s %s", expressionContent, e.getMessage()));
+            }
+            matcher.appendReplacement(sb, resultValue);
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 }

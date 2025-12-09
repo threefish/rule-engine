@@ -13,21 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule.engine.definition.model.gateway;
+package cn.xjbpm.rule.node;
 
-import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
+import cn.xjbpm.rule.node.enums.TriggerMode;
+import cn.xjbpm.rule.node.model.TriggerRule;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * date: 2022/9/29
- * 并行网关
+ * date: 2025/12/9
  */
 @Data
-public class ParallelGatewayNode extends GatewayNode {
+public class StartNodeProperties {
 
-    @Override
-    public NodeType getType() {
-        return NodeType.ParallelGatewayNode;
-    }
+    /**
+     * 触发方式
+     */
+    private TriggerMode triggerMode;
+    /**
+     * 请求参数
+     */
+    private String requestParams;
+    /**
+     * 触发规则列表
+     */
+    private List<TriggerRule> triggers;
+
+
 }

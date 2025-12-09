@@ -21,10 +21,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 /**
  * @author 黄川 huchuc@vip.qq.com
  */
 @Data
+@SuppressWarnings("all")
 public class RuleFlowVO {
 
 
@@ -45,6 +49,19 @@ public class RuleFlowVO {
     private String draftContent;
 
     private RuleFlowStatus status;
+    /**
+     * 是否有更新
+     */
+    private boolean hasUpdate;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime createTime;
+
+    /**
+     * 更新时间，自动填充
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime updateTime;
 
     public static RuleFlowVO create(RuleFlowEntity entity) {
         if (entity == null) {
@@ -56,8 +73,27 @@ public class RuleFlowVO {
         vo.setName(entity.getName());
         vo.setDescription(entity.getDescription());
         vo.setContent(entity.getContent());
-        vo.setDraftContent(entity.getDraftContent() == null ? entity.getContent() : entity.getDraftContent());
+        vo.setDraftContent(entity.getDraftContent());
         vo.setStatus(entity.getStatus());
+        vo.setCreateTime(entity.getCreateTime());
+        vo.setUpdateTime(entity.getUpdateTime());
+        vo.setHasUpdate(Objects.equals(entity.getContent(), entity.getDraftContent()) == false);
+        return vo;
+    }
+
+    public static RuleFlowVO createPageView(RuleFlowEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        RuleFlowVO vo = new RuleFlowVO();
+        vo.setId(entity.getId());
+        vo.setKey(entity.getKey());
+        vo.setName(entity.getName());
+        vo.setDescription(entity.getDescription());
+        vo.setStatus(entity.getStatus());
+        vo.setCreateTime(entity.getCreateTime());
+        vo.setUpdateTime(entity.getUpdateTime());
+        vo.setHasUpdate(Objects.equals(entity.getContent(), entity.getDraftContent()) == false);
         return vo;
     }
 

@@ -15,12 +15,15 @@
  */
 package cn.xjbpm.rule.engine.definition.model;
 
+import cn.xjbpm.rule.engine.definition.model.enums.ErrorStrategy;
+import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
 import cn.xjbpm.rule.engine.definition.model.event.ExcutionListener;
 import cn.xjbpm.rule.engine.runtime.behavior.NodeBehavior;
 import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -67,11 +70,20 @@ public abstract class Node implements java.io.Serializable {
     /**
      * 最大重试次数
      */
-    protected Integer maxRetries;
+    protected int maxRetries;
     /**
      * 重试间隔（毫秒）
      **/
-    protected Integer retryDelay;
+    protected int retryDelay;
+    /**
+     * 失败时重试
+     */
+    protected boolean retryOnFail;
+
+    /**
+     * 错误处理策略
+     */
+    protected ErrorStrategy errorStrategy;
 
     /**
      * 传入节点
@@ -94,6 +106,10 @@ public abstract class Node implements java.io.Serializable {
      * 原始json 通过json转为model时存储，转换为json信息时还原
      */
     protected String originalJson;
+    /**
+     * 自定义属性
+     */
+    protected Map<String, Object> properties;
 
     /**
      * 获取类型

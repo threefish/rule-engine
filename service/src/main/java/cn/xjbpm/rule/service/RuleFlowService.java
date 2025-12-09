@@ -15,11 +15,21 @@
  */
 package cn.xjbpm.rule.service;
 
-import cn.xjbpm.rule.listenner.event.RemoveRuleFlowCacheEvent;
+import cn.xjbpm.rule.common.utils.JsonUtils;
+import cn.xjbpm.rule.custom.RuleFlowModelCacheService;
+import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
+import cn.xjbpm.rule.engine.definition.model.StartNode;
+import cn.xjbpm.rule.listener.event.RemoveRuleFlowCacheEvent;
+import cn.xjbpm.rule.node.StartNodeProperties;
+import cn.xjbpm.rule.node.enums.TriggerMode;
+import cn.xjbpm.rule.node.model.TriggerRule;
 import cn.xjbpm.rule.repository.RuleFlowRepository;
+import cn.xjbpm.rule.repository.RuleFlowScheduledRepository;
 import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
+import cn.xjbpm.rule.repository.entity.RuleFlowScheduledEntity;
 import cn.xjbpm.rule.repository.enums.RuleFlowStatus;
-import cn.xjbpm.rule.utils.JpaUtil;
+import cn.xjbpm.rule.utils.FieldUtil;
+import cn.xjbpm.rule.utils.RuleParserUtil;
 import cn.xjbpm.rule.utils.TransactionOptDelayerHolder;
 import cn.xjbpm.rule.vo.RuleFlowVO;
 import jakarta.persistence.criteria.Predicate;
@@ -30,12 +40,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -47,7 +55,8 @@ public class RuleFlowService {
 
     private final RuleFlowRepository ruleFlowRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
-
+    private final RuleFlowScheduledRepository ruleFlowScheduledRepository;
+    private final SchedulerService schedulerService;
 
     /**
      * 根据ID获取规则流程实体的引用。
@@ -60,7 +69,6 @@ public class RuleFlowService {
         return RuleFlowVO.create(entity);
     }
 
-
     /**
      * 根据Key获取规则流程实体的引用。
      *
@@ -71,7 +79,6 @@ public class RuleFlowService {
         RuleFlowEntity entity = ruleFlowRepository.findByKeyAndStatus(key, RuleFlowStatus.DEOPLOYED).orElse(null);
         return RuleFlowVO.create(entity);
     }
-
 
     /**
      * 分页查询所有规则流程实体。
@@ -85,19 +92,18 @@ public class RuleFlowService {
         Specification<RuleFlowEntity> specification = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (StringUtils.hasText(key)) {
-                predicates.add(criteriaBuilder.equal(JpaUtil.field(root, RuleFlowEntity::getKey), key));
+                predicates.add(criteriaBuilder.equal(FieldUtil.field(root, RuleFlowEntity::getKey), key));
             }
             if (StringUtils.hasText(name)) {
-                predicates.add(criteriaBuilder.like(JpaUtil.field(root, RuleFlowEntity::getName), "%" + name + "%"));
+                predicates.add(criteriaBuilder.like(FieldUtil.field(root, RuleFlowEntity::getName), "%" + name + "%"));
             }
             if (status != null) {
-                predicates.add(criteriaBuilder.equal(JpaUtil.field(root, RuleFlowEntity::getStatus), status));
+                predicates.add(criteriaBuilder.equal(FieldUtil.field(root, RuleFlowEntity::getStatus), status));
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
         return ruleFlowRepository.findAll(specification, pageable);
     }
-
 
     /**
      * @param request 待保存或更新的 RuleFlowEntity
@@ -138,13 +144,35 @@ public class RuleFlowService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public boolean deployById(Long id) {
+    public boolean deployById(Long id, boolean updateContent) {
         RuleFlowEntity baseEntity = ruleFlowRepository.findById(id).orElse(null);
         if (Objects.nonNull(baseEntity)) {
-            baseEntity.setContent(baseEntity.getDraftContent());
+            if (updateContent) {
+                baseEntity.setContent(baseEntity.getDraftContent());
+            }
             baseEntity.setStatus(RuleFlowStatus.DEOPLOYED);
+            RuleFlowModel ruleFlowModel = RuleFlowModelCacheService.RULE_FLOW_MODEL_PARSE.convertToModel(baseEntity.getContent());
+            StartNode startNode = ruleFlowModel.getStartNode();
+            Map<String, Object> properties = startNode.getProperties();
+            if (Objects.nonNull(properties)) {
+                StartNodeProperties startNodeProperties = JsonUtils.json2Obj(JsonUtils.obj2Json(properties), StartNodeProperties.class);
+                TriggerMode triggerMode = startNodeProperties.getTriggerMode();
+                List<RuleFlowScheduledEntity> ruleFlowScheduledEntities = new ArrayList<>();
+                if (triggerMode == TriggerMode.SCHEDULED && CollectionUtils.isEmpty(startNodeProperties.getTriggers()) == false) {
+                    List<TriggerRule> triggers = startNodeProperties.getTriggers();
+                    for (TriggerRule rule : triggers) {
+                        RuleFlowScheduledEntity scheduledEntity = new RuleFlowScheduledEntity();
+                        scheduledEntity.setRuleFlowKey(baseEntity.getKey());
+                        scheduledEntity.setRequestParams(JsonUtils.obj2Json(JsonUtils.json2Obj(startNodeProperties.getRequestParams(), Map.class)));
+                        scheduledEntity.setCronExpression(RuleParserUtil.generateCronExpression(rule));
+                        ruleFlowScheduledEntities.add(scheduledEntity);
+                    }
+                    ruleFlowScheduledRepository.deleteAllByRuleFlowKey(baseEntity.getKey());
+                    ruleFlowScheduledRepository.saveAll(ruleFlowScheduledEntities);
+                }
+                TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> schedulerService.refreshRuleFlowTasks(baseEntity.getKey(), ruleFlowScheduledEntities));
+            }
             ruleFlowRepository.save(baseEntity);
-            // TODO 处理定时启动节点
             TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> applicationEventPublisher.publishEvent(RemoveRuleFlowCacheEvent.create(baseEntity.getKey())));
         }
         return true;
@@ -157,9 +185,12 @@ public class RuleFlowService {
             TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> applicationEventPublisher.publishEvent(RemoveRuleFlowCacheEvent.create(baseEntity.getKey())));
             baseEntity.setStatus(RuleFlowStatus.DISABLED);
             ruleFlowRepository.save(baseEntity);
+            ruleFlowScheduledRepository.deleteAllByRuleFlowKey(baseEntity.getKey());
+            TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> schedulerService.clearScheduledTasks(baseEntity.getKey()));
             return true;
         }
         return false;
     }
+
 
 }

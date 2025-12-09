@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule.listenner.event;
+package cn.xjbpm.rule.listener.event;
 
 import org.springframework.context.ApplicationEvent;
 

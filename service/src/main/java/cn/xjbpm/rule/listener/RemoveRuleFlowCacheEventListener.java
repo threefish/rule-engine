@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule.listenner;
+package cn.xjbpm.rule.listener;
 
-import cn.xjbpm.rule.listenner.event.RemoveRuleFlowCacheEvent;
+import cn.xjbpm.rule.listener.event.RemoveRuleFlowCacheEvent;
 import cn.xjbpm.rule.service.DefaultRuleFlowModelCacheService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

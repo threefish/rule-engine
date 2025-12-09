@@ -27,11 +27,11 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author 黄川 huchuc@vip.qq.com
  */
-public class JpaUtil {
+public class FieldUtil {
     private static final ConcurrentHashMap<SFunction<?, ?>, String> LAMBDA_CACHE = new ConcurrentHashMap<>();
 
     public static <T, R> String name(SFunction<T, R> fn) {
-        return LAMBDA_CACHE.computeIfAbsent(fn, JpaUtil::doParseFieldName);
+        return LAMBDA_CACHE.computeIfAbsent(fn, FieldUtil::doParseFieldName);
     }
 
     private static String doParseFieldName(SFunction<?, ?> fn) {
@@ -55,6 +55,6 @@ public class JpaUtil {
     }
 
     public static <T, R> Expression<R> field(Root<T> root, SFunction<T, R> fn) {
-        return root.get(LAMBDA_CACHE.computeIfAbsent(fn, JpaUtil::doParseFieldName));
+        return root.get(LAMBDA_CACHE.computeIfAbsent(fn, FieldUtil::doParseFieldName));
     }
 }

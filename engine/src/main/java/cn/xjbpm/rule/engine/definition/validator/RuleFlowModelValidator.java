@@ -16,12 +16,15 @@
 package cn.xjbpm.rule.engine.definition.validator;
 
 import cn.xjbpm.rule.engine.definition.model.Node;
-import cn.xjbpm.rule.engine.definition.model.NodeType;
+import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
 import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -29,12 +32,32 @@ import java.util.List;
  */
 public class RuleFlowModelValidator {
 
+    /**
+     * 内置校验器
+     */
+    public static final Map<NodeType, NodeValidator> nodeValidatorMap = new ConcurrentHashMap<>();
+    /**
+     * 自定义校验器
+     */
+    public static final Map<NodeType, NodeValidator> customNodeValidatorMap = new ConcurrentHashMap<>();
 
     /**
-     * 校验
+     * 允许外部程序注入自定义校验类或对象。
+     * * @param type 节点类型
      *
-     * @param ruleFlowModel
-     * @return
+     * @param validator 校验器实例
+     */
+    public static void registerValidator(NodeType type, NodeValidator validator) {
+        if (type != null && validator != null) {
+            customNodeValidatorMap.put(type, validator);
+        }
+    }
+
+    /**
+     * 校验方法
+     *
+     * @param ruleFlowModel 规则流程模型
+     * @return 错误节点信息列表
      */
     public List<ErrorNodeMsg> check(RuleFlowModel ruleFlowModel) {
         List<? extends Node> childNodes = ruleFlowModel.getChildNodes();
@@ -42,12 +65,25 @@ public class RuleFlowModelValidator {
         if (!CollectionUtils.isEmpty(childNodes)) {
             for (Node childNode : childNodes) {
                 NodeType type = childNode.getType();
-                Class<? extends NodeValidator> validatorClass = type.getValidatorClass();
+                NodeValidator validator = nodeValidatorMap.computeIfAbsent(type, k -> {
+                    try {
+                        return type.getValidatorClass().newInstance();
+                    } catch (Exception e) {
+                        throw new RuntimeException("无法创建校验器实例: " + k, e);
+                    }
+                });
                 try {
-                    //TODO 性能待优化
-                    validatorClass.newInstance().check(childNode);
+                    validator.check(childNode);
                 } catch (Exception e) {
                     errorNodeMsgs.add(new ErrorNodeMsg(childNode.getId(), type, e.getMessage()));
+                }
+                NodeValidator nodeValidator = customNodeValidatorMap.get(type);
+                if (Objects.nonNull(nodeValidator)) {
+                    try {
+                        nodeValidator.check(childNode);
+                    } catch (Exception e) {
+                        errorNodeMsgs.add(new ErrorNodeMsg(childNode.getId(), type, e.getMessage()));
+                    }
                 }
             }
         }

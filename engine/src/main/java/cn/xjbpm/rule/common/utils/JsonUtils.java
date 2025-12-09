@@ -116,14 +116,37 @@ public class JsonUtils {
 
     /**
      * List<Map> 到 List<T> 的高效转换
+     *
      * @param fromValue
      * @param elementClass
-     * @return
      * @param <T>
+     * @return
      */
     public static <T> List<T> convertValueToList(Object fromValue, Class<T> elementClass) {
         JavaType listType = OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, elementClass);
         return OBJECT_MAPPER.convertValue(fromValue, listType);
+    }
+
+
+    /**
+     * 使用 Jackson 库执行专业、高性能的 JSON 字符串转义。
+     *
+     * @param originalString 原始字符串
+     * @return 经过转义的字符串（不包含首尾双引号）
+     */
+    public static String escapeJsonString(String originalString) {
+        if (originalString == null) {
+            return null;
+        }
+        try {
+            String escapedAndQuoted = OBJECT_MAPPER.writeValueAsString(originalString);
+            if (escapedAndQuoted.length() >= 2) {
+                return escapedAndQuoted.substring(1, escapedAndQuoted.length() - 1);
+            }
+            return "";
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("JSON转义字符串时出错:" + originalString, e);
+        }
     }
 
     /**

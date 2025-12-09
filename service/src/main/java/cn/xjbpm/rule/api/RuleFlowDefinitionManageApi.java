@@ -32,6 +32,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * @author 黄川 huchuc@vip.qq.com
  */
@@ -55,12 +58,17 @@ public class RuleFlowDefinitionManageApi {
 
     @PostMapping("/deploy")
     public ResultVO<Boolean> deploy(@Validated @RequestBody IDRequestVO request) {
-        return ResultVO.success(ruleFlowService.deployById(request.getId()));
+        return ResultVO.success(ruleFlowService.deployById(request.getId(), true));
     }
 
     @PostMapping("/disable")
     public ResultVO<Boolean> disable(@Validated @RequestBody IDRequestVO request) {
         return ResultVO.success(ruleFlowService.disableById(request.getId()));
+    }
+
+    @PostMapping("/enable")
+    public ResultVO<Boolean> enable(@Validated @RequestBody IDRequestVO request) {
+        return ResultVO.success(ruleFlowService.deployById(request.getId(), false));
     }
 
     @PostMapping("/get")
@@ -69,8 +77,9 @@ public class RuleFlowDefinitionManageApi {
     }
 
     @PostMapping("/page")
-    public ResultVO<PageVO<RuleFlowEntity>> page(Pageable pageable, @RequestBody RuleFlowPageQuery query) {
+    public ResultVO<PageVO<RuleFlowVO>> page(Pageable pageable, @RequestBody RuleFlowPageQuery query) {
         Page<RuleFlowEntity> page = ruleFlowService.findPage(query.getKey(), query.getName(), query.getStatus(), pageable);
-        return ResultVO.success(PageVO.of(page));
+        List<RuleFlowVO> voList = page.getContent().stream().map(RuleFlowVO::createPageView).collect(Collectors.toList());
+        return ResultVO.success(PageVO.of(page, voList));
     }
 }

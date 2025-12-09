@@ -17,8 +17,10 @@ package cn.xjbpm.rule.engine.definition.parse;
 
 import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.engine.definition.model.*;
+import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
 import cn.xjbpm.rule.engine.runtime.behavior.BehaviorFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
@@ -82,6 +84,7 @@ public class RuleFlowModelParse {
                 // 填充基础属性
                 node.setOriginalJson(JsonUtils.obj2Json(map));
                 node.setType(type);
+                node.setProperties(properties);
                 node.setId(getString(map.get("id")));
 
                 Map<String, Object> text = (Map<String, Object>) map.get("text");
@@ -150,6 +153,7 @@ public class RuleFlowModelParse {
             }
 
             ruleFlowModel.setChildNodes(nodes);
+            Assert.notNull(ruleFlowModel.getStartNode(), "规则流必须包含开始节点");
             setBehavior(ruleFlowModel);
             return ruleFlowModel;
         } catch (Exception e) {

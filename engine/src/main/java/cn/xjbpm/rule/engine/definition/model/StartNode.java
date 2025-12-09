@@ -15,6 +15,7 @@
  */
 package cn.xjbpm.rule.engine.definition.model;
 
+import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
 import lombok.Data;
 
 /**

@@ -15,7 +15,7 @@
  */
 package cn.xjbpm.rule.repository.entity;
 
-import cn.xjbpm.rule.repository.enums.RuleFlowStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,19 +27,18 @@ import java.time.LocalDateTime;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * 规则流程实体
  */
 @Entity
 @Table(
-        name = "rule_flow",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uc_flow_key_version", columnNames = {"flow_key", "version"})
+        name = "rule_flow_scheduled",
+        indexes = {
+                @Index(name = "rule_flow_scheduled_key", columnList = "ruleFlowKey")
         }
 )
 @Data
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class RuleFlowEntity {
+public class RuleFlowScheduledEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,47 +48,28 @@ public class RuleFlowEntity {
     /**
      * 唯一标识
      */
-    @Column(name = "flow_key", nullable = false, unique = true, length = 20)
-    private String key;
+    @Column(name = "rule_flow_key", nullable = false, length = 20)
+    private String ruleFlowKey;
 
     /**
      * 名称
      */
-    @Column(name = "name", nullable = false, length = 20)
-    private String name;
+    @Column(name = "cron_expression", nullable = false, length = 20)
+    private String cronExpression;
 
     /**
-     * 描述（200字）
-     */
-    @Column(name = "description", length = 200)
-    private String description;
-
-    /**
-     * 状态
-     */
-    @Column(name = "status", columnDefinition = "varchar(10)  not null default 'UNDEPLOYED'")
-    @Enumerated(EnumType.STRING)
-    private RuleFlowStatus status;
-
-    /**
-     * 规则流程内容（大文本字段）
+     * 参数
      */
     @Lob
-    @Column(name = "content", columnDefinition = "LONGTEXT")
-    private String content;
-
-    /**
-     * 规则流程内容（草稿大文本字段）
-     */
-    @Lob
-    @Column(name = "draft_content", columnDefinition = "LONGTEXT")
-    private String draftContent;
+    @Column(name = "request_params", columnDefinition = "LONGTEXT")
+    private String requestParams;
 
     /**
      * 创建时间，自动填充
      */
     @Column(name = "create_time", nullable = false)
     @CreatedDate
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
 
     /**
@@ -97,7 +77,7 @@ public class RuleFlowEntity {
      */
     @Column(name = "update_time", nullable = false)
     @LastModifiedDate
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime updateTime;
-
 
 }

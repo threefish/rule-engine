@@ -29,4 +29,14 @@ public class PageVO<T> {
         return vo;
     }
 
+    public static <T> PageVO<T> of(Page page,List<T>  content) {
+        PageVO<T> vo = new PageVO<>();
+        vo.setTotalElements(page.getTotalElements());
+        vo.setTotalPages(page.getTotalPages());
+        vo.setContent(content);
+        vo.setNumber(page.getNumber());
+        vo.setSize(page.getSize());
+        return vo;
+    }
+
 }

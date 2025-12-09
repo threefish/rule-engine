@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule.engine.definition.model;
+package cn.xjbpm.rule.engine.definition.model.enums;
 
+import cn.xjbpm.rule.engine.definition.model.*;
+import cn.xjbpm.rule.engine.definition.model.activity.DecisionTablesNode;
 import cn.xjbpm.rule.engine.definition.model.activity.FunctionActivityNode;
+import cn.xjbpm.rule.engine.definition.model.activity.RuleSetNode;
+import cn.xjbpm.rule.engine.definition.model.activity.ScoringCardNode;
 import cn.xjbpm.rule.engine.definition.model.gateway.ExclusiveGatewayNode;
 import cn.xjbpm.rule.engine.definition.model.gateway.InclusiveGatewayNode;
 import cn.xjbpm.rule.engine.definition.model.gateway.ParallelGatewayNode;
@@ -33,20 +37,15 @@ import lombok.Getter;
 public enum NodeType {
     StartNode(StartNode.class, BaseNodeValidator.class, StartNodeBehavior.class),
     EndNode(EndNode.class, BaseNodeValidator.class, EndNodeBehavior.class),
-
     SequenceConnNode(SequenceConnNode.class, BaseNodeValidator.class, SequenceConnNodeBehavior.class),
     ExclusiveGatewayNode(ExclusiveGatewayNode.class, BaseNodeValidator.class, ExclusiveGatewayNodeBehavior.class),
     InclusiveGatewayNode(InclusiveGatewayNode.class, BaseNodeValidator.class, InclusiveGatewayNodeBehavior.class),
     ParallelGatewayNode(ParallelGatewayNode.class, BaseNodeValidator.class, ParallelGatewayNodeBehavior.class),
     FunctionActivityNode(FunctionActivityNode.class, FunctionActivityNodeValidator.class, FunctionActivityNodeBehavior.class),
-    RuleSetNode(cn.xjbpm.rule.engine.definition.model.activity.RuleSetNode.class, RuleSetNodeValidator.class, RuleSetNodeBehavior.class),
-
-    ScoringCardNode(cn.xjbpm.rule.engine.definition.model.activity.ScoringCardNode.class, ScoringCardNodeValidator.class, ScoringCardNodeBehavior.class),
-
-    DecisionTablesNode(cn.xjbpm.rule.engine.definition.model.activity.DecisionTablesNode.class, DecisionTablesNodeValidator.class, DecisionTablesNodeBehavior.class),
+    RuleSetNode(RuleSetNode.class, RuleSetNodeValidator.class, RuleSetNodeBehavior.class),
+    ScoringCardNode(ScoringCardNode.class, ScoringCardNodeValidator.class, ScoringCardNodeBehavior.class),
+    DecisionTablesNode(DecisionTablesNode.class, DecisionTablesNodeValidator.class, DecisionTablesNodeBehavior.class),
     DelayWaitNode(DelayWaitNode.class, DelayWaitNodeValidator.class, DelayWaitNodeBehavior.class),
-
-
     ;
 
     Class<? extends Node> nodeClass;

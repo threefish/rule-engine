@@ -13,21 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.xjbpm.rule.engine.definition.model.gateway;
-
-import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
-import lombok.Data;
+package cn.xjbpm.rule.node.enums;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * date: 2022/9/29
- * 并行网关
+ * date: 2025/12/9
  */
-@Data
-public class ParallelGatewayNode extends GatewayNode {
-
-    @Override
-    public NodeType getType() {
-        return NodeType.ParallelGatewayNode;
-    }
-}
+public enum TimeUnit {SECONDS, MINUTES, HOURS, DAYS, WEEKS, MONTHS, CRON}

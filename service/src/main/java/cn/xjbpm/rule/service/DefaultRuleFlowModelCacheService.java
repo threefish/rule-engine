@@ -16,11 +16,12 @@
 package cn.xjbpm.rule.service;
 
 import cn.xjbpm.rule.custom.RuleFlowModelCacheService;
+import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
 import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
+import cn.xjbpm.rule.node.validator.StartNodeValidator;
 import cn.xjbpm.rule.vo.RuleFlowVO;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -30,10 +31,9 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author 黄川 huchuc@vip.qq.com
  * date: 2025/11/22
- * 规则流缓存服务（集群部署时请使用分布式缓存）
+ * 规则流缓存服务
  */
 @Service
-@AllArgsConstructor
 public class DefaultRuleFlowModelCacheService implements RuleFlowModelCacheService {
 
     private final RuleFlowService ruleFlowService;
@@ -42,6 +42,11 @@ public class DefaultRuleFlowModelCacheService implements RuleFlowModelCacheServi
             .maximumSize(100)
             .expireAfterWrite(1, TimeUnit.HOURS)
             .build();
+
+    public DefaultRuleFlowModelCacheService(RuleFlowService ruleFlowService) {
+        this.ruleFlowService = ruleFlowService;
+        RuleFlowModelCacheService.RULE_FLOW_MODEL_VALIDATOR.registerValidator(NodeType.StartNode, new StartNodeValidator());
+    }
 
     @Override
     public RuleFlowModel getModel(String key) {

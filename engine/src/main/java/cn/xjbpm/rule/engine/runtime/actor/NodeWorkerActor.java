@@ -20,6 +20,7 @@ import akka.actor.Props;
 import cn.xjbpm.rule.common.utils.StringUtils;
 import cn.xjbpm.rule.common.utils.TimeFormatUtil;
 import cn.xjbpm.rule.engine.definition.model.*;
+import cn.xjbpm.rule.engine.definition.model.enums.ErrorStrategy;
 import cn.xjbpm.rule.engine.definition.model.gateway.ExclusiveGatewayNode;
 import cn.xjbpm.rule.engine.definition.model.gateway.InclusiveGatewayNode;
 import cn.xjbpm.rule.engine.definition.model.gateway.ParallelGatewayNode;
@@ -30,6 +31,7 @@ import cn.xjbpm.rule.engine.runtime.model.NodeExcution;
 import lombok.extern.slf4j.Slf4j;
 import scala.concurrent.duration.FiniteDuration;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -86,12 +88,12 @@ public class NodeWorkerActor extends AbstractActor {
     private void handleFailure(WorkflowProtocol.ExecuteNode msg, Exception e) {
         Node node = msg.getNode();
         int currentAttempt = msg.getAttempt();
-        if (isExcludeRetryNode(node)) {
+        if (isExcludeRetryNode(node) || node.isRetryOnFail() == false) {
             this.flowContext.addTraceLog(StringUtils.format("[{}] 执行异常: {}", node.getId(), e.getMessage()));
+            recordExecution(node, msg.getStartTotalTime(), System.nanoTime(), ExecutStatus.FAILURE, e.getMessage());
         } else {
-            int maxRetries = getRetryCount(node);
-            long delaySeconds = getRetryDelay(node);
-
+            int maxRetries = node.getMaxRetries();
+            long delaySeconds = node.getRetryDelay();
             if (currentAttempt < maxRetries) {
                 int nextAttempt = currentAttempt + 1;
                 this.flowContext.addTraceLog(StringUtils.format("[{}] 执行异常 启用重试 准备第{}次重试 最大重试{}次 延迟{}ms",
@@ -114,9 +116,14 @@ public class NodeWorkerActor extends AbstractActor {
                     node.getId(), TimeFormatUtil.formatNanosToMs(endTime - msg.getStartTotalTime()), e.getMessage()));
             recordExecution(node, msg.getStartTotalTime(), endTime, ExecutStatus.FAILURE, e.getMessage());
         }
-        // 通知 Master 失败
-        getSender().tell(new WorkflowProtocol.NodeFailed(node.getId(), node, e), getSelf());
 
+        if (getErrorStrategy(node) == ErrorStrategy.TERMINATE) {
+            // 通知 Master 失败
+            getSender().tell(new WorkflowProtocol.NodeFailed(node.getId(), node, e), getSelf());
+        } else {
+            // 继续执行
+            getSender().tell(new WorkflowProtocol.NodeCompleted(node.getId(), node, false), getSelf());
+        }
     }
 
     private boolean isExcludeRetryNode(Node node) {
@@ -129,12 +136,8 @@ public class NodeWorkerActor extends AbstractActor {
                 || node instanceof EndNode;
     }
 
-    private int getRetryCount(Node node) {
-        return node.getMaxRetries() == null ? 0 : node.getMaxRetries();
-    }
-
-    private long getRetryDelay(Node node) {
-        return node.getRetryDelay() == null ? 0 : node.getRetryDelay();
+    private ErrorStrategy getErrorStrategy(Node node) {
+        return Objects.nonNull(node.getErrorStrategy()) ? node.getErrorStrategy() : ErrorStrategy.TERMINATE;
     }
 
     private void recordExecution(Node node, long start, long end, ExecutStatus status, String error) {

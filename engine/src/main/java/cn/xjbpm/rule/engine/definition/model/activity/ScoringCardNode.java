@@ -15,7 +15,7 @@
  */
 package cn.xjbpm.rule.engine.definition.model.activity;
 
-import cn.xjbpm.rule.engine.definition.model.NodeType;
+import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
 import cn.xjbpm.rule.engine.definition.model.activity.scoringcard.ScoringCalcMethodEnums;
 import cn.xjbpm.rule.engine.definition.model.activity.scoringcard.ScoringCardRow;
 import cn.xjbpm.rule.engine.definition.model.activity.scoringcard.ScoringCardWeight;
