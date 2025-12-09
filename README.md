@@ -176,6 +176,19 @@ ExcuteRuleFlowResult result = processRunService.excute(createProcessRequest);
 
 ![规则引擎界面3](screenshot/规则引擎4.png)
 
+### 规则引擎界面6
+
+![规则引擎界面3](screenshot/规则引擎5.png)
+
+### 规则引擎界面7
+
+![规则引擎界面3](screenshot/规则引擎6.png)
+
+### 规则引擎界面8
+
+![规则引擎界面3](screenshot/规则引擎7.png)
+
+
 ### 条件构造界面
 
 ![条件构造界面](screenshot/条件构造.png)
