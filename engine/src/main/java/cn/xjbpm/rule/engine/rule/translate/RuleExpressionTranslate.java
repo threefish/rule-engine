@@ -32,10 +32,7 @@ import java.util.List;
 @SuppressWarnings("all")
 public class RuleExpressionTranslate {
 
-
     public final Rule rule;
-
-
     private List<String> expressions = new ArrayList<>();
     private String expression;
 

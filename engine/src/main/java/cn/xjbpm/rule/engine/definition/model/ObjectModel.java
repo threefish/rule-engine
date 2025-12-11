@@ -27,12 +27,12 @@ import java.util.List;
 @Data
 public class ObjectModel implements java.io.Serializable {
 
-    String key;
-    String value;
-    VariableType type;
-    boolean required;
-    boolean response;
-    String label;
-    List<ObjectModel> children;
+    private String key;
+    private String value;
+    private VariableType type;
+    private boolean required;
+    private boolean response;
+    private String label;
+    private List<ObjectModel> children;
 
 }

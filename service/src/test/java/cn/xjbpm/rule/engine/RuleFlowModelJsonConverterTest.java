@@ -32,17 +32,17 @@ import java.util.List;
  * @author 黄川 huchuc@vip.qq.com
  * date: 2022/9/29
  */
-public class ProcessModelJsonConverterTest {
+public class RuleFlowModelJsonConverterTest {
 
     private static final RuleFlowModelParse PROCESS_MODEL_JSON_CONVERTER = new RuleFlowModelParse();
 
     @Test
     void convertToJson() {
 
-        RuleFlowModel processModel = new RuleFlowModel();
-        processModel.setKey("test");
-        processModel.setName("测试流程");
-        processModel.setDescription("测试流程");
+        RuleFlowModel ruleFlowModel = new RuleFlowModel();
+        ruleFlowModel.setKey("test");
+        ruleFlowModel.setName("测试流程");
+        ruleFlowModel.setDescription("测试流程");
 
         StartNode startNode = new StartNode();
         startNode.setId("start");
@@ -71,9 +71,9 @@ public class ProcessModelJsonConverterTest {
         f1_to_end.setSourceNodeKey("f1");
         f1_to_end.setTargetNodeKey("end");
 
-        processModel.setChildNodes(Arrays.asList(startNode, endNode, fun1, f1_to_end, f1_to_end));
+        ruleFlowModel.setChildNodes(Arrays.asList(startNode, endNode, fun1, f1_to_end, f1_to_end));
 
-        String json = PROCESS_MODEL_JSON_CONVERTER.convertToJson(processModel);
+        String json = PROCESS_MODEL_JSON_CONVERTER.convertToJson(ruleFlowModel);
 
         System.out.println(json);
     }
@@ -203,14 +203,14 @@ public class ProcessModelJsonConverterTest {
                 "    ]\n" +
                 "}";
 
-        RuleFlowModel processModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(json);
+        RuleFlowModel ruleFlowModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(json);
 
-        RuleFlowModelValidator processModelValidator = new RuleFlowModelValidator();
-        List<ErrorNodeMsg> errorNodeMsgs = processModelValidator.check(processModel);
+        RuleFlowModelValidator ruleFlowModelValidator = new RuleFlowModelValidator();
+        List<ErrorNodeMsg> errorNodeMsgs = ruleFlowModelValidator.check(ruleFlowModel);
 
-        String json2 = PROCESS_MODEL_JSON_CONVERTER.convertToJson(processModel);
+        String json2 = PROCESS_MODEL_JSON_CONVERTER.convertToJson(ruleFlowModel);
 
-        System.out.println(processModel);
+        System.out.println(ruleFlowModel);
         System.out.println(errorNodeMsgs);
         System.out.println(json2);
     }

@@ -19,21 +19,8 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.engine.definition.model.ObjectModel;
 import cn.xjbpm.rule.engine.rule.enums.VariableType;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.SneakyThrows;
-import org.springframework.util.Assert;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -41,127 +28,109 @@ import java.util.Map;
  */
 @SuppressWarnings("all")
 public class VariableTranslateUtils {
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new Jdk8Module())
-            .registerModule(new JavaTimeModule()).setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+    public static Map<String, Object> translate(List<ObjectModel> businessObjectModels, boolean response, Map<String, Object> variable) {
+        if (variable == null) {
+            return new HashMap<>();
+        }
+        return translateInternal(businessObjectModels, response, variable);
+    }
 
-    @SneakyThrows
-    public static Map<String, Object> translate(List<ObjectModel> businessObjectModels, boolean response, Map variable) {
-        String jsonData = JsonUtils.obj2Json(new HashMap<>(variable));
-        JsonNode jsonNode = OBJECT_MAPPER.readTree(jsonData);
-        ObjectNode targetNode = OBJECT_MAPPER.createObjectNode();
-        for (ObjectModel businessObjectModel : businessObjectModels) {
-            if (response && businessObjectModel.isResponse() == false) {
-                // 不需要返回的
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> translateInternal(List<ObjectModel> models, boolean response, Map<String, Object> sourceMap) {
+        Map<String, Object> targetMap = new HashMap<>(models.size());
+
+        for (ObjectModel model : models) {
+            // 1. 过滤不需要返回的字段
+            if (response && !model.isResponse()) {
                 continue;
             }
-            JsonNode currentNode = jsonNode.get(businessObjectModel.getValue());
-            if (response) {
-                currentNode = jsonNode.get(businessObjectModel.getLabel());
-            }
-            if (!businessObjectModel.isRequired() && currentNode == null) {
-                //非必须的且为null
+
+            // 2. 确定取值的 Key
+            // 如果是 response 模式，通常意味着从内部 key 映射出去；如果是 request 模式，是从外部 key 映射进来。
+            String sourceKey = response ? model.getLabel() : model.getValue();
+            Object sourceValue = sourceMap.get(sourceKey);
+
+            // 3. 非必须且为 null，直接跳过
+            if (!model.isRequired() && sourceValue == null) {
                 continue;
             }
-            checkNotNull(businessObjectModel, currentNode);
-            translate(businessObjectModel, response, currentNode, targetNode);
-        }
-        return OBJECT_MAPPER.convertValue(targetNode, Map.class);
-    }
 
-    private static void checkNotNull(ObjectModel businessObjectModel, JsonNode jsonNode) {
-        VariableType type = businessObjectModel.getType();
-        if (businessObjectModel.isRequired()) {
-            Assert.notNull(jsonNode, String.format("[%s]字段不能为空", businessObjectModel.getLabel()));
-            if (type == VariableType.LIST) {
-                Assert.isTrue(jsonNode instanceof ArrayNode, String.format("[%s]字段必须为集合", businessObjectModel.getLabel()));
-                ArrayNode arrayNode = ((ArrayNode) jsonNode);
-                Assert.isTrue(!arrayNode.isEmpty(), String.format("[%s]集合不能为空", businessObjectModel.getLabel()));
-            }
-            if (type == VariableType.OBJECT) {
-                Assert.isTrue(jsonNode instanceof ObjectNode, String.format("[%s]字段必须为对象", businessObjectModel.getLabel()));
-                ObjectNode objectNode = ((ObjectNode) jsonNode);
-                Assert.isTrue(!objectNode.isEmpty(), String.format("[%s]对象下级属性不能为空", businessObjectModel.getLabel()));
-            }
-            if (type == VariableType.STRING) {
-                Assert.isTrue(StrUtil.isNotBlank(jsonNode.asText()), String.format("[%s]字段不能为空", businessObjectModel.getLabel()));
-            }
-        }
-    }
+            // 4. 校验 (优化：避免 String.format 的预计算)
+            checkNotNull(model, sourceValue);
 
-    private static void translate(ObjectModel businessObjectModel, boolean response, JsonNode currentNode, ObjectNode targetNode) {
-        if (businessObjectModel.getType() == VariableType.OBJECT) {
-            translateObject(businessObjectModel, response, currentNode, targetNode);
-        } else if (businessObjectModel.getType() == VariableType.LIST) {
-            translateArray(businessObjectModel, response, currentNode, targetNode);
-        } else {
-            translateBaseNode(businessObjectModel, response, currentNode, targetNode);
-        }
-    }
+            // 5. 确定目标 Key
+            String targetKey = response ? model.getValue() : model.getLabel();
 
-    private static void translateBaseNode(ObjectModel businessObjectModel, boolean response, JsonNode currentNode, ObjectNode targetNode) {
-        if (!response) {
-            targetNode.set(businessObjectModel.getLabel(), currentNode);
-        } else {
-            targetNode.set(businessObjectModel.getValue(), currentNode);
-        }
-    }
-
-
-    private static void translateObject(ObjectModel businessObjectModel, boolean response, JsonNode currentNode, ObjectNode targetNode) {
-        ObjectNode tempNode = OBJECT_MAPPER.createObjectNode();
-        List<ObjectModel> children = businessObjectModel.getChildren();
-        if (CollUtil.isNotEmpty(children)) {
-            for (ObjectModel child : children) {
-                if (response && child.isResponse() == false) {
-                    continue;
+            // 6. 递归处理或直接赋值
+            if (model.getType() == VariableType.OBJECT) {
+                if (sourceValue instanceof Map) {
+                    Map<String, Object> childResult = translateInternal(model.getChildren(), response, (Map<String, Object>) sourceValue);
+                    targetMap.put(targetKey, childResult);
                 }
-                JsonNode childNode = currentNode.get(child.getValue());
-                if (response) {
-                    childNode = currentNode.get(child.getLabel());
+            } else if (model.getType() == VariableType.LIST) {
+                if (sourceValue instanceof Collection) {
+                    List<Object> listResult = translateList(model, response, (Collection<?>) sourceValue);
+                    targetMap.put(targetKey, listResult);
                 }
-                checkNotNull(child, childNode);
-                translate(child, response, childNode, tempNode);
+            } else {
+                // 基础类型直接赋值 (如果需要类型强转，可以在这里结合 VariableType 的策略)
+                targetMap.put(targetKey, sourceValue);
             }
         }
-        if (!response) {
-            targetNode.set(businessObjectModel.getLabel(), tempNode);
-        } else {
-            targetNode.set(businessObjectModel.getValue(), tempNode);
-        }
+        return targetMap;
     }
 
-    private static void translateArray(ObjectModel businessObjectModel, boolean response, JsonNode currentNode, ObjectNode targetNode) {
-        if (currentNode == null) {
+    @SuppressWarnings("unchecked")
+    private static List<Object> translateList(ObjectModel model, boolean response, Collection<?> sourceList) {
+        List<Object> resultList = new ArrayList<>(sourceList.size());
+        List<ObjectModel> childrenModels = model.getChildren();
+
+        if (CollUtil.isEmpty(childrenModels)) {
+            // 如果没有定义子结构，直接拷贝值
+            resultList.addAll(sourceList);
+            return resultList;
+        }
+
+        for (Object item : sourceList) {
+            if (item instanceof Map) {
+                // 列表中的每个对象都需要递归转换
+                Map<String, Object> convertedItem = translateInternal(childrenModels, response, (Map<String, Object>) item);
+                resultList.add(convertedItem);
+            }
+        }
+        return resultList;
+    }
+
+    private static void checkNotNull(ObjectModel model, Object value) {
+        if (!model.isRequired()) {
             return;
         }
-        Assert.isTrue(currentNode instanceof ArrayNode, String.format("[%s]字段实际内容不是list格式！", businessObjectModel.getLabel(), businessObjectModel.getType()));
-        if (currentNode instanceof ArrayNode) {
-            ArrayNode arrayNode = (ArrayNode) currentNode;
-            ArrayNode tempArrayNode = OBJECT_MAPPER.createArrayNode();
-            for (JsonNode arrChildNode : arrayNode) {
-                List<ObjectModel> children = businessObjectModel.getChildren();
-                if (CollUtil.isNotEmpty(children)) {
-                    ObjectNode tempNode = OBJECT_MAPPER.createObjectNode();
-                    for (ObjectModel child : children) {
-                        if (response && child.isResponse() == false) {
-                            continue;
-                        }
-                        JsonNode childNode = arrChildNode.get(child.getValue());
-                        if (response) {
-                            childNode = arrChildNode.get(child.getLabel());
-                        }
-                        checkNotNull(child, childNode);
-                        translate(child, response, childNode, tempNode);
-                    }
-                    tempArrayNode.add(tempNode);
-                }
+
+        // 仅在 value 为 null 时才进入异常抛出逻辑，避免 String.format 带来的开销
+        if (value == null) {
+            throw new IllegalArgumentException(String.format("[%s]字段不能为空", model.getLabel()));
+        }
+
+        VariableType type = model.getType();
+
+        // 简单的类型检查
+        if (type == VariableType.LIST) {
+            if (!(value instanceof Collection)) {
+                throw new IllegalArgumentException(String.format("[%s]字段必须为集合", model.getLabel()));
             }
-            if (!response) {
-                targetNode.set(businessObjectModel.getLabel(), tempArrayNode);
-            } else {
-                targetNode.set(businessObjectModel.getValue(), tempArrayNode);
+            if (CollUtil.isEmpty((Collection<?>) value)) {
+                throw new IllegalArgumentException(String.format("[%s]集合不能为空", model.getLabel()));
+            }
+        } else if (type == VariableType.OBJECT) {
+            if (!(value instanceof Map)) {
+                throw new IllegalArgumentException(String.format("[%s]字段必须为对象", model.getLabel()));
+            }
+            if (CollUtil.isEmpty((Map<?, ?>) value)) {
+                throw new IllegalArgumentException(String.format("[%s]对象下级属性不能为空", model.getLabel()));
+            }
+        } else if (type == VariableType.STRING) {
+            if (value instanceof String && StrUtil.isBlank((String) value)) {
+                throw new IllegalArgumentException(String.format("[%s]字段不能为空", model.getLabel()));
             }
         }
     }

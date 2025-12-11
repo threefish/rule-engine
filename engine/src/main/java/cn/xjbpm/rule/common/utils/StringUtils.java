@@ -40,4 +40,9 @@ public class StringUtils {
         sb.append(template, start, template.length());
         return sb.toString();
     }
+
+
+    public static boolean isBlank(String  str){
+        return str == null || str.trim().length() == 0;
+    }
 }

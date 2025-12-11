@@ -30,7 +30,7 @@ import cn.xjbpm.rule.engine.runtime.model.ExecutStatus;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
 import cn.xjbpm.rule.engine.runtime.model.NodeExcution;
 import cn.xjbpm.rule.event.RuleFlowExcuteCompledEvent;
-import lombok.AllArgsConstructor;
+import cn.xjbpm.rule.properties.RuleProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ApplicationEventPublisher;
@@ -50,15 +50,20 @@ import java.util.stream.Collectors;
  */
 @Component
 @Slf4j
-@AllArgsConstructor
 public class RuleFlowExcuteService implements DisposableBean {
-
 
     private final RuleFlowModelCacheService ruleFlowModelCacheService;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final ActorSystem actorSystem;
 
-    private final ActorSystem actorSystem = ActorSystem.create("rule-engine");
+    private final AkkaRuleFlowScheduler scheduler;
 
+    public RuleFlowExcuteService(RuleFlowModelCacheService ruleFlowModelCacheService, ApplicationEventPublisher applicationEventPublisher, RuleProperties ruleProperties) {
+        this.ruleFlowModelCacheService = ruleFlowModelCacheService;
+        this.applicationEventPublisher = applicationEventPublisher;
+        this.actorSystem = ActorSystem.create(ruleProperties.getAkkaSystemName());
+        this.scheduler = new AkkaRuleFlowScheduler(actorSystem, ruleProperties.getAkkaDefaultTimeoutSeconds(), ruleProperties.getAkkaGlobalWorkerPoolSize());
+    }
 
     @Override
     public void destroy() {
@@ -73,23 +78,22 @@ public class RuleFlowExcuteService implements DisposableBean {
      */
     public ExcuteRuleFlowResult startFlow(ExcuteRuleFlow request) {
         Assert.isTrue(StrUtil.isNotBlank(request.getKey()), "规则编码不能为空");
-        RuleFlowModel processModel;
+        RuleFlowModel ruleFlowModel;
         if (StringUtils.hasText(request.getContent())) {
-            processModel = ruleFlowModelCacheService.convertToModel(request.getContent());
+            ruleFlowModel = ruleFlowModelCacheService.convertToModel(request.getContent());
         } else {
-            processModel = ruleFlowModelCacheService.getModel(request.getKey());
+            ruleFlowModel = ruleFlowModelCacheService.getModel(request.getKey());
         }
         ExcuteRuleFlowResult processInstance = new ExcuteRuleFlowResult();
         processInstance.setRequestId(request.getRequestId());
         processInstance.setId(IdUtil.getSnowflakeNextId());
-        processInstance.setRuleFlowKey(processModel.getKey());
+        processInstance.setRuleFlowKey(ruleFlowModel.getKey());
         Map<String, Object> runtimeVar = new HashMap<>();
-        runtimeVar.put(RuleFlowConstant.BUSINESS_OBJECTS, VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), false, request.getVariables()));
+        runtimeVar.put(RuleFlowConstant.BUSINESS_OBJECTS, VariableTranslateUtils.translate(ruleFlowModel.getBusinessObjectModels(), false, request.getVariables()));
         FlowContext flowContext = new FlowContext(runtimeVar);
         long startTime = System.currentTimeMillis();
-        AkkaRuleFlowScheduler scheduler = new AkkaRuleFlowScheduler(actorSystem);
         if (request.isAsyncExcute()) {
-            scheduler.startFlowAsync(processModel, flowContext, request.getSkipNodeIds(), failure -> {
+            scheduler.startFlowAsync(ruleFlowModel, flowContext, request.getSkipNodeIds(), failure -> {
                 if (Objects.isNull(failure)) {
                     processInstance.setSuccess(true);
                 } else {
@@ -98,11 +102,11 @@ public class RuleFlowExcuteService implements DisposableBean {
                 processInstance.setNodeExcutions(flowContext.getNodeExcutions());
                 processInstance.setTimeConsuming((System.currentTimeMillis() - startTime));
                 processInstance.setTraceLogs(flowContext.getTraceLogs());
-                doComplete(flowContext, processModel, processInstance, request);
+                doComplete(flowContext, ruleFlowModel, processInstance, request);
             });
         } else {
             try {
-                scheduler.startFlow(processModel, flowContext, request.getSkipNodeIds());
+                scheduler.startFlow(ruleFlowModel, flowContext, request.getSkipNodeIds());
                 processInstance.setSuccess(true);
             } catch (Exception e) {
                 handFailure(processInstance, flowContext, e);
@@ -111,7 +115,7 @@ public class RuleFlowExcuteService implements DisposableBean {
                 processInstance.setTimeConsuming((System.currentTimeMillis() - startTime));
                 processInstance.setTraceLogs(flowContext.getTraceLogs());
             }
-            doComplete(flowContext, processModel, processInstance, request);
+            doComplete(flowContext, ruleFlowModel, processInstance, request);
         }
         return processInstance;
     }
@@ -141,16 +145,16 @@ public class RuleFlowExcuteService implements DisposableBean {
      * 完成
      *
      * @param flowContext
-     * @param processModel
+     * @param ruleFlowModel
      * @param processInstance
      * @param request
      */
-    private void doComplete(FlowContext flowContext, RuleFlowModel processModel, ExcuteRuleFlowResult processInstance, ExcuteRuleFlow request) {
+    private void doComplete(FlowContext flowContext, RuleFlowModel ruleFlowModel, ExcuteRuleFlowResult processInstance, ExcuteRuleFlow request) {
         Map businessVariables = (Map) flowContext.getVariable().get(RuleFlowConstant.BUSINESS_OBJECTS);
-        Map<String, Object> response = VariableTranslateUtils.translate(processModel.getBusinessObjectModels(), true, businessVariables);
+        Map<String, Object> response = VariableTranslateUtils.translate(ruleFlowModel.getBusinessObjectModels(), true, businessVariables);
         processInstance.setResponse(response);
-        if (StrUtil.isNotBlank(processModel.getKey())) {
-            applicationEventPublisher.publishEvent(RuleFlowExcuteCompledEvent.create(ExcutingHistoryLogVO.create(processInstance, request.getVariables(), processModel.getOriginalJson(), request.getRetryOriginId())));
+        if (StrUtil.isNotBlank(ruleFlowModel.getKey())) {
+            applicationEventPublisher.publishEvent(RuleFlowExcuteCompledEvent.create(ExcutingHistoryLogVO.create(processInstance, request.getVariables(), ruleFlowModel.getOriginalJson(), request.getRetryOriginId())));
         }
     }
 

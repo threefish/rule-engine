@@ -46,8 +46,8 @@ public class Rule {
     private VariableType varType;
     private OperatorType operator;
     private String descript;
-
     private String expressionCacheString;
+
 
     public String getExpressionCacheString() {
         if (this.expressionCacheString == null) {

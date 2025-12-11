@@ -36,7 +36,7 @@ public class AsyncThreadPoolConfig implements AsyncConfigurer {
 
     private static final int PROCESSORS = Runtime.getRuntime().availableProcessors();
 
-    private static final int CORE_POOL_SIZE = (PROCESSORS + 2) * 3;
+    private static final int CORE_POOL_SIZE = PROCESSORS;
 
     private static final int MAXIMUM_POOL_SIZE = CORE_POOL_SIZE * 2;
 
@@ -55,7 +55,7 @@ public class AsyncThreadPoolConfig implements AsyncConfigurer {
         executor.setMaxPoolSize(MAXIMUM_POOL_SIZE);
         executor.setQueueCapacity(QUEUE_CAPACITY);
         executor.setKeepAliveSeconds(KEEP_ALIVE_SECONDS);
-        executor.setThreadNamePrefix("async-thread-pool-excutor-");
+        executor.setThreadNamePrefix("async-thread-pool-executor-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(AWAIT_TERMINATION_SECONDS);
         executor.setRejectedExecutionHandler(REJECTED_EXECUTION_HANDLER);

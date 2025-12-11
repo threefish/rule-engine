@@ -20,9 +20,20 @@ package cn.xjbpm.rule.engine.runtime.model;
  */
 public enum ExecutStatus {
 
+    /**
+     * 节点执行成功
+     */
     SUCCESS,
-
+    /**
+     * 节点执行异常
+     */
     FAILURE,
-
+    /**
+     * 引擎内部执行跳过状态，非用户指定执行跳过状态
+     */
+    SKIP,
+    /**
+     * 节点已到达过，正在等待中其他节点执行完成触发完成检测
+     */
     WAITING;
 }

@@ -43,7 +43,6 @@ public class RuleFlowExcuteLogService {
      */
     public void save(RuleFlowExcuteLogEntity entity) {
         ruleFlowExcuteLogRepository.save(entity);
-
     }
 
     public Page<RuleFlowExcuteLogEntity> findPage(Pageable pageable, String key, String requestId) {

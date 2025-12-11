@@ -18,6 +18,7 @@ package cn.xjbpm.rule.engine.definition.parse;
 import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.engine.definition.model.*;
 import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
+import cn.xjbpm.rule.engine.rule.Rule;
 import cn.xjbpm.rule.engine.runtime.behavior.BehaviorFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
@@ -128,6 +129,10 @@ public class RuleFlowModelParse {
                 node.setTargetNodeKey(getString(map.get("targetNodeId")));
                 node.setSourceNode(nodeMap.get(node.getSourceNodeKey()));
                 node.setTargetNode(nodeMap.get(node.getTargetNodeKey()));
+                node.setSortNum(getIntValueFromMap(properties, "sortNum", 0));
+
+                node.setRule(JsonUtils.convertValue(properties.get("rule"), Rule.class));
+
 
                 nodes.add(node);
                 nodeMap.put(node.getId(), node);
@@ -161,6 +166,7 @@ public class RuleFlowModelParse {
             throw new RuntimeException("规则流图转换规则模型失败", e);
         }
     }
+
 
     /**
      * 辅助方法：从 Map 中安全获取 Integer 值，兼容 Jackson 将数字解析为 Number 的问题

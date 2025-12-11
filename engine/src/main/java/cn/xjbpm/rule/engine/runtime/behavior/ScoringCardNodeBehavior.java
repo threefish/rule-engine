@@ -97,15 +97,15 @@ public class ScoringCardNodeBehavior implements NodeBehavior {
         /**
          * 行序号
          */
-        int rowIndex;
+        private int rowIndex;
         /**
          * 分数
          */
-        double value;
+        private double value;
         /**
          * 权重
          */
-        double weight;
+        private double weight;
     }
 
 }

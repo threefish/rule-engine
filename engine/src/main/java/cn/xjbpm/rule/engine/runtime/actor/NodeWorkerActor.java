@@ -35,21 +35,19 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 池化版节点工作 Actor
+ * 全局共享节点工作 Actor (无状态)
  *
  * @author 黄川 huchuc@vip.qq.com
  */
 @Slf4j
 public class NodeWorkerActor extends AbstractActor {
 
-    private final FlowContext flowContext;
 
-    public NodeWorkerActor(FlowContext flowContext) {
-        this.flowContext = flowContext;
+    public static Props props() {
+        return Props.create(NodeWorkerActor.class, NodeWorkerActor::new);
     }
 
-    public static Props props(FlowContext flowContext) {
-        return Props.create(NodeWorkerActor.class, () -> new NodeWorkerActor(flowContext));
+    public NodeWorkerActor() {
     }
 
     @Override
@@ -61,67 +59,65 @@ public class NodeWorkerActor extends AbstractActor {
 
     private void handleExecute(WorkflowProtocol.ExecuteNode msg) {
         Node node = msg.getNode();
+        FlowContext flowContext = msg.getFlowContext(); // 从消息中获取上下文
+
         try {
             if (!(node instanceof SequenceConnNode) && msg.getAttempt() > 0) {
-                this.flowContext.addTraceLog(StringUtils.format("[{}] 开始第 {} 次重试执行", node.getId(), msg.getAttempt()));
+                flowContext.addTraceLog(StringUtils.format("[{}] 开始第 {} 次重试执行", node.getId(), msg.getAttempt()));
             }
 
             NodeBehavior behavior = node.getBehavior();
             if (behavior != null) {
                 behavior.execution(flowContext);
             } else {
-                this.flowContext.addTraceLog(StringUtils.format("[{}] 未找到执行行为类 跳过执行", node.getId()));
+                flowContext.addTraceLog(StringUtils.format("[{}] 未找到执行行为类 跳过执行", node.getId()));
             }
 
             long endTime = System.nanoTime();
-            recordExecution(node, msg.getStartTotalTime(), endTime, ExecutStatus.SUCCESS, null);
+            recordExecution(flowContext, node, msg.getStartTotalTime(), endTime, ExecutStatus.SUCCESS, null);
 
             // 通知 Master 任务完成
-            // 注意：在 Router 模式下，getSender() 依然是指向 Master (因为 Master 是通过 router.tell(msg, self) 发送的)
             getSender().tell(new WorkflowProtocol.NodeCompleted(node.getId(), node, true), getSelf());
 
         } catch (Exception e) {
-            handleFailure(msg, e);
+            handleFailure(msg, flowContext, e);
         }
     }
 
-    private void handleFailure(WorkflowProtocol.ExecuteNode msg, Exception e) {
+    private void handleFailure(WorkflowProtocol.ExecuteNode msg, FlowContext flowContext, Exception e) {
         Node node = msg.getNode();
         int currentAttempt = msg.getAttempt();
-        if (isExcludeRetryNode(node) || node.isRetryOnFail() == false) {
-            this.flowContext.addTraceLog(StringUtils.format("[{}] 执行异常: {}", node.getId(), e.getMessage()));
-            recordExecution(node, msg.getStartTotalTime(), System.nanoTime(), ExecutStatus.FAILURE, e.getMessage());
+        if (isExcludeRetryNode(node) || !node.isRetryOnFail()) {
+            flowContext.addTraceLog(StringUtils.format("[{}] 执行异常: {}", node.getId(), e.getMessage()));
+            recordExecution(flowContext, node, msg.getStartTotalTime(), System.nanoTime(), ExecutStatus.FAILURE, e.getMessage());
         } else {
             int maxRetries = node.getMaxRetries();
             long delaySeconds = node.getRetryDelay();
             if (currentAttempt < maxRetries) {
                 int nextAttempt = currentAttempt + 1;
-                this.flowContext.addTraceLog(StringUtils.format("[{}] 执行异常 启用重试 准备第{}次重试 最大重试{}次 延迟{}ms",
+                flowContext.addTraceLog(StringUtils.format("[{}] 执行异常 启用重试 准备第{}次重试 最大重试{}次 延迟{}ms",
                         node.getId(), nextAttempt, maxRetries, delaySeconds));
-                // 重试消息发给 Router (Parent)
-                // getContext().parent() 在 Router 模式下指向的是 Router Actor
-                // 这样重试任务会被重新负载均衡，不一定由当前 Worker 执行，效率更高
+
+                // 重试时，务必将 flowContext 继续传递下去
                 getContext().system().scheduler().scheduleOnce(
                         FiniteDuration.create(delaySeconds, TimeUnit.MILLISECONDS),
-                        getContext().parent(), // 发送给 Router
-                        new WorkflowProtocol.ExecuteNode(node, nextAttempt, msg.getStartTotalTime()),
+                        getContext().parent(), // 发送给 Router (实际上是 Global Router)
+                        new WorkflowProtocol.ExecuteNode(node, nextAttempt, msg.getStartTotalTime(), flowContext),
                         getContext().dispatcher(),
-                        getSender() // Sender 保持为 Master
+                        getSender() // Sender 保持为 Master (WorkflowInstanceActor)
                 );
                 return;
             }
             // 重试耗尽
             long endTime = System.nanoTime();
-            this.flowContext.addTraceLog(StringUtils.format("[{}] 执行失败 耗时{} 异常描述: {}",
+            flowContext.addTraceLog(StringUtils.format("[{}] 执行失败 耗时{} 异常描述: {}",
                     node.getId(), TimeFormatUtil.formatNanosToMs(endTime - msg.getStartTotalTime()), e.getMessage()));
-            recordExecution(node, msg.getStartTotalTime(), endTime, ExecutStatus.FAILURE, e.getMessage());
+            recordExecution(flowContext, node, msg.getStartTotalTime(), endTime, ExecutStatus.FAILURE, e.getMessage());
         }
 
         if (getErrorStrategy(node) == ErrorStrategy.TERMINATE) {
-            // 通知 Master 失败
             getSender().tell(new WorkflowProtocol.NodeFailed(node.getId(), node, e), getSelf());
         } else {
-            // 继续执行
             getSender().tell(new WorkflowProtocol.NodeCompleted(node.getId(), node, false), getSelf());
         }
     }
@@ -140,13 +136,13 @@ public class NodeWorkerActor extends AbstractActor {
         return Objects.nonNull(node.getErrorStrategy()) ? node.getErrorStrategy() : ErrorStrategy.TERMINATE;
     }
 
-    private void recordExecution(Node node, long start, long end, ExecutStatus status, String error) {
+    private void recordExecution(FlowContext ctx, Node node, long start, long end, ExecutStatus status, String error) {
         NodeExcution.NodeExcutionBuilder builder = NodeExcution.builder()
                 .id(node.getId()).name(node.getName()).startTime(start).endTime(end)
                 .status(status);
         if (error != null) {
             builder.errorMessage(error);
         }
-        flowContext.putNodeExcution(node.getId(), builder.build());
+        ctx.putNodeExcution(node.getId(), builder.build());
     }
 }

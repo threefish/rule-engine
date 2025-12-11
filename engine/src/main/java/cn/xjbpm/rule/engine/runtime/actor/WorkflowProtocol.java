@@ -33,12 +33,12 @@ public interface WorkflowProtocol {
     // ================= 外部 -> Master =================
     @Value
     class StartProcess {
-        RuleFlowModel processModel;
+        RuleFlowModel ruleFlowModel;
         FlowContext flowContext;
         Set<String> skipNodeIds;
 
-        public StartProcess(RuleFlowModel processModel, FlowContext flowContext, Set<String> skipNodeIds) {
-            this.processModel = processModel;
+        public StartProcess(RuleFlowModel ruleFlowModel, FlowContext flowContext, Set<String> skipNodeIds) {
+            this.ruleFlowModel = ruleFlowModel;
             this.flowContext = flowContext;
             this.skipNodeIds = skipNodeIds == null ? Collections.emptySet() : skipNodeIds;
         }
@@ -50,6 +50,7 @@ public interface WorkflowProtocol {
         Node node;
         int attempt; // 当前是第几次尝试 (0开始)
         long startTotalTime;//记录该节点被调度的初始时间
+        FlowContext flowContext;
     }
 
     // ================= Worker -> Master =================

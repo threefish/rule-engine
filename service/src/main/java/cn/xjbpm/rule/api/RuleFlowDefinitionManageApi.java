@@ -49,10 +49,9 @@ public class RuleFlowDefinitionManageApi {
 
     @PostMapping("/save")
     public ResultVO<Long> save(@Validated @RequestBody RuleFlowVO request) {
-        if (request == null || request.getKey() == null) {
-            throw new IllegalArgumentException("规则编码不可为空！");
+        if (request.getId() != null) {
+            ruleFlowModelCacheService.convertToModel(request.getDraftContent());
         }
-        ruleFlowModelCacheService.convertToModel(request.getDraftContent());
         return ResultVO.success(ruleFlowService.saveOrUpdateNoDeployed(request));
     }
 

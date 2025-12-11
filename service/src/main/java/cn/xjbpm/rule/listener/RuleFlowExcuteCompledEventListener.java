@@ -51,20 +51,12 @@ public class RuleFlowExcuteCompledEventListener implements ApplicationListener<R
             ExcutingHistoryLogVO data = event.getData();
             RuleFlowExcuteLogEntity logEntity = new RuleFlowExcuteLogEntity();
             if (Objects.nonNull(data.getRetryOriginId())) {
-                logEntity = ruleFlowExcuteLogService.findById(data.getRetryOriginId());
-                if (Objects.nonNull(data.getRetryOriginId())) {
-                    log.info("更新执行日志 key:{} ID:{}", data.getRuleFlowKey(), data.getRetryOriginId());
-                    logEntity.setTimeConsuming(data.getTimeConsuming());
-                    logEntity.setErrorMessage(data.getErrorMessage());
-                    logEntity.setSuccess(data.getSuccess());
-                    logEntity.setContent(JsonUtils.obj2Json(data));
-                } else {
-                    logEntity.setId(data.getId());
-                    logEntity.setRuleFlowKey(data.getRuleFlowKey());
-                    logEntity.setRequestId(data.getRequestId());
-                }
+                logEntity.setId(data.getRetryOriginId());
+                logEntity.setTimeConsuming(data.getTimeConsuming());
+                logEntity.setErrorMessage(data.getErrorMessage());
+                logEntity.setSuccess(data.getSuccess());
+                logEntity.setContent(JsonUtils.obj2Json(data));
             } else {
-                log.info("存储执行日志 key:{} ID:{}", data.getRuleFlowKey(), data.getId());
                 logEntity.setId(data.getId());
                 logEntity.setRuleFlowKey(data.getRuleFlowKey());
                 logEntity.setRequestId(data.getRequestId());

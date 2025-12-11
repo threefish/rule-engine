@@ -1,202 +1,302 @@
-# 规则引擎
+# Rule Engine
 
-这是一个基于 Java、高性能 **Akka Actor 模型** 和 **Aviator表达式引擎** 构建的灵活、强大的规则引擎系统。该引擎专注于高并发、复杂的业务规则定义、组合和执行，适用于需要快速决策和弹性调度的场景。
+🔥 **High-performance, High-concurrency, Visualized Enterprise-level Rule Engine System** 🔥
 
-[前端源码获取](https://github.com/threefish/rule-engine-web)
+A flexible and powerful rule engine built on Java, Akka Actor model, and Aviator expression engine, focusing on complex business rule definition, combination, and execution in high-concurrency scenarios, providing enterprises with fast decision-making and elastic scheduling capabilities.
 
-## 项目特点
+[![GitHub stars](https://img.shields.io/github/stars/threefish/rule-engine.svg?style=social&label=Star)](https://github.com/threefish/rule-engine)
+[![GitHub forks](https://img.shields.io/github/forks/threefish/rule-engine.svg?style=social&label=Fork)](https://github.com/threefish/rule-engine)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/threefish/rule-engine/blob/main/LICENSE)
 
-- **核心调度：基于 Akka Actor 模型**：利用 Akka 的高并发、异步和容错能力，实现规则流程节点间的并行、分支和聚合的弹性调度。
-- **表达式核心：基于 Aviator 引擎**：提供高性能的表达式解析和执行，支持复杂的逻辑计算。
-- **灵活的规则定义**：支持多种操作符、组合方式和条件类型。
-- **流程驱动**：基于流程模型编排规则执行的逻辑和顺序。
-- **自动重试机制**：节点执行失败时支持配置化的自动重试策略。
-- **线程安全的上下文管理**：通过 FlowContext 实现节点间安全的数据共享。
+English | [简体中文](README_ZH.md)
 
-## 核心概念
+**[Frontend Source Code](https://github.com/threefish/rule-engine-web)**
 
-### 规则 (Rule)
+## 🎯 Core Advantages
 
-规则是规则引擎的基本构建块，包含条件定义和执行逻辑。
+- **🚀 High Performance**: Based on Akka Actor model for high concurrency design, supporting large-scale rule parallel execution
+- **🎨 Visualization**: Provides intuitive rule definition and process orchestration interface, lowering the threshold for business personnel
+- **⚡ High Flexibility**: Supports complex rule condition combinations and multiple operators, adapting to various business scenarios
+- **🔄 High Reliability**: Complete error handling and automatic retry mechanism to ensure the reliability of rule execution
+- **📊 Monitorable**: Detailed execution logs and monitoring mechanisms for easy problem locating and performance optimization
+- **🔧 Easy to Extend**: Modular design, supporting custom extensions and secondary development
 
-- **基本条件**：单个字段的比较操作（等于、大于、小于等）
-- **复合条件**：通过AND/OR组合多个子规则
-- **支持的操作符**：
-- 比较操作符：`=`、`!=`、`<`、`>`、`<=`、`>=`
-- 字符串操作符：`contains`、`notContains`、`like`、`notLike`、`beginWith`、`endWith`等
-- 集合操作符：`inCollection`、`notInCollection`、`between`、`notBetween`
-- 空值判断：`isNull`、`isNotNull`、`isEmpty`、`isNotEmpty`
+## ✨ Project Features
 
-### 规则动作 (RuleAction)
+- **Core Scheduling: Based on Akka Actor Model**: Utilizes Akka's high concurrency, asynchronous, and fault-tolerant capabilities to achieve flexible scheduling of parallel, branch, and aggregation between rule flow nodes
+- **Expression Core: Based on Aviator Engine**: Provides high-performance expression parsing and execution, supporting complex logical calculations
+- **Flexible Rule Definition**: Supports multiple operators, combination methods, and condition types
+- **Process-driven**: Orchestrates the logic and order of rule execution based on process models
+- **Automatic Retry Mechanism**: Supports configurable automatic retry strategies when node execution fails
+- **Thread-safe Context Management**: Achieves safe data sharing between nodes through FlowContext
+- **Support for Synchronous and Asynchronous Execution**: Can flexibly choose execution mode according to business needs
+- **Complete Rule Execution Logs**: Detailed records of rule execution process and results, facilitating auditing and debugging
 
-规则动作定义了规则满足条件时的行为。
+## 🏗️ Project Structure
 
-- **条件规则**：定义触发条件的`whenRule`
-- **满足动作**：条件满足时执行的`thenActions`
-- **不满足动作**：条件不满足时执行的`otherwiseActions`
+### Technology Stack
 
-### 规则集 (RuleSet)
 
-规则集是规则动作的集合，支持批量管理和执行规则。
+| Technology      | Version | Purpose                                                  |
+| --------------- | ------- | -------------------------------------------------------- |
+| Java            | 1.8     | Main development language                                |
+| Spring Boot     | 3.5.7   | Service framework                                        |
+| Akka            | 2.6.20  | Actor model for high concurrency process scheduling      |
+| Aviator         | 5.3.3   | High-performance expression parsing and execution engine |
+| Quartz          | 2.5.0   | Scheduled task framework                                 |
+| Spring Data JPA | 3.5.7   | Persistence framework                                    |
+| MySQL           | 8.0.33  | Database                                                 |
+| Hutool          | 5.7.18  | Java tool library                                        |
+| Lombok          | 1.18.42 | Simplify Java code                                       |
 
-### 流程模型 (ProcessModel)
-
-流程模型定义了规则引擎的执行流程和节点。
-
-- **起始节点**：流程的入口点
-- **结束节点**：流程的终止点
-- **业务对象模型**：定义流程中使用的数据模型
-- **执行监听器**：监听流程执行事件
-
-### 流程执行上下文 (FlowContext)
-
-线程安全的上下文对象，用于在多个节点间共享数据，提供并发安全的数据访问机制。
-
-### 节点行为 (NodeBehavior)
-
-定义节点的执行逻辑，每个节点类型可以有自己的行为实现。
-
-### 核心模块
-
-1. **规则引擎核心 (engine)**
-
-- **actor**：基于 Akka 的高并发流程调度和节点编排。
-- **aviator**：Aviator表达式执行器和自定义函数。
-- **rule**：规则定义和规则动作模型。
-- **definition**：流程定义和模型解析。
-- **runtime**：流程运行时服务和上下文。
-- **common**：公共工具和常量。
-
-2. **核心服务组件**
-
-- **ProcessRunService**：流程启动和执行的核心服务。
-- **AkkaRuleFlowScheduler**：基于 Akka 的规则流程调度器。
-- **RuleFlowService**：规则流程的持久化服务。
-
-### 技术栈
-
-- **Java**：主要开发语言
-- **Akka**：用于高并发流程调度的 Actor 模型框架
-- **Aviator**：高性能表达式解析和执行引擎
-- **Spring Boot**：服务层框架
-
-## 规则引擎工作流程
-
-1. **规则定义**：创建规则对象，设置条件和操作符。
-2. **流程构建**：定义流程模型，通过网关节点编排串行、并行、分支和聚合逻辑。
-3. **流程执行**：调用 ProcessRunService 启动流程实例。
-4. **Actor 调度**：AkkaRuleFlowScheduler 创建 WorkflowInstanceActor 控制流程。
-5. **节点执行**：WorkflowInstanceActor 调度 NodeWorkerActor 执行各个节点。
-6. **依赖处理**：通过 NodeDependencyBuilder 管理节点间依赖，支持串行和并行执行。
-7. **汇聚处理**：处理多个并行分支的汇合逻辑。
-8. **自动重试**：节点执行失败时自动触发配置的重试策略。
-9. **结果处理**：根据规则执行结果执行相应的动作或输出决策。
-
-## 表达式执行
-
-规则引擎使用Aviator表达式引擎来执行规则表达式：
-
-- **自动类型转换**：支持数字、字符串等类型的精确计算
-- **缓存机制**：支持表达式缓存，提高性能
-- **自定义函数**：可扩展的自定义函数支持
-- **上下文管理**：提供表达式执行的上下文环境
-
-## 扩展点
-
-1. **自定义函数**：实现`AviatorFunction`接口，添加自定义表达式函数
-2. **执行监听器**：添加流程执行事件监听器
-3. **节点行为**：自定义节点执行行为
-4. **流程定义服务**：实现`ProcessDefinitionService`接口，自定义流程模型的加载方式
-
-## 快速开始
-
-### 环境要求
-
-- JDK 17+
-- Maven 3.6+
-
-### 使用示例
-
-**执行规则流程**
-
-- 通过 ProcessRunService 执行规则流程：
-
-```java
-
-ProcessRunService processRunService = ...; // 获取服务实例
-Map<String, Object> variables = new HashMap<>(); // 设置输入变量
-ExcuteRuleFlow createProcessRequest = new ExcuteRuleFlow();  
-createProcessRequest.setKey("myRuleKey");  
-createProcessRequest.setVariables(map);  
-ExcuteRuleFlowResult result = processRunService.excute(createProcessRequest);
+### Overall Architecture
 
 ```
+rule-engine/
+├── engine/             # Rule engine core module
+│   ├── common/         # Common tools and constants
+│   ├── custom/         # Custom services
+│   ├── dto/            # Data transfer objects
+│   ├── engine/         # Engine core implementation
+│   │   ├── aviator/    # Aviator expression executor
+│   │   ├── rule/       # Rule definition
+│   │   └── runtime/    # Runtime services
+│   ├── event/          # Event definition
+│   └── exception/      # Exception definition
+└── service/            # Rule engine service module
+    ├── api/            # API interface definition
+    ├── config/         # Configuration classes
+    ├── job/            # Dynamic tasks
+    ├── listener/       # Listeners
+    ├── node/           # Node-related definitions
+    ├── repository/     # Data access layer
+    ├── runner/         # Startup loaders
+    ├── service/        # Business service implementation
+    └── utils/          # Utility classes
+```
 
-## 适用场景
+## 🔄 Rule Engine Workflow
 
-✅ 适用场景 (高并发、快速决策、复杂条件)
+1. **Rule Definition**: Create rule objects, set conditions and operators
+2. **Process Construction**: Define process models, orchestrate serial, parallel, branch, and aggregation logic through gateway nodes
+3. **Process Execution**: Call RuleFlowExcuteService to start process instances
+4. **Actor Scheduling**: AkkaRuleFlowScheduler creates Actors to control the process
+5. **Node Execution**: Schedule NodeWorkerActor to execute each node
+6. **Dependency Handling**: Manage dependencies between nodes through NodeDependencyBuilder, supporting serial and parallel execution
+7. **Convergence Processing**: Handle the convergence logic of multiple parallel branches
+8. **Automatic Retry**: Automatically trigger configured retry strategies when node execution fails
+9. **Result Processing**: Execute corresponding actions or output decisions based on rule execution results
+10. **Log Recording**: Record complete execution logs for monitoring and auditing
+
+## 📝 Expression Execution
+
+The rule engine uses Aviator expression engine to execute rule expressions:
+
+- **Automatic Type Conversion**: Supports precise calculation of numbers, strings, etc.
+- **Caching Mechanism**: Supports expression caching to improve performance
+- **Custom Functions**: Extensible custom function support
+- **Context Management**: Provides context environment for expression execution
+
+## 🔌 Extension Points
+
+1. **Custom Functions**: Implement the `AviatorFunction` interface to add custom expression functions
+2. **Node Behavior**: Custom node execution behavior
+3. **Rule Flow Model Cache Service**: Implement the `RuleFlowModelCacheService` interface to customize the cache strategy for rule flow models
+
+## 🔧 Deployment Methods
+
+- **Independent Deployment**: Deploy as an independent service, providing REST API interfaces for other systems to call
+- **Embedded Deployment**: Can be embedded into other Java applications for use as part of the application
+- **Cluster Deployment**: Supports multi-instance deployment, achieving high availability and horizontal expansion through load balancing
+
+## 📈 Performance Indicators
+
+- **Single Node QPS**: Supports thousands of rule executions per second
+- **Rule Execution Delay**: Millisecond-level response
+- **Number of Supported Rules**: A single rule flow supports hundreds of rule nodes
+- **Supported Concurrent Requests**: Based on Akka Actor model, supporting high concurrent processing
+
+## 🔍 Monitoring and Logs
+
+- **Execution Logs**: Detailed records of rule execution process, parameters, and results
+- **Performance Monitoring**: Records rule execution time, success rate, and other indicators
+- **Exception Monitoring**: Captures and records exceptions during rule execution
+- **Audit Logs**: Records the creation, modification, deletion, and other operations of rules
+
+## 📋 Development Specifications
+
+- **Code Style**: Follows Alibaba Java Development Specifications
+- **Naming Conventions**: Uses camelCase naming, clearly expressing the meaning of variables and methods
+- **Comment Specifications**: Adds detailed comments to key code for easy understanding and maintenance
+- **Testing Specifications**: Writes unit tests and integration tests to ensure code quality
+
+## 🎯 Application Scenarios
+
+✅ **Applicable Scenarios (High Concurrency, Fast Decision Making, Complex Conditions)**
 
 
-| 场景           | 核心特点                                                                     | 示例                                                                                                                                  |
-| -------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| 实时风险评估   | 需要在毫秒级对大量请求进行多维度、并行判断，以快速做出“是”或“否”的决策。 | 信贷审批： 用户提交贷款申请，引擎同时检查“信用分数 > 600？”、“工作年限 > 1年？”、“负债率 < 50%？”等多个规则，快速决定是否通过。 |
-| 复杂的费用核算 | 涉及多个条件分支，计算过程需要复杂的顺序和并行操作。                         | 订单折扣： 计算一个订单的最终价格时，引擎同时跑“会员折扣”、“地区运费”、“满减活动”等规则，并将结果合并得出最终应付金额。         |
-| 动态营销推荐   | 根据用户当前的状态或行为，在短时间内触发一系列个性化动作或推荐逻辑。         | App 消息推送： 用户打开 App，引擎快速判断：“上次登录时间超过 7 天” 或 “购物车有未付款商品”，立即推送相应的召回消息或优惠券。      |
+| Scenario                          | Core Features                                                                                                                                   | Example                                                                                                                                                                                                                                   |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Real-time Risk Assessment         | Needs to make multi-dimensional, parallel judgments on a large number of requests at millisecond level to quickly make "yes" or "no" decisions. | Credit Approval: When a user submits a loan application, the engine simultaneously checks multiple rules such as "credit score > 600?", "work experience > 1 year?", "debt ratio < 50%?", and quickly decides whether to approve.         |
+| Complex Cost Calculation          | Involves multiple condition branches, and the calculation process requires complex sequential and parallel operations.                          | Order Discount: When calculating the final price of an order, the engine simultaneously runs rules such as "member discount", "regional shipping fee", "full reduction activity", and merges the results to get the final payable amount. |
+| Dynamic Marketing Recommendations | Triggers a series of personalized actions or recommendation logic in a short time based on the user's current state or behavior.                | App Message Push: When a user opens the App, the engine quickly judges: "last login time exceeds 7 days" or "shopping cart has unpaid items", and immediately pushes corresponding recall messages or coupons.                            |
+| Business Rule Management          | Needs to separate business rules from code for easy maintenance and modification by business personnel.                                         | Insurance Claims: Automatically calculates claim amounts and processing flows based on different claim types, amounts, customer levels, etc.                                                                                              |
+| Compliance Checking               | Needs to conduct multi-dimensional compliance checks on business data to ensure business operations comply with regulatory requirements.        | Financial Transactions: Conducts anti-money laundering, anti-fraud, and compliance checks on each transaction to ensure the legality and compliance of the transaction.                                                                   |
 
-❌ 不适用场景 (长事务、人工干预、纯数据操作)
-
-
-| 场景                 | 核心特点                                                                             | 示例                                                                                                |
-| -------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| 长事务/人工审批流    | 流程涉及需要长时间（几小时到几天）等待人工输入或审批的步骤，Akka 的优势难以发挥。    | 员工报销： 员工提交报销单，流程需要等待财务人员审核、领导签字，耗时较长，且涉及到资源锁定和持久化。 |
-| 纯粹的数据存储与查询 | 流程的主要目的是简单地进行 CRUD (增删改查) 操作，没有复杂的业务判断逻辑。            | 数据归档： 定时将一年前的订单记录从在线数据库迁移到历史数据库，核心是数据迁移而非业务决策。         |
-| 大规模数据批量ETL    | 针对 TB 级别的数据进行清洗、转换和加载，重点在于数据吞吐量和资源管理，而非流程编排。 | 日志处理： 每晚运行程序，读取上百万条服务器日志，清洗格式，然后统一导入大数据平台。                 |
-
-## 截图展示
-
-以下是规则引擎的主要功能截图：
-
-### 规则引擎界面1
-
-![规则引擎界面](screenshot/规则引擎0.png)
-
-### 规则引擎界面2
-
-![规则引擎界面2](screenshot/规则引擎1.png)
-
-### 规则引擎界面3
-
-![规则引擎界面3](screenshot/规则引擎2.png)
-
-### 规则引擎界面4
-
-![规则引擎界面3](screenshot/规则引擎3.png)
-
-### 规则引擎界面5
-
-![规则引擎界面3](screenshot/规则引擎4.png)
-
-### 规则引擎界面6
-
-![规则引擎界面3](screenshot/规则引擎5.png)
-
-### 规则引擎界面7
-
-![规则引擎界面3](screenshot/规则引擎6.png)
-
-### 规则引擎界面8
-
-![规则引擎界面3](screenshot/规则引擎7.png)
+❌ **Not Applicable Scenarios (Long Transactions, Manual Intervention, Pure Data Operations)**
 
 
-### 条件构造界面
+| Scenario                                | Core Features                                                                                                                                         | Example                                                                                                                                                                                                                           |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Long Transactions/Manual Approval Flows | The process involves steps that require long-term (hours to days) waiting for manual input or approval, and Akka's advantages are difficult to exert. | Employee Reimbursement: When an employee submits a reimbursement form, the process needs to wait for financial personnel to review and leadership to sign, which takes a long time and involves resource locking and persistence. |
+| Pure Data Storage and Query             | The main purpose of the process is simply to perform CRUD (create, read, update, delete) operations without complex business judgment logic.          | Data Archiving: Regularly migrate order records from a year ago from the online database to the historical database, with the core being data migration rather than business decision-making.                                     |
+| Large-scale Data Batch ETL              | Cleans, transforms, and loads TB-level data, with the focus on data throughput and resource management rather than process orchestration.             | Log Processing: Runs a program every night to read millions of server logs, clean the format, and then uniformly import them into the big data platform.                                                                          |
 
-![条件构造界面](screenshot/条件构造.png)
+## 📸 Screenshot Display
 
-### 表达式编辑界面
+The following are the main function screenshots of the rule engine:
 
-![表达式编辑界面](screenshot/编辑表达式.png)
+### Rule Engine Interface 1
 
-## 联系信息
+![Rule Engine Interface](screenshot/规则引擎0.png)
 
-**作者**：黄川 (huchuc@vip.qq.com)
+### Rule Engine Interface 2
+
+![Rule Engine Interface 2](screenshot/规则引擎1.png)
+
+### Rule Engine Interface 3
+
+![Rule Engine Interface 3](screenshot/规则引擎2.png)
+
+### Rule Engine Interface 4
+
+![Rule Engine Interface 3](screenshot/规则引擎3.png)
+
+### Rule Engine Interface 5
+
+![Rule Engine Interface 3](screenshot/规则引擎4.png)
+
+### Rule Engine Interface 6
+
+![Rule Engine Interface 3](screenshot/规则引擎5.png)
+
+### Rule Engine Interface 7
+
+![Rule Engine Interface 3](screenshot/规则引擎6.png)
+
+### Rule Engine Interface 8
+
+![Rule Engine Interface 3](screenshot/规则引擎7.png)
+
+### Condition Construction Interface
+
+![Condition Construction Interface](screenshot/条件构造.png)
+
+### Expression Editing Interface
+
+![Expression Editing Interface](screenshot/编辑表达式.png)
+
+## 🚀 Quick Start
+
+### Environment Requirements
+
+- JDK 8+
+- Maven 3.6+
+- MySQL 5.7+
+
+### Installation and Running
+
+1. **Clone the project**
+
+   ```bash
+   git clone https://github.com/threefish/rule-engine.git
+   cd rule-engine
+   ```
+2. **Configure the database**
+
+   - Modify the database configuration in the `service/src/main/resources/application.yml` file
+3. **Build the project**
+
+   ```bash
+   mvn clean install -DskipTests
+   ```
+4. **Start the service**
+
+   ```bash
+   cd service
+   mvn spring-boot:run
+   ```
+5. **Access the frontend page**
+
+   - The console will output the frontend access address, click to access
+
+### Usage Examples
+
+**Embedded Mode: Execute Rule Flow**
+
+```java
+RuleFlowExcuteService ruleFlowExcuteService = ...; // Get service instance
+Map<String, Object> variables = new HashMap<>(); // Set input variables
+variables.put("age", 18);
+variables.put("score", 85);
+
+ExcuteRuleFlow request = new ExcuteRuleFlow();  
+request.setKey("myRuleKey");  // Unique identifier of the rule flow
+request.setVariables(variables);  // Input variables
+request.setAsyncExcute(false);  // Synchronous execution
+
+ExcuteRuleFlowResult result = ruleFlowExcuteService.startFlow(request);
+
+// Process execution results
+if (result.isSuccess()) {
+    System.out.println("Rule execution successful!");
+    System.out.println("Execution result: " + result.getResponse());
+} else {
+    System.out.println("Rule execution failed: " + result.getErrorMessage());
+}
+```
+
+**Independent Deployment Mode: Execute Rule Flow**
+
+```shell
+curl -X POST \
+-H "token: YOUR_TOKEN" \
+-H "Content-Type: application/json" \
+-d '{"appCode": "test", "key": "grsdsjs", "requestId": "1111111", "variables": {"key1": "value1", "key2": "value2"}}' \
+https://host:port/openapi/v1/ruleflow/excute
+```
+
+## 🤝 Contribution Guide
+
+Welcome to participate in the contribution and jointly improve the rule engine project!
+
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project uses the Apache 2.0 license, see the [LICENSE](LICENSE) file for details.
+
+## 🔮 Future Planning
+
+- [ ]  Enhance visualized orchestration capabilities, support more node types
+- [ ]  Enhance rule management and monitoring functions
+- [ ]  Enhance real-time monitoring and alerting functions for rule execution
+- [ ]  Provide visualized analysis tools for rule execution
+
+## 📞 Contact Information
+
+**Author**: Huang Chuan (huchuc@vip.qq.com)
+**GitHub**: https://github.com/threefish/rule-engine
+**Frontend Project**: https://github.com/threefish/rule-engine-web
+
+---
+
+**If you find this project helpful, please give it a Star ⭐ support!**
+
+---
+
+*Continuously updating...*

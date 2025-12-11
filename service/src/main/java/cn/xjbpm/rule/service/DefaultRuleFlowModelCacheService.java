@@ -56,11 +56,11 @@ public class DefaultRuleFlowModelCacheService implements RuleFlowModelCacheServi
                 if (Objects.isNull(entity)) {
                     throw new RuntimeException("未找到规则流：" + key);
                 }
-                RuleFlowModel processModel = convertToModel(entity.getContent());
-                processModel.setKey(entity.getKey());
-                processModel.setName(entity.getName());
-                processModel.setDescription(entity.getDescription());
-                return processModel;
+                RuleFlowModel ruleFlowModel = convertToModel(entity.getContent());
+                ruleFlowModel.setKey(entity.getKey());
+                ruleFlowModel.setName(entity.getName());
+                ruleFlowModel.setDescription(entity.getDescription());
+                return ruleFlowModel;
             });
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();

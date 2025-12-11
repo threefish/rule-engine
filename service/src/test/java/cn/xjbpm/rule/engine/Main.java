@@ -42,18 +42,18 @@ public class Main {
     public static void main(String[] args) {
         InputStream resourceAsStream = Main.class.getResourceAsStream("/process/个人所得税计算.json");
         String processDefinitionContent = IoUtil.readUtf8(resourceAsStream);
-        RuleFlowModel processModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(processDefinitionContent);
+        RuleFlowModel ruleFlowModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(processDefinitionContent);
         String requestJson = IoUtil.readUtf8(ProcessRunServiceTest.class.getResourceAsStream("/process/个人所得税计算_request.json"));
         ActorSystem actorSystem = ActorSystem.create("FlowSystem");
-        AkkaRuleFlowScheduler scheduler = new AkkaRuleFlowScheduler(actorSystem);
+        AkkaRuleFlowScheduler scheduler = new AkkaRuleFlowScheduler(actorSystem, 30, 200);
         try {
             for (int i = 0; i < 3; i++) {
                 Map<String, Object> runtimeVar = new HashMap<>();
-                runtimeVar.put(RuleFlowConstant.BUSINESS_OBJECTS, VariableTranslateUtils.translate(processModel.getBusinessObjectModels(),
+                runtimeVar.put(RuleFlowConstant.BUSINESS_OBJECTS, VariableTranslateUtils.translate(ruleFlowModel.getBusinessObjectModels(),
                         false, JsonUtils.json2Obj(requestJson, Map.class)));
                 long startTime = System.currentTimeMillis();
                 FlowContext flowContext = new FlowContext(runtimeVar);
-                scheduler.startFlow(processModel, flowContext);
+                scheduler.startFlow(ruleFlowModel, flowContext);
                 log.info("总耗时：{}ms", (System.currentTimeMillis() - startTime));
                 log.info("流程执行完成！");
             }
