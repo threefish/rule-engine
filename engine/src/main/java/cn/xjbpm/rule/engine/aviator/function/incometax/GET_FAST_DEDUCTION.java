@@ -16,12 +16,19 @@
 package cn.xjbpm.rule.engine.aviator.function.incometax;
 
 import cn.xjbpm.rule.engine.aviator.function.AbstractBaseFunction;
-import com.googlecode.aviator.runtime.type.AviatorBigInt;
+import cn.xjbpm.rule.engine.aviator.function.AviatorExtendFunction;
+import com.googlecode.aviator.runtime.type.AviatorLong;
 import com.googlecode.aviator.runtime.type.AviatorObject;
+import org.springframework.util.Assert;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
+ * 个人所得税速算扣除数获取函数
+ * 强化了防御性编程，根据应纳税所得额计算对应的扣除数，严格执行非空及类型校验。
+ *
  * @author 黄川 huchuc@vip.qq.com
  * date: 2023/7/1
  */
@@ -31,25 +38,46 @@ public class GET_FAST_DEDUCTION extends AbstractBaseFunction {
     @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1) {
         Object target = arg1.getValue(env);
-        int kcs = 0;
-        if (target instanceof Number) {
-            Number val = ((Number) target);
-            if (val.longValue() >= 36000) {
-                kcs = 2520;
-            } else if (val.longValue() >= 144000) {
-                kcs = 16920;
-            } else if (val.longValue() >= 300000) {
-                kcs = 31920;
-            } else if (val.longValue() >= 420000) {
-                kcs = 52920;
-            } else if (val.longValue() >= 660000) {
-                kcs = 85920;
-            } else if (val.longValue() >= 960000) {
-                kcs = 181920;
-            }
+
+        // 防御性编程：根据要求，参数为 null 必须抛出异常
+        Assert.notNull(target, String.format("函数 %s 的参数(应纳税所得额)不能为空", getName()));
+
+        // 校验是否为数字类型，非数字类型在税务计算中应视为非法输入并抛出异常
+        if (!(target instanceof Number)) {
+            throw new IllegalArgumentException(String.format("函数 %s 期待数字类型参数，实际类型为: %s",
+                    getName(), target.getClass().getName()));
         }
-        return AviatorBigInt.valueOf(kcs);
+
+        long value = ((Number) target).longValue();
+        int kcs = 0;
+
+        // 逻辑优化：从最高阈值开始判断
+        if (value >= 960000) {
+            kcs = 181920;
+        } else if (value >= 660000) {
+            kcs = 85920;
+        } else if (value >= 420000) {
+            kcs = 52920;
+        } else if (value >= 300000) {
+            kcs = 31920;
+        } else if (value >= 144000) {
+            kcs = 16920;
+        } else if (value >= 36000) {
+            kcs = 2520;
+        }
+
+        return AviatorLong.valueOf(kcs);
     }
 
-
+    @Override
+    public List<AviatorExtendFunction> docs() {
+        return Collections.singletonList(
+                new AviatorExtendFunction(
+                        getName(),
+                        String.format("%s(income)", getName()),
+                        "number",
+                        "获取个税速算扣除数。基于应纳税所得额返回对应数值。任意参数为 null 或非数字类型将抛出异常。",
+                        String.format("%s(150000)", getName()))
+        );
+    }
 }

@@ -15,7 +15,7 @@
  */
 package cn.xjbpm.rule.engine.definition.validator;
 
-import cn.xjbpm.rule.engine.definition.model.activity.ScoringCardNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.ScoringCardNode;
 
 /**
  * @author 黄川 huchuc@vip.qq.com

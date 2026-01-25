@@ -18,6 +18,7 @@ package cn.xjbpm.rule.engine.rule.translate;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.engine.rule.Rule;
+import cn.xjbpm.rule.engine.rule.enums.AssignmentType;
 import cn.xjbpm.rule.engine.rule.enums.CombinatorType;
 import cn.xjbpm.rule.engine.rule.enums.RuleType;
 import cn.xjbpm.rule.engine.rule.enums.VariableType;
@@ -45,7 +46,7 @@ public class RuleExpressionTranslate {
             return "";
         }
         if (StrUtil.isBlank(expression)) {
-            expressions.add(rule.getCombinator().name());
+            expressions.add(rule.getCombinator().getValue());
             if (rule.isRoot() || rule.getRuleType() == RuleType.group) {
                 if (CollUtil.isNotEmpty(rule.getRules())) {
                     expressions.add("(");
@@ -57,7 +58,7 @@ public class RuleExpressionTranslate {
             }
             if (expressions.size() > 0) {
                 String start = expressions.get(0);
-                if (CombinatorType.AND.toString().equals(start) || CombinatorType.OR.toString().equals(start)) {
+                if (CombinatorType.AND.getValue().equals(start) || CombinatorType.OR.getValue().equals(start)) {
                     expressions.remove(0);
                 }
             }
@@ -76,7 +77,7 @@ public class RuleExpressionTranslate {
         for (int i = 0; i < rules.size(); i++) {
             Rule childRule = rules.get(i);
             if (i != 0) {
-                expressions.add(rule.getCombinator().name());
+                expressions.add(rule.getCombinator().getValue());
             }
             expressions.add(new RuleExpressionTranslate(childRule).getExpression());
         }

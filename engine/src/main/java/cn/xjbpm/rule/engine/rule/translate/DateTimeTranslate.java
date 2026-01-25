@@ -28,12 +28,60 @@ public class DateTimeTranslate extends AbstractTranslate {
 
     private static final Map<OperatorType, OperatorSupplier> OPERATOR_TYPE_CACHE = new HashMap() {
         {
-            put(OperatorType.EQ, (OperatorSupplier) rule -> String.format("%s==%s", rule.getName(), rule.getValue()));
-            put(OperatorType.NOT_EQ, (OperatorSupplier) rule -> String.format("%s!=%s", rule.getName(), rule.getValue()));
-            put(OperatorType.GT, (OperatorSupplier) rule -> String.format("%s>%s", rule.getName(), rule.getValue()));
-            put(OperatorType.GTE, (OperatorSupplier) rule -> String.format("%s>=%s", rule.getName(), rule.getValue()));
-            put(OperatorType.LT, (OperatorSupplier) rule -> String.format("%s<%s", rule.getName(), rule.getValue()));
-            put(OperatorType.LTE, (OperatorSupplier) rule -> String.format("%s<=%s", rule.getName(), rule.getValue()));
+            put(OperatorType.EQ, (OperatorSupplier) rule -> {
+                switch (rule.getAssignmentType()) {
+                    case VAR:
+                        return String.format("%s==%s", rule.getName(), rule.getFieldValue());
+                    case CALC:
+                        return String.format("%s==%s", rule.getName(), rule.getExpressionValue());
+                }
+                return String.format("%s==%s", rule.getName(), rule.getValue());
+            });
+            put(OperatorType.NOT_EQ, (OperatorSupplier) rule -> {
+                switch (rule.getAssignmentType()) {
+                    case VAR:
+                        return String.format("%s!=%s", rule.getName(), rule.getFieldValue());
+                    case CALC:
+                        return String.format("%s!=%s", rule.getName(), rule.getExpressionValue());
+                }
+                return String.format("%s!=%s", rule.getName(), rule.getValue());
+            });
+            put(OperatorType.GT, (OperatorSupplier) rule -> {
+                switch (rule.getAssignmentType()) {
+                    case VAR:
+                        return String.format("%s>%s", rule.getName(), rule.getFieldValue());
+                    case CALC:
+                        return String.format("%s>%s", rule.getName(), rule.getExpressionValue());
+                }
+                return String.format("%s>%s", rule.getName(), rule.getValue());
+            });
+            put(OperatorType.GTE, (OperatorSupplier) rule -> {
+                switch (rule.getAssignmentType()) {
+                    case VAR:
+                        return String.format("%s>=%s", rule.getName(), rule.getFieldValue());
+                    case CALC:
+                        return String.format("%s>=%s", rule.getName(), rule.getExpressionValue());
+                }
+                return String.format("%s>=%s", rule.getName(), rule.getValue());
+            });
+            put(OperatorType.LT, (OperatorSupplier) rule -> {
+                switch (rule.getAssignmentType()) {
+                    case VAR:
+                        return String.format("%s<%s", rule.getName(), rule.getFieldValue());
+                    case CALC:
+                        return String.format("%s<%s", rule.getName(), rule.getExpressionValue());
+                }
+                return String.format("%s<%s", rule.getName(), rule.getValue());
+            });
+            put(OperatorType.LTE, (OperatorSupplier) rule -> {
+                switch (rule.getAssignmentType()) {
+                    case VAR:
+                        return String.format("%s<=%s", rule.getName(), rule.getFieldValue());
+                    case CALC:
+                        return String.format("%s<=%s", rule.getName(), rule.getExpressionValue());
+                }
+                return String.format("%s<=%s", rule.getName(), rule.getValue());
+            });
             //TODO 需要判断是否是表达式
             put(OperatorType.BETWEEN, (OperatorSupplier) rule -> String.format("BETWEEN(%s,%s,%s)", rule.getName(), rule.getValueStart(), rule.getValueEnd()));
             put(OperatorType.NOT_BETWEEN, (OperatorSupplier) rule -> String.format("NOT_BETWEEN(%s,%s,%s)", rule.getName(), rule.getValueStart(), rule.getValueEnd()));

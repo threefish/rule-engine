@@ -1,0 +1,89 @@
+/*
+ * Copyright 2025 threefish.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package cn.xjbpm.rule.manager;
+
+import cn.xjbpm.rule.custom.RuleFlowModelCacheManager;
+import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
+import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
+import cn.xjbpm.rule.engine.definition.validator.RuleFlowModelValidator;
+import cn.xjbpm.rule.node.validator.StartNodeValidator;
+import cn.xjbpm.rule.service.RuleFlowService;
+import cn.xjbpm.rule.vo.RuleFlowVO;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * @author 黄川 huchuc@vip.qq.com
+ * date: 2025/11/22
+ * 规则流缓存服务
+ */
+@Service
+public class DefaultRuleFlowModelCacheManager implements RuleFlowModelCacheManager {
+
+    private final RuleFlowService ruleFlowService;
+
+    private final Cache<String, RuleFlowModel> cache = CacheBuilder.newBuilder()
+            .maximumSize(100)
+            .expireAfterWrite(1, TimeUnit.HOURS)
+            .build();
+
+    public DefaultRuleFlowModelCacheManager(RuleFlowService ruleFlowService) {
+        this.ruleFlowService = ruleFlowService;
+        RuleFlowModelValidator.registerValidator(NodeType.StartNode, new StartNodeValidator());
+    }
+
+    @Override
+    public RuleFlowModel getModel(String key) {
+        try {
+            return cache.get(key, () -> {
+                RuleFlowVO entity = ruleFlowService.findByKeyAndDeployed(key);
+                if (Objects.isNull(entity)) {
+                    throw new RuntimeException("未找到规则流：" + key);
+                }
+                RuleFlowModel ruleFlowModel = convertToModel(entity.getContent());
+                ruleFlowModel.setKey(entity.getKey());
+                ruleFlowModel.setName(entity.getName());
+                ruleFlowModel.setDescription(entity.getDescription());
+                return ruleFlowModel;
+            });
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) {
+                throw (RuntimeException) cause;
+            }
+            throw new RuntimeException("缓存加载失败: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public RuleFlowModel convertToModel(String content) {
+        return RuleFlowModelCacheManager.super.convertToModel(content);
+    }
+
+    /**
+     * 删除缓存
+     *
+     * @param key
+     */
+    public void removeCache(String key) {
+        cache.invalidate(key);
+    }
+}

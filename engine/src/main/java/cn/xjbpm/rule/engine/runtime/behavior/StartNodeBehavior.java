@@ -15,7 +15,7 @@
  */
 package cn.xjbpm.rule.engine.runtime.behavior;
 
-import cn.xjbpm.rule.engine.definition.model.StartNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.StartNode;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,8 +32,4 @@ public class StartNodeBehavior implements NodeBehavior {
         this.node = node;
     }
 
-    @Override
-    public void execution(FlowContext context) {
-
-    }
 }

@@ -16,6 +16,9 @@
 package cn.xjbpm.rule.engine.definition.model;
 
 import cn.xjbpm.rule.engine.definition.model.event.ExcutionListener;
+import cn.xjbpm.rule.engine.definition.model.nodes.EndNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.Node;
+import cn.xjbpm.rule.engine.definition.model.nodes.StartNode;
 import lombok.Data;
 
 import java.util.ArrayList;

@@ -16,16 +16,23 @@
 package cn.xjbpm.rule.engine.aviator.function.object;
 
 import cn.xjbpm.rule.engine.aviator.function.AbstractBaseFunction;
+import cn.xjbpm.rule.engine.aviator.function.AviatorExtendFunction;
 import com.googlecode.aviator.runtime.type.AviatorBoolean;
 import com.googlecode.aviator.runtime.type.AviatorObject;
+import org.springframework.util.Assert;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 /**
+ * 对象非空断言函数
+ *
  * @author 黄川 huchuc@vip.qq.com
  * date: 2023/8/6
  */
+@SuppressWarnings("all")
 public class IS_NOT_NULL extends AbstractBaseFunction {
 
     @Override
@@ -34,4 +41,15 @@ public class IS_NOT_NULL extends AbstractBaseFunction {
         return AviatorBoolean.valueOf(Objects.nonNull(value));
     }
 
+    @Override
+    public List<AviatorExtendFunction> docs() {
+        return Collections.singletonList(
+                new AviatorExtendFunction(
+                        getName(),
+                        String.format("%s(value)", getName()),
+                        "boolean",
+                        "断言对象不为 NULL。",
+                        String.format("%s('hello')", getName()))
+        );
+    }
 }

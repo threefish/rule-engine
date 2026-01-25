@@ -28,11 +28,6 @@ import java.util.Map;
 @Data
 public class ExcuteRuleFlowRequest {
     /**
-     * 应用编码
-     */
-    @NotBlank
-    private String appCode;
-    /**
      * 规则流key
      */
     @NotBlank
@@ -43,7 +38,7 @@ public class ExcuteRuleFlowRequest {
     @NotBlank
     private String requestId;
     /**
-     * 流程变量
+     * 规则流变量
      */
     @NotNull
     private Map<String, Object> variables;

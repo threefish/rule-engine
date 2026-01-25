@@ -16,7 +16,7 @@
 package cn.xjbpm.rule.listener;
 
 import cn.xjbpm.rule.listener.event.RemoveRuleFlowCacheEvent;
-import cn.xjbpm.rule.service.DefaultRuleFlowModelCacheService;
+import cn.xjbpm.rule.manager.DefaultRuleFlowModelCacheManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
@@ -31,13 +31,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RemoveRuleFlowCacheEventListener implements ApplicationListener<RemoveRuleFlowCacheEvent> {
 
-    private final DefaultRuleFlowModelCacheService defaultRuleFlowDefinitionCacheService;
+    private final DefaultRuleFlowModelCacheManager defaultRuleFlowModelCacheManager;
 
     @Override
     @Async
     public void onApplicationEvent(RemoveRuleFlowCacheEvent event) {
         try {
-            defaultRuleFlowDefinitionCacheService.removeCache(event.getData());
+            defaultRuleFlowModelCacheManager.removeCache(event.getData());
         } catch (Exception e) {
             log.error("缓存移除失败:{}", e.getMessage(), e);
         }

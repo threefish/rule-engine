@@ -19,6 +19,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
+import akka.routing.DefaultResizer;
 import akka.routing.RoundRobinPool;
 import akka.util.Timeout;
 import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
@@ -44,7 +45,7 @@ public class AkkaRuleFlowScheduler {
     /**
      * 默认超时时间
      */
-    private final long DEFAULT_TIMEOUT_SECONDS;
+    private final long defaultExecuteTimeoutSeconds;
 
     private final ActorSystem actorSystem;
     /**
@@ -52,16 +53,19 @@ public class AkkaRuleFlowScheduler {
      */
     private final ActorRef globalWorkerRouter;
 
-    public AkkaRuleFlowScheduler(ActorSystem actorSystem, long akkaDefaultTimeoutSeconds, int akkaGlobalWorkerPoolSize) {
+    public AkkaRuleFlowScheduler(ActorSystem actorSystem, long akkaDefaultExecuteTimeoutSeconds, int akkaGlobalWorkerPoolInitSize, int akkaGlobalWorkerPoolMaxSize) {
         this.actorSystem = actorSystem;
-        this.DEFAULT_TIMEOUT_SECONDS = akkaDefaultTimeoutSeconds;
+        this.defaultExecuteTimeoutSeconds = akkaDefaultExecuteTimeoutSeconds;
         // 初始化全局路由池
-        this.globalWorkerRouter = actorSystem.actorOf(new RoundRobinPool(akkaGlobalWorkerPoolSize).props(NodeWorkerActor.props()), "global-worker-router");
-        log.info("AkkaRuleFlowScheduler 初始化完成，全局路由池大小: {}", akkaGlobalWorkerPoolSize);
+        this.globalWorkerRouter = actorSystem.actorOf(
+                new RoundRobinPool(0)
+                        .withResizer(new DefaultResizer(akkaGlobalWorkerPoolInitSize, akkaGlobalWorkerPoolMaxSize))
+                        .props(NodeWorkerActor.props()), "akka-global-worker-router");
+        log.info("AkkaRuleFlowScheduler 初始化完成，全局路由池大小: init:{} max:{}", akkaGlobalWorkerPoolInitSize, akkaGlobalWorkerPoolMaxSize);
     }
 
     /**
-     * 启动流程并同步等待结果
+     * 启动规则流并同步等待结果
      */
     public void startFlow(RuleFlowModel ruleModel, FlowContext flowContext) throws Exception {
         startFlow(ruleModel, flowContext, Collections.emptySet());
@@ -75,21 +79,21 @@ public class AkkaRuleFlowScheduler {
         Future<Object> future = Patterns.ask(masterActor, new WorkflowProtocol.StartProcess(ruleModel, flowContext, skipNodeIds), timeout);
         try {
             Await.result(future, timeout.duration());
-            log.info("流程执行成功完成: {}", ruleModel.getKey());
+            log.info("规则流执行成功完成: {}", ruleModel.getKey());
         } catch (TimeoutException e) {
-            log.error("流程执行超时: {}", ruleModel.getKey());
+            log.error("规则流执行超时: {}", ruleModel.getKey());
             actorSystem.stop(masterActor);
             throw e;
         } catch (Exception e) {
-            log.error("流程执行失败: {}", e.getMessage());
+            log.error("规则流执行失败: {}", e.getMessage());
             throw e;
         }
     }
 
     private Timeout calculateTimeout(RuleFlowModel ruleModel) {
-        Long timeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
+        Long timeoutSeconds = defaultExecuteTimeoutSeconds;
         if (Objects.nonNull(ruleModel.getTimeoutSeconds())) {
-            timeoutSeconds = Math.min(ruleModel.getTimeoutSeconds(), DEFAULT_TIMEOUT_SECONDS);
+            timeoutSeconds = Math.min(ruleModel.getTimeoutSeconds(), defaultExecuteTimeoutSeconds);
         }
         return new Timeout(timeoutSeconds, TimeUnit.SECONDS);
     }
@@ -108,18 +112,18 @@ public class AkkaRuleFlowScheduler {
             @Override
             public void onComplete(Throwable failure, Object success) {
                 if (failure != null) {
-                    log.error("流程异步执行异常: {}", ruleModel.getKey(), failure);
+                    log.error("规则流异步执行异常: {}", ruleModel.getKey(), failure);
                     if (failure instanceof TimeoutException) {
                         actorSystem.stop(masterActor);
                     }
                 } else {
-                    log.info("流程异步执行完成: {}", ruleModel.getKey());
+                    log.info("规则流异步执行完成: {}", ruleModel.getKey());
                 }
                 if (onCompletion != null) {
                     try {
                         onCompletion.onComplete(failure);
                     } catch (Exception e) {
-                        log.error("流程完成回调执行异常: {}", ruleModel.getKey(), e);
+                        log.error("规则流完成回调执行异常: {}", ruleModel.getKey(), e);
                     }
                 }
             }

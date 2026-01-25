@@ -16,15 +16,14 @@
 
 package cn.xjbpm.rule.dto;
 
+import cn.xjbpm.rule.common.utils.TimeFormatUtil;
 import cn.xjbpm.rule.engine.runtime.model.NodeExcution;
 import cn.xjbpm.rule.engine.runtime.model.TraceLog;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -33,6 +32,7 @@ import java.util.Set;
 @Data
 public class ExcuteRuleFlowResult {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
     private String requestId;
@@ -43,11 +43,19 @@ public class ExcuteRuleFlowResult {
 
     private long timeConsuming;
 
-    private Boolean success;
+    private String timeConsumingStr;
+
+    private RuleFlowStatus status;
 
     private String errorMessage;
 
-    private List<TraceLog> traceLogs;
+    private Collection<TraceLog> traceLogs;
 
     private Map<String, NodeExcution> nodeExcutions;
+
+    private Map<String, Object> nodesData;
+
+    public String getTimeConsumingStr() {
+        return TimeFormatUtil.formatMs(timeConsuming);
+    }
 }

@@ -27,7 +27,9 @@ public interface NodeBehavior {
     /**
      * 执行方法
      */
-    void execution(FlowContext context) throws Exception;
+   default void execution(FlowContext context) throws Exception{
+
+   }
 
 
 }

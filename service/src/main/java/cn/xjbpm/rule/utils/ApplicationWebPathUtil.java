@@ -36,10 +36,10 @@ public class ApplicationWebPathUtil {
         }
         String contextPath = StrUtil.nullToEmpty(getContextPath());
         contextPath = StrUtil.isBlank(contextPath) ? "/" : contextPath;
-        if (contextPath.endsWith("/") == false) {
+        if (!contextPath.endsWith("/")) {
             contextPath = contextPath + "/";
         }
-        String ip = "127.0.0.1";
+        String ip = "localhost";
         return String.format("http://%s%s%sindex.html", ip, port, contextPath);
     }
 

@@ -15,7 +15,7 @@
  */
 package cn.xjbpm.rule.vo.excute;
 
-import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 /**
@@ -25,17 +25,13 @@ import lombok.Data;
 @Data
 public class QueryExcuteRuleFlowRequest {
     /**
-     * 应用编码
-     */
-    @NotBlank
-    private String appCode;
-    /**
      * 请求ID
      */
     private String requestId;
     /**
      * 重试原始ID
      */
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
 }

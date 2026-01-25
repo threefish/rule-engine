@@ -18,10 +18,10 @@ package cn.xjbpm.rule.engine.runtime.behavior;
 import cn.hutool.core.collection.CollUtil;
 import cn.xjbpm.rule.common.utils.ConditionUtil;
 import cn.xjbpm.rule.common.utils.VariableUtils;
-import cn.xjbpm.rule.engine.definition.model.activity.DecisionTablesNode;
-import cn.xjbpm.rule.engine.definition.model.activity.decisiontable.DecisionTablesRow;
-import cn.xjbpm.rule.engine.definition.model.activity.decisiontable.DecisionTablesRowAssignColumn;
-import cn.xjbpm.rule.engine.definition.model.activity.decisiontable.DecisionTablesRowConditionColumn;
+import cn.xjbpm.rule.engine.definition.model.nodes.DecisionTablesNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.decisiontable.DecisionTablesRow;
+import cn.xjbpm.rule.engine.definition.model.nodes.decisiontable.DecisionTablesRowAssignColumn;
+import cn.xjbpm.rule.engine.definition.model.nodes.decisiontable.DecisionTablesRowConditionColumn;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
 import lombok.extern.slf4j.Slf4j;
 

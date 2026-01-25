@@ -20,7 +20,7 @@ import cn.xjbpm.rule.common.utils.ActionUtils;
 import cn.xjbpm.rule.common.utils.ConditionUtil;
 import cn.xjbpm.rule.engine.aviator.AviatorContext;
 import cn.xjbpm.rule.engine.aviator.AviatorExecutor;
-import cn.xjbpm.rule.engine.definition.model.activity.RuleSetNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.RuleSetNode;
 import cn.xjbpm.rule.engine.rule.Action;
 import cn.xjbpm.rule.engine.rule.RuleAction;
 import cn.xjbpm.rule.engine.rule.RuleSet;
@@ -64,8 +64,8 @@ public class RuleSetNodeBehavior implements NodeBehavior {
         ruleSetTag:
         for (RuleSet ruleSet : ruleSets) {
             RuleSetType type = ruleSet.getType();
-            Object currentVariable = AviatorExecutor.execute(AviatorContext.create(ruleSet.getLoopVariableName(), variable));
             if (type == RuleSetType.LOOP) {
+                Object currentVariable = AviatorExecutor.execute(AviatorContext.create(ruleSet.getLoopVariableName(), variable));
                 if (Objects.nonNull(currentVariable)) {
                     Assert.isTrue(currentVariable instanceof List, "循环变量不是一个有效的集合对象");
                 }

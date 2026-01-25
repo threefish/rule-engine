@@ -18,7 +18,7 @@ package cn.xjbpm.rule.node.validator;
 import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.engine.aviator.AviatorContext;
 import cn.xjbpm.rule.engine.aviator.AviatorExecutor;
-import cn.xjbpm.rule.engine.definition.model.StartNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.StartNode;
 import cn.xjbpm.rule.engine.definition.validator.NodeValidator;
 import cn.xjbpm.rule.node.StartNodeProperties;
 import cn.xjbpm.rule.node.enums.TriggerMode;
@@ -43,18 +43,18 @@ public class StartNodeValidator implements NodeValidator<StartNode> {
         Map<String, Object> properties = startNode.getProperties();
         StartNodeProperties startNodeProperties = JsonUtils.json2Obj(JsonUtils.obj2Json(properties), StartNodeProperties.class);
         TriggerMode triggerMode = startNodeProperties.getTriggerMode();
-        if (Objects.equals(triggerMode, TriggerMode.SCHEDULED) && CollectionUtils.isEmpty(startNodeProperties.getTriggers()) == false) {
+        if (Objects.equals(triggerMode, TriggerMode.SCHEDULED) && !CollectionUtils.isEmpty(startNodeProperties.getTriggers())) {
             List<TriggerRule> triggers = startNodeProperties.getTriggers();
             for (int i = 0; i < triggers.size(); i++) {
                 TriggerRule trigger = triggers.get(i);
                 String cronExpression = RuleParserUtil.generateCronExpression(trigger);
-                if (CronExpression.isValidExpression(cronExpression) == false) {
+                if (!CronExpression.isValidExpression(cronExpression)) {
                     throw new Exception(String.format("自动触发规则 存在错误 序号:%s ", i + 1));
                 }
             }
             if (StringUtils.hasText(startNodeProperties.getRequestParams())) {
                 try {
-                    AviatorExecutor.evaluateAndReplace(AviatorContext.create(startNodeProperties.getRequestParams(), null));
+                    AviatorExecutor.evaluateString(AviatorContext.create(startNodeProperties.getRequestParams(), null));
                 } catch (Exception e) {
                     throw e;
                 }

@@ -16,21 +16,45 @@
 package cn.xjbpm.rule.engine.aviator.function.string;
 
 import cn.xjbpm.rule.engine.aviator.function.AbstractBaseFunction;
+import cn.xjbpm.rule.engine.aviator.function.AviatorExtendFunction;
 import com.googlecode.aviator.runtime.type.AviatorObject;
 import com.googlecode.aviator.runtime.type.AviatorString;
+import org.springframework.util.Assert;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
+ * 字符串去空格函数
+ * 强化了防御性编程，去除字符串首尾空格，严格执行参数非空校验。
+ *
  * @author 黄川 huchuc@vip.qq.com
  * date: 2023/7/5
  */
+@SuppressWarnings("all")
 public class TRIM extends AbstractBaseFunction {
 
     @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1) {
-        String var1 = arg1.getValue(env).toString();
+        Object valueObj = arg1.getValue(env);
+
+        
+        Assert.notNull(valueObj, String.format("函数 %s 的目标对象(var1)不能为空", getName()));
+
+        String var1 = valueObj.toString();
         return new AviatorString(var1.trim());
     }
 
+    @Override
+    public List<AviatorExtendFunction> docs() {
+        return Collections.singletonList(
+                new AviatorExtendFunction(
+                        getName(),
+                        String.format("%s(var1)", getName()),
+                        "string",
+                        "去除字符串首尾空格。参数为 null 将抛出异常。",
+                        String.format("%s('  Hello  ')", getName()))
+        );
+    }
 }

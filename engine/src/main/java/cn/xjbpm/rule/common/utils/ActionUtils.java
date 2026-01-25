@@ -35,7 +35,7 @@ public class ActionUtils {
      */
     public static void assignment(Action action, Map<String, Object> variable) {
         AviatorContext aviatorContext = AviatorContext.builder().cached(true).env(variable).build();
-        aviatorContext.setExpression(String.format("%s=%s", action.getLeft(), action.getValues()));
+        aviatorContext.setExpression(String.format("%s=%s", action.getLeft(), action.getValue()));
         if (action.getAssignmentType() == AssignmentType.CALC) {
             aviatorContext.setExpression(String.format("%s=%s", action.getLeft(), action.getExpressionValue()));
         } else if (action.getAssignmentType() == AssignmentType.VAR) {

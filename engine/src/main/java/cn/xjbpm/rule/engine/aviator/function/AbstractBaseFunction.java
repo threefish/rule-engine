@@ -17,6 +17,8 @@ package cn.xjbpm.rule.engine.aviator.function;
 
 import com.googlecode.aviator.runtime.function.AbstractFunction;
 
+import java.util.List;
+
 /**
  * @author 黄川 huchuc@vip.qq.com
  * date: 2023/7/5
@@ -29,4 +31,9 @@ public abstract class AbstractBaseFunction extends AbstractFunction {
     public String getName() {
         return FUNCTION_NAME;
     }
+
+    /**
+     * 文档
+     */
+    public abstract List<AviatorExtendFunction> docs();
 }

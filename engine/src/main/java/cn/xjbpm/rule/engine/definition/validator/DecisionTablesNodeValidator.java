@@ -15,7 +15,7 @@
  */
 package cn.xjbpm.rule.engine.definition.validator;
 
-import cn.xjbpm.rule.engine.definition.model.activity.DecisionTablesNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.DecisionTablesNode;
 
 /**
  * @author 黄川 huchuc@vip.qq.com

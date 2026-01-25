@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: xj-rule
   profiles:
     active: dev
   datasource:
@@ -33,3 +35,18 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+  freemarker:
+    cache: false
+    charset: UTF-8
+    checkTemplateLocation: true
+    content-type: text/html
+    enabled: true
+    number_format: '''0.##'' '
+    request-context-attribute: req
+    suffix: .ftl
+    template-loader-path: classpath:/templates/
+
+rule:
+  akkaGlobalWorkerPoolInitSize: 100
+  akkaGlobalWorkerPoolMaxSize: 2000
+  akkaDefaultExecuteTimeoutSeconds: 600

@@ -11,7 +11,7 @@ import lombok.Getter;
 @Getter
 public enum RuleFlowStatus {
 
-    DEOPLOYED("已部署"),
+    DEPLOYED("已部署"),
 
     UNDEPLOYED("未部署"),
 

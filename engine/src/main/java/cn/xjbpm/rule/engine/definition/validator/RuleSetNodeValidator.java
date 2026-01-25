@@ -15,7 +15,7 @@
  */
 package cn.xjbpm.rule.engine.definition.validator;
 
-import cn.xjbpm.rule.engine.definition.model.activity.RuleSetNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.RuleSetNode;
 
 /**
  * @author 黄川 huchuc@vip.qq.com

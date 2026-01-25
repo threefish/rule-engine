@@ -21,6 +21,10 @@ package cn.xjbpm.rule.engine.runtime.model;
 public enum ExecutStatus {
 
     /**
+     * 节点执行中
+     */
+    RUNNING,
+    /**
      * 节点执行成功
      */
     SUCCESS,

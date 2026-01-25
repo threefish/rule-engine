@@ -15,97 +15,70 @@
  */
 package cn.xjbpm.rule.service;
 
-import cn.xjbpm.rule.common.utils.JsonUtils;
-import cn.xjbpm.rule.error.AuthoriztionConstant;
-import cn.xjbpm.rule.repository.entity.RuleFlowAuthoriztionEntity;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import cn.hutool.core.util.IdUtil;
+import cn.xjbpm.rule.listener.event.DisabledApiKeyEvent;
+import cn.xjbpm.rule.repository.AuthoriztionRepository;
+import cn.xjbpm.rule.repository.entity.AuthoriztionEntity;
+import cn.xjbpm.rule.vo.AuthoriztionVO;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.AntPathMatcher;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * date: 2025/12/5
+ * date: 2025/11/27
  */
 @Service
 @AllArgsConstructor
 public class AuthoriztionService {
 
-
-    private final static Cache<String, TokenAuth> cache = CacheBuilder.newBuilder()
-            .maximumSize(100)
-            .expireAfterWrite(1, TimeUnit.HOURS)
-            .build();
+    private final AuthoriztionRepository authoriztionRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
 
-    private final RuleFlowAuthoriztionService ruleFlowAuthoriztionService;
-    private final AntPathMatcher antPathMatcher = new AntPathMatcher();
-
-    /**
-     * Token 验证
-     */
-    public boolean validateToken(String appCode, String token) {
-        TokenAuth tokenAuth = getTokenAuth(appCode);
-        if (Objects.nonNull(tokenAuth)) {
-            return Objects.equals(token, tokenAuth.getSecretKey());
+    public Page<AuthoriztionEntity> findPage(String key, Pageable pageable) {
+        if (StringUtils.hasText(key)) {
+            return authoriztionRepository.findAllByApiKey(key, pageable);
         }
-        return false;
+        return authoriztionRepository.findAll(pageable);
     }
 
-    private TokenAuth getTokenAuth(String key) {
-        try {
-            return cache.get(key, () -> {
-                RuleFlowAuthoriztionEntity entity = ruleFlowAuthoriztionService.findByAppCode(key);
-                if (Objects.nonNull(entity)) {
-                    TokenAuth tokenAuth = new TokenAuth();
-                    tokenAuth.setSecretKey(entity.getSecretKey());
-                    tokenAuth.setRules(JsonUtils.json2List(entity.getAuthoriztion(), String.class));
-                    return tokenAuth;
-                }
-                throw new RuntimeException(AuthoriztionConstant.TOKEN_ERROR);
-            });
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof RuntimeException) {
-                throw (RuntimeException) cause;
-            }
-            throw new RuntimeException("缓存加载失败: " + e.getMessage(), e);
+    public boolean save(AuthoriztionVO.SaveRequest request) {
+        AuthoriztionEntity entity = null;
+        if (Objects.nonNull(request.getId())) {
+            entity = authoriztionRepository.findById(request.getId()).orElse(null);
         }
+        if (Objects.isNull(entity)) {
+            entity = new AuthoriztionEntity();
+            entity.setApiKey(IdUtil.fastSimpleUUID());
+            entity.setEnabled(true);
+        }
+        entity.setName(request.getName());
+        entity.setDescription(request.getDescription());
+        entity.setAuthoriztion(request.getAuthoriztion());
+        authoriztionRepository.save(entity);
+        return true;
     }
 
-    /**
-     * 验证规则
-     *
-     * @param appCode
-     * @param ruleFlowKey
-     * @return
-     */
 
-    public boolean validateRuleFlowKey(String appCode, String ruleFlowKey) {
-        TokenAuth tokenAuth = getTokenAuth(appCode);
-        for (String rule : tokenAuth.getRules()) {
-            if (antPathMatcher.match(rule, ruleFlowKey)) {
-                return true;
-            }
+    @Transactional(rollbackFor = Exception.class)
+    public boolean changeStatus(Long id, boolean enabled) {
+        AuthoriztionEntity entity = authoriztionRepository.findById(id).orElse(null);
+        entity.setEnabled(enabled);
+        authoriztionRepository.save(entity);
+        if (enabled == false) {
+            applicationEventPublisher.publishEvent(DisabledApiKeyEvent.create(entity.getApiKey()));
         }
         return true;
     }
 
-    public void invalidate(String appCode) {
-        cache.invalidate(appCode);
+    public AuthoriztionEntity findByApiKey(String apiKey) {
+        return authoriztionRepository.findByApiKey(apiKey).orElse(null);
     }
-
-    @Data
-    public class TokenAuth {
-        private String secretKey;
-        private List<String> rules;
-    }
-
 }

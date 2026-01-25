@@ -16,11 +16,11 @@
 package cn.xjbpm.rule.engine.aviator.function.object;
 
 import cn.xjbpm.rule.engine.aviator.function.AbstractBaseFunction;
+import cn.xjbpm.rule.engine.aviator.function.AviatorExtendFunction;
 import com.googlecode.aviator.runtime.type.AviatorBoolean;
 import com.googlecode.aviator.runtime.type.AviatorObject;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -34,4 +34,15 @@ public class IS_NULL extends AbstractBaseFunction {
         return AviatorBoolean.valueOf(Objects.isNull(value));
     }
 
+    @Override
+    public List<AviatorExtendFunction> docs() {
+        return Collections.singletonList(
+                new AviatorExtendFunction(
+                        getName(),
+                        String.format("%s(value)", getName()),
+                        "boolean",
+                        "断言对象为 NULL。",
+                        String.format("%s('hello')", getName()))
+        );
+    }
 }

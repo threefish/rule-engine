@@ -15,12 +15,13 @@
  */
 package cn.xjbpm.rule.engine.runtime.actor;
 
-import cn.xjbpm.rule.engine.definition.model.Node;
+import cn.xjbpm.rule.engine.definition.model.nodes.Node;
 import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
 import lombok.Value;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -51,6 +52,7 @@ public interface WorkflowProtocol {
         int attempt; // 当前是第几次尝试 (0开始)
         long startTotalTime;//记录该节点被调度的初始时间
         FlowContext flowContext;
+        ExecutionScope scope;
     }
 
     // ================= Worker -> Master =================
@@ -59,6 +61,8 @@ public interface WorkflowProtocol {
         String nodeId;
         Node node;
         boolean success;
+        ExecutionScope scope;
+        Long startTime;
     }
 
     @Value
@@ -66,5 +70,15 @@ public interface WorkflowProtocol {
         String nodeId;
         Node node;
         Throwable reason;
+    }
+
+    @Value
+    @lombok.Builder
+    class ExecutionScope implements java.io.Serializable {
+        String loopNodeId;      // 循环节点ID
+        String iterationId;     // 迭代唯一标识 (e.g., LoopID_Index)
+        int index;              // 索引
+        Map<String, Object> localVariables; // 局部变量
+        long startTime;//记录该节点被调度的初始时间
     }
 }

@@ -15,7 +15,7 @@
  */
 package cn.xjbpm.rule.engine.runtime.behavior;
 
-import cn.xjbpm.rule.engine.definition.model.SequenceConnNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.SequenceConnNode;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
 import lombok.extern.slf4j.Slf4j;
 

@@ -21,6 +21,8 @@ import cn.xjbpm.rule.engine.runtime.model.TraceLog;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -45,11 +47,11 @@ public class ExcutingHistoryLogVO {
 
     private long timeConsuming;
 
-    private Boolean success;
+    private RuleFlowStatus status;
 
     private String errorMessage;
 
-    private List<TraceLog> traceLogs;
+    private Collection<TraceLog> traceLogs;
 
     private Map<String, NodeExcution> nodeExcutions;
 
@@ -63,7 +65,7 @@ public class ExcutingHistoryLogVO {
         excutingHistoryLogVO.setRequest(variables);
         excutingHistoryLogVO.setResponse(response.getResponse());
         excutingHistoryLogVO.setTimeConsuming(response.getTimeConsuming());
-        excutingHistoryLogVO.setSuccess(response.getSuccess());
+        excutingHistoryLogVO.setStatus(response.getStatus());
         excutingHistoryLogVO.setErrorMessage(response.getErrorMessage());
         excutingHistoryLogVO.setTraceLogs(response.getTraceLogs());
         excutingHistoryLogVO.setNodeExcutions(response.getNodeExcutions());

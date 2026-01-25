@@ -901,7 +901,7 @@
     },
     {
       "id": "026",
-      "type": "FunctionActivityNode",
+      "type": "FunctionNode",
       "x": 962,
       "y": 332,
       "properties": {

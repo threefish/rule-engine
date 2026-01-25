@@ -15,24 +15,34 @@
  */
 package cn.xjbpm.rule.engine.runtime.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import cn.xjbpm.rule.custom.BeanContextManager;
+import cn.xjbpm.rule.dto.ExcuteRuleFlowResult;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * 流程执行上下文：用于在多个节点间共享数据
+ * 规则流执行上下文：用于在多个节点间共享数据
  * 提供线程安全的数据访问机制
  *
  * @author 黄川 huchuc@vip.qq.com
  */
+@Slf4j
 public class FlowContext {
 
-    /**
-     * 节点共享数据
-     */
+    @Getter
+    private final BeanContextManager beanContextManager;
 
-    private final Map<String, Object> sharedData = new ConcurrentHashMap<>();
+    @Getter
+    private final boolean debugModel;
+
+    @Getter
+    private final ExcuteRuleFlowResult processInstance;
 
     /**
      * 业务入参变量
@@ -43,23 +53,36 @@ public class FlowContext {
      * 节点执行信息
      */
     private final Map<String, NodeExcution> nodeExcutions = new ConcurrentHashMap<>();
-    /**
-     * 调试模式下，记录日志
-     */
-    private final List<TraceLog> traceLogs = new ArrayList<>();
 
-    public FlowContext(Map<String, Object> variable) {
+    /**
+     * 记录执行日志
+     */
+    private final Collection<TraceLog> traceLogs = new ConcurrentLinkedQueue<>();
+
+    public FlowContext(ExcuteRuleFlowResult processInstance, Map<String, Object> variable, boolean debugModel, BeanContextManager beanContextManager) {
+        this.processInstance = processInstance;
         this.variable = new ConcurrentHashMap<>(variable);
+        this.debugModel = debugModel;
+        this.beanContextManager = beanContextManager;
     }
 
-    public List<TraceLog> getTraceLogs() {
+    public Collection<TraceLog> getTraceLogs() {
         return traceLogs;
+    }
+
+    public Map<String, Object> getNodesData() {
+        Map<String, Object> nodesData = new HashMap<>(nodeExcutions.size());
+        this.getVariable().forEach((key, value) -> {
+            if (key.startsWith("N")) {
+                nodesData.put(key, value);
+            }
+        });
+        return nodesData;
     }
 
     public Map<String, Object> getVariable() {
         return variable;
     }
-
 
     public void putNodeExcution(String key, NodeExcution excution) {
         nodeExcutions.put(key, excution);
@@ -70,57 +93,17 @@ public class FlowContext {
     }
 
     /**
-     * 存储共享数据
+     * 存储节点数据出参，提供给后续节点使用数据
      */
-    public void put(String key, Object value) {
-        sharedData.put(key, value);
-    }
-
-    /**
-     * 获取共享数据
-     */
-    public Object get(String key) {
-        return sharedData.get(key);
-    }
-
-    /**
-     * 获取指定类型的共享数据
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T get(String key, Class<T> type) {
-        Object value = sharedData.get(key);
-        return value != null ? (T) value : null;
-    }
-
-    /**
-     * 移除共享数据
-     */
-    public Object remove(String key) {
-        return sharedData.remove(key);
-    }
-
-    /**
-     * 检查是否包含指定键
-     */
-    public boolean containsKey(String key) {
-        return sharedData.containsKey(key);
-    }
-
-    /**
-     * 清空所有共享数据
-     */
-    public void clear() {
-        sharedData.clear();
-    }
-
-    /**
-     * 获取所有共享数据的快照
-     */
-    public Map<String, Object> getAllData() {
-        return new ConcurrentHashMap<>(sharedData);
+    public void put(String nodeId, Object value) {
+        if (value == null) {
+            return;
+        }
+        variable.put(nodeId, value);
     }
 
     public void addTraceLog(String message) {
         traceLogs.add(TraceLog.of(message));
     }
+
 }

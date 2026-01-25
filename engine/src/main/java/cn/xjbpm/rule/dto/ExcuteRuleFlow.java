@@ -15,7 +15,7 @@ import java.util.Set;
 public class ExcuteRuleFlow {
 
     /**
-     * 流程定义key
+     * 规则流定义key
      */
     @NotBlank
     private String key;
@@ -25,12 +25,12 @@ public class ExcuteRuleFlow {
      */
     private String requestId;
     /**
-     * 流程变量
+     * 规则流变量
      */
     @NotNull
     private Map<String, Object> variables;
     /**
-     * 流程定义内容
+     * 规则流定义内容
      */
     private String content;
     /**
@@ -45,4 +45,9 @@ public class ExcuteRuleFlow {
      * 跳过节点
      */
     private Set<String> skipNodeIds;
+    /**
+     * 调试模式
+     */
+    private boolean debugModel;
+
 }

@@ -25,7 +25,7 @@ public class StringUtils {
         if (template == null || args == null || args.length == 0) {
             return template;
         }
-        StringBuilder sb = new StringBuilder(template.length() + 50);
+        StringBuilder sb = new StringBuilder(template.length() + args.length * 10);
         int argIndex = 0;
         int start = 0;
         int i;
@@ -34,15 +34,19 @@ public class StringUtils {
                 break;
             }
             sb.append(template, start, i);
-            sb.append(args[argIndex++]);
+            Object arg = args[argIndex++];
+            sb.append(arg == null ? "null" : arg);
             start = i + 2;
         }
         sb.append(template, start, template.length());
         return sb.toString();
     }
 
+    public static boolean isNotBlank(String str) {
+        return !isBlank(str);
+    }
 
-    public static boolean isBlank(String  str){
+    public static boolean isBlank(String str) {
         return str == null || str.trim().length() == 0;
     }
 }

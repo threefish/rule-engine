@@ -17,6 +17,7 @@ package cn.xjbpm.rule.engine.rule;
 
 import cn.xjbpm.rule.engine.rule.enums.ActionType;
 import cn.xjbpm.rule.engine.rule.enums.AssignmentType;
+import cn.xjbpm.rule.engine.rule.enums.VariableType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,9 +36,11 @@ import java.util.List;
 public class Action {
     private String key;
     private ActionType type;
+    private Object value;
     private String left;
     private String fieldValue;
     private String expressionValue;
     private List<Object> values;
     private AssignmentType assignmentType;
+    private VariableType varType;
 }

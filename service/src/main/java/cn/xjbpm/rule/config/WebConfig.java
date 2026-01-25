@@ -15,15 +15,43 @@
  */
 package cn.xjbpm.rule.config;
 
+import cn.xjbpm.rule.interceptor.AuthInterceptor;
+import cn.xjbpm.rule.utils.JwtUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.io.PrintWriter;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
  */
 @Component
+@AllArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
+
+    private final AuthInterceptor authInterceptor;
+
+    /**
+     * 注册拦截器
+     * 拦截所有 /manage/** 开头的请求
+     */
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(authInterceptor)
+                .addPathPatterns("/manage/**")
+                .excludePathPatterns("/manage/login")
+                .excludePathPatterns("/openapi/**")
+                .excludePathPatterns("/public/**");
+    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

@@ -53,20 +53,17 @@ public class SchedulerService {
      * 1. 指定 ruleFlowKey 清除相关的定时任务
      * 利用 Quartz 的 Group 机制，将 ruleFlowKey 作为 GroupName，一次性查找并删除
      *
-     * @param ruleFlowKey 流程唯一标识
+     * @param ruleFlowKey 规则流唯一标识
      */
     public void clearScheduledTasks(String ruleFlowKey) {
         try {
             // 匹配该组下的所有 Job
             GroupMatcher<JobKey> matcher = GroupMatcher.jobGroupEquals(ruleFlowKey);
             Set<JobKey> jobKeys = scheduler.getJobKeys(matcher);
-
             if (jobKeys != null && !jobKeys.isEmpty()) {
                 // 批量删除
                 scheduler.deleteJobs(new ArrayList<>(jobKeys));
                 log.info("已清除 ruleFlowKey=[{}] 下的 {} 个定时任务", ruleFlowKey, jobKeys.size());
-            } else {
-                log.info("ruleFlowKey=[{}] 下无需清除的任务", ruleFlowKey);
             }
         } catch (SchedulerException e) {
             log.error("清除定时任务失败 ruleFlowKey={}", ruleFlowKey, e);

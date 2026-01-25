@@ -31,6 +31,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +92,20 @@ public class GlobalExceptionAdvice {
             return requestAttributes instanceof ServletRequestAttributes ? new ServletServerHttpRequest(((ServletRequestAttributes) requestAttributes).getRequest()) : (HttpRequest) requestAttributes;
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    @ExceptionHandler(value = AsyncRequestNotUsableException.class)
+    public void asyncRequestNotUsableException(AsyncRequestNotUsableException ex) {
+        if (log.isDebugEnabled()) {
+            log.debug("客户端已关闭连接，忽略异常 {}", ex);
+        }
+    }
+
+    @ExceptionHandler(value = AsyncRequestTimeoutException.class)
+    public void asyncRequestNotUsableException(AsyncRequestTimeoutException ex) {
+        if (log.isDebugEnabled()) {
+            log.debug("客户端已关闭连接，忽略异常 {}", ex);
         }
     }
 

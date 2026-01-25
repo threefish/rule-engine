@@ -16,7 +16,8 @@
 package cn.xjbpm.rule.engine.definition.validator;
 
 import cn.hutool.core.util.StrUtil;
-import cn.xjbpm.rule.engine.definition.model.Node;
+import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
+import cn.xjbpm.rule.engine.definition.model.nodes.Node;
 import org.springframework.util.Assert;
 
 /**
@@ -29,6 +30,8 @@ public class BaseNodeValidator<T> implements NodeValidator<T> {
     public void check(T t) {
         Node node = ((Node) t);
         Assert.isTrue(StrUtil.isNotBlank(node.getId()), "节点ID不能为空");
-        Assert.isTrue(StrUtil.isNotBlank(node.getName()), "节点名称不能为空");
+        if (node.getType() != NodeType.SequenceConnNode) {
+            Assert.isTrue(StrUtil.isNotBlank(node.getName()), "节点名称不能为空");
+        }
     }
 }

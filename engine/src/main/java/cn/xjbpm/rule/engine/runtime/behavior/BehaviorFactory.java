@@ -15,7 +15,7 @@
  */
 package cn.xjbpm.rule.engine.runtime.behavior;
 
-import cn.xjbpm.rule.engine.definition.model.Node;
+import cn.xjbpm.rule.engine.definition.model.nodes.Node;
 import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
 import lombok.SneakyThrows;
 

@@ -16,8 +16,13 @@
 package cn.xjbpm.rule.engine.definition.parse;
 
 import cn.xjbpm.rule.common.utils.JsonUtils;
+import cn.xjbpm.rule.common.utils.StringUtils;
 import cn.xjbpm.rule.engine.definition.model.*;
 import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
+import cn.xjbpm.rule.engine.definition.model.nodes.EndNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.Node;
+import cn.xjbpm.rule.engine.definition.model.nodes.SequenceConnNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.StartNode;
 import cn.xjbpm.rule.engine.rule.Rule;
 import cn.xjbpm.rule.engine.runtime.behavior.BehaviorFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +42,7 @@ public class RuleFlowModelParse {
     /**
      * 转换成模型
      *
-     * @param json 流程定义的 JSON 字符串
+     * @param json 规则流定义的 JSON 字符串
      * @return 转换后的 RuleFlowModel
      */
     @SuppressWarnings("unchecked")
@@ -87,9 +92,13 @@ public class RuleFlowModelParse {
                 node.setType(type);
                 node.setProperties(properties);
                 node.setId(getString(map.get("id")));
+                node.setParentId(getString(map.get("parentId")));
+                node.setExtent(getString(map.get("extent")));
 
-                Map<String, Object> text = (Map<String, Object>) map.get("text");
-                node.setName(Objects.nonNull(text) && text.containsKey("value") ? getString(text.get("value")) : null);
+                if(StringUtils.isBlank(node.getName())){
+                    Map<String, Object> text = (Map<String, Object>) map.get("text");
+                    node.setName(Objects.nonNull(text) && text.containsKey("value") ? getString(text.get("value")) : null);
+                }
                 node.setDocumentation(getString(properties.get("name")));
                 node.setTag(getString(properties.get("tag")));
 
@@ -115,28 +124,22 @@ public class RuleFlowModelParse {
             for (Map<String, Object> map : edgeJsonArray) {
                 NodeType type = JsonUtils.convertValue(map.get("type"), NodeType.class);
                 SequenceConnNode node = JsonUtils.convertValue(map, (Class<SequenceConnNode>) type.getNodeClass());
-
                 node.setOriginalJson(JsonUtils.obj2Json(map));
                 node.setType(type);
-
+                if(StringUtils.isBlank(node.getName())){
+                    Map<String, Object> text = (Map<String, Object>) map.get("text");
+                    node.setName(Objects.nonNull(text) ? getString(text.get("value")) : null);
+                }
                 Map<String, Object> properties = (Map<String, Object>) map.get("properties");
-                Map<String, Object> text = (Map<String, Object>) map.get("text");
-
-                node.setName(Objects.nonNull(text) ? getString(text.get("value")) : null);
                 node.setDocumentation(getString(properties.get("name")));
-
                 node.setSourceNodeKey(getString(map.get("sourceNodeId")));
                 node.setTargetNodeKey(getString(map.get("targetNodeId")));
                 node.setSourceNode(nodeMap.get(node.getSourceNodeKey()));
                 node.setTargetNode(nodeMap.get(node.getTargetNodeKey()));
                 node.setSortNum(getIntValueFromMap(properties, "sortNum", 0));
-
                 node.setRule(JsonUtils.convertValue(properties.get("rule"), Rule.class));
-
-
                 nodes.add(node);
                 nodeMap.put(node.getId(), node);
-
                 sequenceConnNodes.add(node);
             }
 

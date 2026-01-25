@@ -34,17 +34,17 @@ public class RuleFlowTestExcuteVO {
      */
     private Set<String> skipNodeIds;
     /**
-     * 流程定义key
+     * 规则流定义key
      */
     @NotBlank
     private String key;
     /**
-     * 流程变量
+     * 规则流变量
      */
     @NotNull
     private Map<String, Object> variables;
     /**
-     * 流程定义内容
+     * 规则流定义内容
      */
     @NotBlank
     private String content;

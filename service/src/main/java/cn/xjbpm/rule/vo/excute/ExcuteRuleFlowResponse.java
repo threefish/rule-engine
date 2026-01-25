@@ -16,6 +16,8 @@
 package cn.xjbpm.rule.vo.excute;
 
 import cn.xjbpm.rule.dto.ExcuteRuleFlowResult;
+import cn.xjbpm.rule.dto.RuleFlowStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.util.Map;
@@ -25,11 +27,13 @@ import java.util.Map;
  * date: 2025/12/5
  */
 @Data
+@SuppressWarnings("all")
 public class ExcuteRuleFlowResponse {
 
     /**
      * 规则流执行记录ID，可用来重试
      */
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
     private String requestId;
@@ -40,7 +44,9 @@ public class ExcuteRuleFlowResponse {
 
     private long timeConsuming;
 
-    private Boolean success;
+
+    private RuleFlowStatus status;
+
 
     private String errorMessage;
 
@@ -51,7 +57,7 @@ public class ExcuteRuleFlowResponse {
         response.setRuleFlowKey(excuteRuleFlowResponse.getRuleFlowKey());
         response.setResponse(excuteRuleFlowResponse.getResponse());
         response.setTimeConsuming(excuteRuleFlowResponse.getTimeConsuming());
-        response.setSuccess(excuteRuleFlowResponse.getSuccess());
+        response.setStatus(excuteRuleFlowResponse.getStatus());
         response.setErrorMessage(excuteRuleFlowResponse.getErrorMessage());
         return response;
     }

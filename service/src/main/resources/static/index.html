@@ -1,14 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-    <script type="module" crossorigin src="/assets/pKmX7Z53.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/Dl7ht70c.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="icon" type="image/svg+xml" href="/vite.svg"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <title>星极规则引擎 - 高性能可视化业务逻辑配置平台</title>
+    <meta name="description"
+          content="星极规则引擎是一款领先的业务逻辑编排工具，提供可视化界面、高性能执行引擎，帮助开发者快速实现复杂的业务决策与规则校验。"/>
+    <meta name="keywords" content="规则引擎, 业务流, 低代码, 决策引擎, 星极引擎, 可视化编程"/>
+    <meta name="author" content="星极团队"/>
+
+    <meta property="og:title" content="星极规则引擎"/>
+    <meta property="og:description" content="高性能可视化业务逻辑配置平台"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="https://github.com/threefish/rule-engine"/>
+
+    <meta name="renderer" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+        }
+
+        .spin {
+            padding: 0;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+
+        .spin-loading {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top: 3px solid #1677ff;
+            border-right: 3px solid #1677ff;
+            animation: spin 0.9s linear infinite;
+            margin: 20% auto 0px auto;
+        }
+
+        .spin-loading-title {
+            text-align: center;
+            margin-top: 30px;
+            color: #0f66d6;
+            font-size: 15px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <script>
+        window['RULE-ENGINE-GATEWAY-BASE-URL'] = "http://152.136.109.198:8080/"
+    </script>
+    <script type="module" crossorigin src="/assets/DiIPru6-.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/DV8IWQse.css">
+</head>
+<body>
+<div id="root">
+    <div class="spin">
+        <div class="spin-loading"></div>
+        <div class="spin-loading-title">页面加载中...</div>
+        <div style="display:none">
+            <h1>星极规则引擎</h1>
+            <p>提供高效的业务逻辑自动化处理方案，支持多场景集成。</p>
+        </div>
+    </div>
+</div>
+</body>
 </html>

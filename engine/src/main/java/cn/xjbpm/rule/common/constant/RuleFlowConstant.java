@@ -19,6 +19,11 @@ package cn.xjbpm.rule.common.constant;
  * @author 黄川 huchuc@vip.qq.com
  * date: 2023/7/22
  */
-public interface RuleFlowConstant {
-    String BUSINESS_OBJECTS = "业务对象";
+public class RuleFlowConstant {
+    public static final String BUSINESS_OBJECTS = "业务对象";
+
+    /**
+     * 演示模式
+     */
+    public static boolean DEMO_MODE = false;
 }

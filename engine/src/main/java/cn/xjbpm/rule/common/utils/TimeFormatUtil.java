@@ -23,6 +23,9 @@ public class TimeFormatUtil {
     // 定义纳秒显示的最大阈值（4位数字），超过此值即切换为ms
     private static final long MAX_NS_DISPLAY_THRESHOLD = 10_000; // 10,000 ns
 
+    // 1 秒 = 1000 ms
+    private static final long MS_TO_S_THRESHOLD = 1_000; // 1000 ms
+
     public static String formatNanosToMs(long nanoseconds) {
         if (nanoseconds < 0) {
             return "0ms";
@@ -31,9 +34,29 @@ public class TimeFormatUtil {
         if (nanoseconds < MAX_NS_DISPLAY_THRESHOLD) {
             return nanoseconds + "ns";
         }
-        // 2. 否则 (大于等于 10,000 ns)，显示为毫秒 (ms)，保留两位小数
         double milliseconds = nanoseconds / 1_000_000.0;
-        return String.format("%.2fms", milliseconds);
+        // 2. 小于 1000 ms，显示 ms
+        if (milliseconds < MS_TO_S_THRESHOLD) {
+            return String.format("%.2fms", milliseconds);
+        }
+        // 3. 大于等于 1000 ms，显示 s
+        double seconds = milliseconds / 1_000.0;
+        return String.format("%.2fs", seconds);
+    }
+
+    public static String formatMs(long millis) {
+        if (millis <= 0) {
+            return "0ms";
+        }
+
+        // 小于 1 秒，直接显示毫秒
+        if (millis < 1_000) {
+            return millis + "ms";
+        }
+
+        // 大于等于 1 秒，显示秒
+        double seconds = millis / 1_000.0;
+        return String.format("%.2fs", seconds);
     }
 
 }

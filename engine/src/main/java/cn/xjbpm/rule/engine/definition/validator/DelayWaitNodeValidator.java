@@ -15,7 +15,7 @@
  */
 package cn.xjbpm.rule.engine.definition.validator;
 
-import cn.xjbpm.rule.engine.definition.model.DelayWaitNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.DelayWaitNode;
 import org.springframework.util.Assert;
 
 /**

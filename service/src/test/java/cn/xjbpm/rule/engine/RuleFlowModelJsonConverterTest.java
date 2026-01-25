@@ -15,11 +15,11 @@
  */
 package cn.xjbpm.rule.engine;
 
-import cn.xjbpm.rule.engine.definition.model.EndNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.EndNode;
 import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
-import cn.xjbpm.rule.engine.definition.model.SequenceConnNode;
-import cn.xjbpm.rule.engine.definition.model.StartNode;
-import cn.xjbpm.rule.engine.definition.model.activity.FunctionActivityNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.SequenceConnNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.StartNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.FunctionNode;
 import cn.xjbpm.rule.engine.definition.parse.RuleFlowModelParse;
 import cn.xjbpm.rule.engine.definition.validator.ErrorNodeMsg;
 import cn.xjbpm.rule.engine.definition.validator.RuleFlowModelValidator;
@@ -41,15 +41,15 @@ public class RuleFlowModelJsonConverterTest {
 
         RuleFlowModel ruleFlowModel = new RuleFlowModel();
         ruleFlowModel.setKey("test");
-        ruleFlowModel.setName("测试流程");
-        ruleFlowModel.setDescription("测试流程");
+        ruleFlowModel.setName("测试规则流");
+        ruleFlowModel.setDescription("测试规则流");
 
         StartNode startNode = new StartNode();
         startNode.setId("start");
-        startNode.setName("流程开始");
+        startNode.setName("规则流开始");
 
 
-        FunctionActivityNode fun1 = new FunctionActivityNode();
+        FunctionNode fun1 = new FunctionNode();
         fun1.setId("f1");
         fun1.setName("函数1节点");
         fun1.setId("FUN001");
@@ -57,7 +57,7 @@ public class RuleFlowModelJsonConverterTest {
 
         EndNode endNode = new EndNode();
         endNode.setId("end");
-        endNode.setName("流程结束");
+        endNode.setName("规则流结束");
 
 
         SequenceConnNode start_to_f1 = new SequenceConnNode();
@@ -84,7 +84,7 @@ public class RuleFlowModelJsonConverterTest {
         String json = "{\n" +
                 "    \"key\":\"test\",\n" +
                 "    \"name\":\"测试\",\n" +
-                "    \"documentation\":\"一个测试流程\",\n" +
+                "    \"documentation\":\"一个测试规则流\",\n" +
                 "    \"executionListeners\":[],\n" +
                 "    \"nodes\": [\n" +
                 "        {\n" +

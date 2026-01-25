@@ -15,15 +15,12 @@
  */
 package cn.xjbpm.rule.engine.definition.validator;
 
-import cn.xjbpm.rule.engine.definition.model.Node;
-import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
+import cn.xjbpm.rule.engine.definition.model.nodes.Node;
 import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
+import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -56,14 +53,20 @@ public class RuleFlowModelValidator {
     /**
      * 校验方法
      *
-     * @param ruleFlowModel 规则流程模型
+     * @param ruleFlowModel 规则规则流模型
      * @return 错误节点信息列表
      */
     public List<ErrorNodeMsg> check(RuleFlowModel ruleFlowModel) {
         List<? extends Node> childNodes = ruleFlowModel.getChildNodes();
         List<ErrorNodeMsg> errorNodeMsgs = new ArrayList<>();
+        Set<String> ids = new HashSet<>();
         if (!CollectionUtils.isEmpty(childNodes)) {
             for (Node childNode : childNodes) {
+                if (ids.contains(childNode.getId())) {
+                    errorNodeMsgs.add(new ErrorNodeMsg(childNode.getId(), childNode.getType(), "节点ID重复"));
+                } else {
+                    ids.add(childNode.getId());
+                }
                 NodeType type = childNode.getType();
                 NodeValidator validator = nodeValidatorMap.computeIfAbsent(type, k -> {
                     try {

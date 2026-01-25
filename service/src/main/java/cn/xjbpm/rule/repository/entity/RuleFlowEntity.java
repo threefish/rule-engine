@@ -27,7 +27,7 @@ import java.time.LocalDateTime;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
- * 规则流程实体
+ * 规则规则流实体
  */
 @Entity
 @Table(
@@ -72,14 +72,14 @@ public class RuleFlowEntity {
     private RuleFlowStatus status;
 
     /**
-     * 规则流程内容（大文本字段）
+     * 规则规则流内容（大文本字段）
      */
     @Lob
     @Column(name = "content", columnDefinition = "LONGTEXT")
     private String content;
 
     /**
-     * 规则流程内容（草稿大文本字段）
+     * 规则规则流内容（草稿大文本字段）
      */
     @Lob
     @Column(name = "draft_content", columnDefinition = "LONGTEXT")

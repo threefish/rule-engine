@@ -15,45 +15,50 @@
  */
 package cn.xjbpm.rule.engine.aviator.function.encryption;
 
+import cn.hutool.crypto.digest.DigestUtil;
 import cn.xjbpm.rule.engine.aviator.function.AbstractBaseFunction;
+import cn.xjbpm.rule.engine.aviator.function.AviatorExtendFunction;
 import com.googlecode.aviator.runtime.type.AviatorObject;
 import com.googlecode.aviator.runtime.type.AviatorString;
+import org.springframework.util.Assert;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
+ * SHA-256 加密函数
+ * 强化了防御性编程，提供 64 位小写加密结果，严格执行参数非空校验。
+ *
  * @author 黄川 huchuc@vip.qq.com
  * date: 2023/10/25
  */
 @SuppressWarnings("all")
 public class SHA256 extends AbstractBaseFunction {
 
-
     @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1) {
-        String message = String.valueOf(arg1.getValue(env));
-        return new AviatorString(sha256Encode(message));
+        Object valueObj = arg1.getValue(env);
+
+        
+        Assert.notNull(valueObj, String.format("函数 %s 的待加密对象(var1)不能为空", getName()));
+
+        String message = valueObj.toString();
+        // 使用 Hutool 工具类进行 SHA256 加密并转换为 64 位小写十六进制字符串
+        String hex = DigestUtil.sha256Hex(message);
+
+        return new AviatorString(hex);
     }
 
-    private String sha256Encode(String input) {
-        try {
-            // 创建一个SHA-256消息摘要对象
-            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-            // 将输入字符串转换为字节串并更新消息摘要对象
-            messageDigest.update(input.getBytes(StandardCharsets.UTF_8));
-            // 获取哈希值的字节数组表示
-            byte[] hashedBytes = messageDigest.digest();
-            // 将字节数组转换为十六进制字符串
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hashedBytes) {
-                hexString.append(String.format("%02x", b));
-            }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("无法找到SHA-256算法", e);
-        }
+    @Override
+    public List<AviatorExtendFunction> docs() {
+        return Collections.singletonList(
+                new AviatorExtendFunction(
+                        getName(),
+                        String.format("%s(value)", getName()),
+                        "string",
+                        "获取 SHA-256 加密后的 64 位小写字符串。任意参数为 null 将抛出异常。",
+                        String.format("%s('hello')", getName()))
+        );
     }
 }

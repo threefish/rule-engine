@@ -15,7 +15,7 @@
  */
 package cn.xjbpm.rule.engine.runtime.behavior;
 
-import cn.xjbpm.rule.engine.definition.model.gateway.InclusiveGatewayNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.gateway.InclusiveGatewayNode;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
 
 /**
@@ -31,8 +31,5 @@ public class InclusiveGatewayNodeBehavior implements NodeBehavior {
         this.node = node;
     }
 
-    @Override
-    public void execution(FlowContext context) {
 
-    }
 }

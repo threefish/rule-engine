@@ -53,7 +53,7 @@ public class DynamicJob implements Job {
         String cronExpression = jobDataMap.getString(FieldUtil.name(RuleFlowScheduledEntity::getCronExpression));
         String requestParams = jobDataMap.getString(FieldUtil.name(RuleFlowScheduledEntity::getRequestParams));
         log.info("任务ID:{} 调度:{} 表达式:{}", id, ruleFlowKey, cronExpression);
-        String realRequestParams = AviatorExecutor.evaluateAndReplace(AviatorContext.create(requestParams, null));
+        String realRequestParams = AviatorExecutor.evaluateString(AviatorContext.create(requestParams, null));
         ExcuteRuleFlow excuteRuleFlow = new ExcuteRuleFlow();
         excuteRuleFlow.setKey(ruleFlowKey);
         excuteRuleFlow.setRequestId(IdUtil.getSnowflakeNextIdStr());

@@ -16,23 +16,48 @@
 package cn.xjbpm.rule.engine.aviator.function.encryption;
 
 import cn.xjbpm.rule.engine.aviator.function.AbstractBaseFunction;
+import cn.xjbpm.rule.engine.aviator.function.AviatorExtendFunction;
 import com.googlecode.aviator.runtime.type.AviatorObject;
 import com.googlecode.aviator.runtime.type.AviatorString;
-import lombok.SneakyThrows;
+import org.springframework.util.Assert;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
+ * MD5 加密函数
+ * 强化了防御性编程，提供 32 位小写加密结果，严格执行参数非空校验。
+ *
  * @author 黄川 huchuc@vip.qq.com
  * date: 2023/10/25
  */
 @SuppressWarnings("all")
 public class MD5 extends AbstractBaseFunction {
 
-    @SneakyThrows
     @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1) {
-        String message = String.valueOf(arg1.getValue(env));
-        return new AviatorString(cn.hutool.crypto.digest.MD5.create().digestHex16(message));
+        Object valueObj = arg1.getValue(env);
+
+        
+        Assert.notNull(valueObj, String.format("函数 %s 的待加密对象(var1)不能为空", getName()));
+
+        String message = valueObj.toString();
+        // 使用 Hutool 生成 32 位小写 MD5 摘要
+        String hex = cn.hutool.crypto.digest.MD5.create().digestHex(message);
+
+        return new AviatorString(hex);
+    }
+
+    @Override
+    public List<AviatorExtendFunction> docs() {
+        return Collections.singletonList(
+                new AviatorExtendFunction(
+                        getName(),
+                        String.format("%s(value)", getName()),
+                        "string",
+                        "获取 MD5 加密后的 32 位小写字符串。任意参数为 null 将抛出异常。",
+                        String.format("%s('hello')", getName()))
+        );
     }
 }

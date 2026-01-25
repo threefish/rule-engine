@@ -15,14 +15,10 @@
  */
 package cn.xjbpm.rule.engine.definition.model.enums;
 
-import cn.xjbpm.rule.engine.definition.model.*;
-import cn.xjbpm.rule.engine.definition.model.activity.DecisionTablesNode;
-import cn.xjbpm.rule.engine.definition.model.activity.FunctionActivityNode;
-import cn.xjbpm.rule.engine.definition.model.activity.RuleSetNode;
-import cn.xjbpm.rule.engine.definition.model.activity.ScoringCardNode;
-import cn.xjbpm.rule.engine.definition.model.gateway.ExclusiveGatewayNode;
-import cn.xjbpm.rule.engine.definition.model.gateway.InclusiveGatewayNode;
-import cn.xjbpm.rule.engine.definition.model.gateway.ParallelGatewayNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.*;
+import cn.xjbpm.rule.engine.definition.model.nodes.gateway.ExclusiveGatewayNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.gateway.InclusiveGatewayNode;
+import cn.xjbpm.rule.engine.definition.model.nodes.gateway.ParallelGatewayNode;
 import cn.xjbpm.rule.engine.definition.validator.*;
 import cn.xjbpm.rule.engine.runtime.behavior.*;
 import lombok.AllArgsConstructor;
@@ -41,11 +37,18 @@ public enum NodeType {
     ExclusiveGatewayNode(ExclusiveGatewayNode.class, BaseNodeValidator.class, ExclusiveGatewayNodeBehavior.class),
     InclusiveGatewayNode(InclusiveGatewayNode.class, BaseNodeValidator.class, InclusiveGatewayNodeBehavior.class),
     ParallelGatewayNode(ParallelGatewayNode.class, BaseNodeValidator.class, ParallelGatewayNodeBehavior.class),
-    FunctionActivityNode(FunctionActivityNode.class, FunctionActivityNodeValidator.class, FunctionActivityNodeBehavior.class),
+    FunctionNode(FunctionNode.class, FunctionNodeValidator.class, FunctionNodeBehavior.class),
     RuleSetNode(RuleSetNode.class, RuleSetNodeValidator.class, RuleSetNodeBehavior.class),
     ScoringCardNode(ScoringCardNode.class, ScoringCardNodeValidator.class, ScoringCardNodeBehavior.class),
     DecisionTablesNode(DecisionTablesNode.class, DecisionTablesNodeValidator.class, DecisionTablesNodeBehavior.class),
     DelayWaitNode(DelayWaitNode.class, DelayWaitNodeValidator.class, DelayWaitNodeBehavior.class),
+    HttpNode(HttpNode.class, HttpNodeValidator.class, HttpNodeBehavior.class),
+    ShellNode(ShellNode.class, ShellNodeValidator.class, ShellNodeBehavior.class),
+    SshNode(SshNode.class, SshNodeValidator.class, SshNodeBehavior.class),
+    VolcanoImageGenerationNode(VolcanoImageGenerationNode.class, VolcanoImageGenerationNodeValidator.class, VolcanoImageGenerationNodeBehavior.class),
+    VolcanoChatGenerationNode(VolcanoChatGenerationNode.class, VolcanoChatGenerationNodeValidator.class, VolcanoChatGenerationNodeBehavior.class),
+    DownloadFileNode(DownloadFileNode.class, DownloadFileNodeValidator.class, DownloadFileNodeBehavior.class),
+    LoopNode(LoopNode.class, LoopNodeValidator.class, LoopNodeBehavior.class),
     ;
 
     Class<? extends Node> nodeClass;

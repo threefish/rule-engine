@@ -20,15 +20,18 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.common.constant.RuleFlowConstant;
 import cn.xjbpm.rule.common.utils.VariableTranslateUtils;
-import cn.xjbpm.rule.custom.RuleFlowModelCacheService;
+import cn.xjbpm.rule.custom.BeanContextManager;
+import cn.xjbpm.rule.custom.RuleFlowModelCacheManager;
 import cn.xjbpm.rule.dto.ExcuteRuleFlow;
 import cn.xjbpm.rule.dto.ExcuteRuleFlowResult;
 import cn.xjbpm.rule.dto.ExcutingHistoryLogVO;
+import cn.xjbpm.rule.dto.RuleFlowStatus;
 import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
 import cn.xjbpm.rule.engine.runtime.actor.AkkaRuleFlowScheduler;
 import cn.xjbpm.rule.engine.runtime.model.ExecutStatus;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
 import cn.xjbpm.rule.engine.runtime.model.NodeExcution;
+import cn.xjbpm.rule.event.RuleFlowDebugEvent;
 import cn.xjbpm.rule.event.RuleFlowExcuteCompledEvent;
 import cn.xjbpm.rule.properties.RuleProperties;
 import lombok.extern.slf4j.Slf4j;
@@ -52,17 +55,26 @@ import java.util.stream.Collectors;
 @Slf4j
 public class RuleFlowExcuteService implements DisposableBean {
 
-    private final RuleFlowModelCacheService ruleFlowModelCacheService;
+    private final RuleFlowModelCacheManager ruleFlowModelCacheManager;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final BeanContextManager beanContextManager;
     private final ActorSystem actorSystem;
 
     private final AkkaRuleFlowScheduler scheduler;
 
-    public RuleFlowExcuteService(RuleFlowModelCacheService ruleFlowModelCacheService, ApplicationEventPublisher applicationEventPublisher, RuleProperties ruleProperties) {
-        this.ruleFlowModelCacheService = ruleFlowModelCacheService;
+    public RuleFlowExcuteService(RuleFlowModelCacheManager ruleFlowModelCacheManager,
+                                 ApplicationEventPublisher applicationEventPublisher,
+                                 BeanContextManager beanContextManager,
+                                 RuleProperties ruleProperties) {
+        this.ruleFlowModelCacheManager = ruleFlowModelCacheManager;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.beanContextManager = beanContextManager;
         this.actorSystem = ActorSystem.create(ruleProperties.getAkkaSystemName());
-        this.scheduler = new AkkaRuleFlowScheduler(actorSystem, ruleProperties.getAkkaDefaultTimeoutSeconds(), ruleProperties.getAkkaGlobalWorkerPoolSize());
+        this.scheduler = new AkkaRuleFlowScheduler(actorSystem,
+                ruleProperties.getAkkaDefaultExecuteTimeoutSeconds(),
+                ruleProperties.getAkkaGlobalWorkerPoolInitSize(),
+                ruleProperties.getAkkaGlobalWorkerPoolMaxSize()
+        );
     }
 
     @Override
@@ -71,7 +83,7 @@ public class RuleFlowExcuteService implements DisposableBean {
     }
 
     /**
-     * 开始流程
+     * 开始规则流
      *
      * @param request
      * @return
@@ -80,9 +92,9 @@ public class RuleFlowExcuteService implements DisposableBean {
         Assert.isTrue(StrUtil.isNotBlank(request.getKey()), "规则编码不能为空");
         RuleFlowModel ruleFlowModel;
         if (StringUtils.hasText(request.getContent())) {
-            ruleFlowModel = ruleFlowModelCacheService.convertToModel(request.getContent());
+            ruleFlowModel = ruleFlowModelCacheManager.convertToModel(request.getContent());
         } else {
-            ruleFlowModel = ruleFlowModelCacheService.getModel(request.getKey());
+            ruleFlowModel = ruleFlowModelCacheManager.getModel(request.getKey());
         }
         ExcuteRuleFlowResult processInstance = new ExcuteRuleFlowResult();
         processInstance.setRequestId(request.getRequestId());
@@ -90,12 +102,12 @@ public class RuleFlowExcuteService implements DisposableBean {
         processInstance.setRuleFlowKey(ruleFlowModel.getKey());
         Map<String, Object> runtimeVar = new HashMap<>();
         runtimeVar.put(RuleFlowConstant.BUSINESS_OBJECTS, VariableTranslateUtils.translate(ruleFlowModel.getBusinessObjectModels(), false, request.getVariables()));
-        FlowContext flowContext = new FlowContext(runtimeVar);
+        FlowContext flowContext = new FlowContext(processInstance, runtimeVar, request.isDebugModel(), this.beanContextManager);
         long startTime = System.currentTimeMillis();
         if (request.isAsyncExcute()) {
             scheduler.startFlowAsync(ruleFlowModel, flowContext, request.getSkipNodeIds(), failure -> {
                 if (Objects.isNull(failure)) {
-                    processInstance.setSuccess(true);
+                    processInstance.setStatus(RuleFlowStatus.COMPLETED);
                 } else {
                     handFailure(processInstance, flowContext, failure);
                 }
@@ -107,7 +119,7 @@ public class RuleFlowExcuteService implements DisposableBean {
         } else {
             try {
                 scheduler.startFlow(ruleFlowModel, flowContext, request.getSkipNodeIds());
-                processInstance.setSuccess(true);
+                processInstance.setStatus(RuleFlowStatus.COMPLETED);
             } catch (Exception e) {
                 handFailure(processInstance, flowContext, e);
             } finally {
@@ -137,8 +149,7 @@ public class RuleFlowExcuteService implements DisposableBean {
         } else {
             excuteRuleFlowResult.setErrorMessage(StrUtil.subPre(failure.getMessage(), 100));
         }
-        excuteRuleFlowResult.setSuccess(false);
-        log.error("流程执行出错：{}", failure.getMessage(), failure);
+        excuteRuleFlowResult.setStatus(RuleFlowStatus.FAILED);
     }
 
     /**
@@ -151,11 +162,17 @@ public class RuleFlowExcuteService implements DisposableBean {
      */
     private void doComplete(FlowContext flowContext, RuleFlowModel ruleFlowModel, ExcuteRuleFlowResult processInstance, ExcuteRuleFlow request) {
         Map businessVariables = (Map) flowContext.getVariable().get(RuleFlowConstant.BUSINESS_OBJECTS);
+
         Map<String, Object> response = VariableTranslateUtils.translate(ruleFlowModel.getBusinessObjectModels(), true, businessVariables);
         processInstance.setResponse(response);
+        if (flowContext.isDebugModel()) {
+            processInstance.setNodesData(flowContext.getNodesData());
+            applicationEventPublisher.publishEvent(RuleFlowDebugEvent.create(flowContext));
+        }
         if (StrUtil.isNotBlank(ruleFlowModel.getKey())) {
             applicationEventPublisher.publishEvent(RuleFlowExcuteCompledEvent.create(ExcutingHistoryLogVO.create(processInstance, request.getVariables(), ruleFlowModel.getOriginalJson(), request.getRetryOriginId())));
         }
+
     }
 
 }

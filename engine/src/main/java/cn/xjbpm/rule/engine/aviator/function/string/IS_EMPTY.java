@@ -17,12 +17,18 @@ package cn.xjbpm.rule.engine.aviator.function.string;
 
 import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.engine.aviator.function.AbstractBaseFunction;
+import cn.xjbpm.rule.engine.aviator.function.AviatorExtendFunction;
 import com.googlecode.aviator.runtime.type.AviatorBoolean;
 import com.googlecode.aviator.runtime.type.AviatorObject;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
+ * 字符串判空函数
+ * 强化了防御性编程，判断字符串是否为空字符串，严格执行参数非空校验。
+ *
  * @author 黄川 huchuc@vip.qq.com
  * date: 2023/7/5
  */
@@ -30,12 +36,24 @@ import java.util.Map;
 public class IS_EMPTY extends AbstractBaseFunction {
 
     @Override
-    public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2) {
-        String value = arg1.getValue(env).toString();
-        if (value == null) {
+    public AviatorObject call(Map<String, Object> env, AviatorObject arg1) {
+        Object valueObj = arg1.getValue(env);
+        if (valueObj == null) {
             return AviatorBoolean.TRUE;
         }
+        String value = valueObj.toString();
         return AviatorBoolean.valueOf(StrUtil.isEmpty(value));
     }
 
+    @Override
+    public List<AviatorExtendFunction> docs() {
+        return Collections.singletonList(
+                new AviatorExtendFunction(
+                        getName(),
+                        String.format("%s(var1)", getName()),
+                        "boolean",
+                        "判断字符串是否为空字符串。",
+                        String.format("%s('')", getName()))
+        );
+    }
 }

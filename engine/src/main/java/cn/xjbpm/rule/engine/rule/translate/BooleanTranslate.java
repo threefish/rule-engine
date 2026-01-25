@@ -30,8 +30,24 @@ public class BooleanTranslate extends AbstractTranslate {
         {
             put(OperatorType.IS_NULL, (OperatorSupplier) rule -> String.format("IS_NULL(%s)", rule.getName()));
             put(OperatorType.IS_NOT_NULL, (OperatorSupplier) rule -> String.format("IS_NOT_NULL(%s)", rule.getName()));
-            put(OperatorType.EQ, (OperatorSupplier) rule -> String.format("%s==%s", rule.getName(), rule.getValue()));
-            put(OperatorType.NOT_EQ, (OperatorSupplier) rule -> String.format("%s!=%s", rule.getName(), rule.getValue()));
+            put(OperatorType.EQ, (OperatorSupplier) rule -> {
+                switch (rule.getAssignmentType()) {
+                    case VAR:
+                        return String.format("%s==%s", rule.getName(), rule.getFieldValue());
+                    case CALC:
+                        return String.format("%s==%s", rule.getName(), rule.getExpressionValue());
+                }
+                return String.format("%s==%s", rule.getName(), rule.getValue());
+            });
+            put(OperatorType.NOT_EQ, (OperatorSupplier) rule -> {
+                switch (rule.getAssignmentType()) {
+                    case VAR:
+                        return String.format("%s!=%s", rule.getName(), rule.getFieldValue());
+                    case CALC:
+                        return String.format("%s!=%s", rule.getName(), rule.getExpressionValue());
+                }
+                return String.format("%s!=%s", rule.getName(), rule.getValue());
+            });
         }
     };
 

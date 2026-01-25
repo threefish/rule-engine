@@ -19,13 +19,17 @@ public class RuleProperties {
     private String akkaSystemName = "rule-engine";
 
     /**
-     * 默认超时时间
+     * 默认执行超时时间
      */
-    private long akkaDefaultTimeoutSeconds = 30;
+    private long akkaDefaultExecuteTimeoutSeconds = 30;
     /**
-     * 全局 Worker 线程池大小
+     * 全局 Worker 路由池初始大小
      */
-    private int akkaGlobalWorkerPoolSize = 200;
+    private int akkaGlobalWorkerPoolInitSize = 200;
+    /**
+     * 全局 Worker 路由池最大大小
+     */
+    private int akkaGlobalWorkerPoolMaxSize = 2000;
 
 
 }

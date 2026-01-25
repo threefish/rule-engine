@@ -97,5 +97,12 @@ public class RuleFlowVO {
         return vo;
     }
 
+    @Data
+    public static class PageQuery {
+        private String key;
+        private String name;
+        private RuleFlowStatus status;
+    }
+
 
 }
