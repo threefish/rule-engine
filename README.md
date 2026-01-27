@@ -1,4 +1,4 @@
-# Rule Engine
+# XJ-Rule Engine
 
 🔥 **High-performance, High-concurrency, Visualized Enterprise-level Rule Engine System** 🔥
 
@@ -20,6 +20,8 @@ English | [简体中文](README_ZH.md)
 - **🔄 High Reliability**: Complete error handling and automatic retry mechanism to ensure the reliability of rule execution
 - **📊 Monitorable**: Detailed execution logs and monitoring mechanisms for easy problem locating and performance optimization
 - **🔧 Easy to Extend**: Modular design, supporting custom extensions and secondary development
+- **🤖 IO Node Scheduling**: Supports scheduling capabilities for IO nodes (AI, SSH, HTTP, etc.)
+- **🎯 Precise Calculation**: Based on Aviator expression engine for high-precision calculation, supporting Decimal type to ensure numerical accuracy
 
 ## ✨ Project Features
 
@@ -34,8 +36,7 @@ English | [简体中文](README_ZH.md)
 
 ## 🏗️ Project Structure
 
-### Technology Stack
-
+## 🛠️ Technology Stack
 
 | Technology      | Version | Purpose                                                  |
 | --------------- | ------- | -------------------------------------------------------- |
@@ -56,7 +57,6 @@ rule-engine/
 ├── engine/             # Rule engine core module
 │   ├── common/         # Common tools and constants
 │   ├── custom/         # Custom services
-│   ├── dto/            # Data transfer objects
 │   ├── engine/         # Engine core implementation
 │   │   ├── aviator/    # Aviator expression executor
 │   │   ├── rule/       # Rule definition
@@ -134,7 +134,6 @@ The rule engine uses Aviator expression engine to execute rule expressions:
 
 ✅ **Applicable Scenarios (High Concurrency, Fast Decision Making, Complex Conditions)**
 
-
 | Scenario                          | Core Features                                                                                                                                   | Example                                                                                                                                                                                                                                   |
 | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Real-time Risk Assessment         | Needs to make multi-dimensional, parallel judgments on a large number of requests at millisecond level to quickly make "yes" or "no" decisions. | Credit Approval: When a user submits a loan application, the engine simultaneously checks multiple rules such as "credit score > 600?", "work experience > 1 year?", "debt ratio < 50%?", and quickly decides whether to approve.         |
@@ -144,7 +143,6 @@ The rule engine uses Aviator expression engine to execute rule expressions:
 | Compliance Checking               | Needs to conduct multi-dimensional compliance checks on business data to ensure business operations comply with regulatory requirements.        | Financial Transactions: Conducts anti-money laundering, anti-fraud, and compliance checks on each transaction to ensure the legality and compliance of the transaction.                                                                   |
 
 ❌ **Not Applicable Scenarios (Long Transactions, Manual Intervention, Pure Data Operations)**
-
 
 | Scenario                                | Core Features                                                                                                                                         | Example                                                                                                                                                                                                                           |
 | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -170,23 +168,23 @@ The following are the main function screenshots of the rule engine:
 
 ### Rule Engine Interface 4
 
-![Rule Engine Interface 3](screenshot/规则引擎3.png)
+![Rule Engine Interface 4](screenshot/规则引擎3.png)
 
 ### Rule Engine Interface 5
 
-![Rule Engine Interface 3](screenshot/规则引擎4.png)
+![Rule Engine Interface 5](screenshot/规则引擎4.png)
 
 ### Rule Engine Interface 6
 
-![Rule Engine Interface 3](screenshot/规则引擎5.png)
+![Rule Engine Interface 6](screenshot/规则引擎5.png)
 
 ### Rule Engine Interface 7
 
-![Rule Engine Interface 3](screenshot/规则引擎6.png)
+![Rule Engine Interface 7](screenshot/规则引擎6.png)
 
 ### Rule Engine Interface 8
 
-![Rule Engine Interface 3](screenshot/规则引擎7.png)
+![Rule Engine Interface 8](screenshot/规则引擎7.png)
 
 ### Condition Construction Interface
 
@@ -212,20 +210,24 @@ The following are the main function screenshots of the rule engine:
    git clone https://github.com/threefish/rule-engine.git
    cd rule-engine
    ```
+
 2. **Configure the database**
 
    - Modify the database configuration in the `service/src/main/resources/application.yml` file
+
 3. **Build the project**
 
    ```bash
    mvn clean install -DskipTests
    ```
+
 4. **Start the service**
 
    ```bash
    cd service
    mvn spring-boot:run
    ```
+
 5. **Access the frontend page**
 
    - The console will output the frontend access address, click to access
@@ -282,15 +284,17 @@ This project uses the Apache 2.0 license, see the [LICENSE](LICENSE) file for de
 
 ## 🔮 Future Planning
 
-- [ ]  Enhance visualized orchestration capabilities, support more node types
-- [ ]  Enhance rule management and monitoring functions
+- [ ]  Support more node types
+- [ ]  Support distributed deployment and horizontal scaling
 - [ ]  Enhance real-time monitoring and alerting functions for rule execution
 - [ ]  Provide visualized analysis tools for rule execution
 
 ## 📞 Contact Information
 
 **Author**: Huang Chuan (huchuc@vip.qq.com)
+
 **GitHub**: https://github.com/threefish/rule-engine
+
 **Frontend Project**: https://github.com/threefish/rule-engine-web
 
 ---
