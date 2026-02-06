@@ -1,18 +1,19 @@
-/*
+/**
  * Copyright 2025 threefish.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cn.xjbpm.rule.engine.runtime.actor;
 
 import akka.actor.AbstractActor;
@@ -46,11 +47,11 @@ import java.util.concurrent.TimeUnit;
 public class NodeWorkerActor extends AbstractActor {
 
 
-    public NodeWorkerActor() {
-    }
-
     public static Props props() {
         return Props.create(NodeWorkerActor.class, NodeWorkerActor::new);
+    }
+
+    public NodeWorkerActor() {
     }
 
     @Override
@@ -67,7 +68,7 @@ public class NodeWorkerActor extends AbstractActor {
 
         try {
             if (!(node instanceof SequenceConnNode) && msg.getAttempt() > 0) {
-                flowContext.addTraceLog(StringUtils.format("[{}] 开始第 {} 次重试执行", node.getId(), msg.getAttempt()));
+                flowContext.addTraceLog(node.getId(), "开始第 {} 次重试执行", new Object[]{msg.getAttempt()});
                 if (log.isDebugEnabled()) {
                     log.debug("[{}] 开始第 {} 次重试执行", node.getId(), msg.getAttempt());
                 }
@@ -77,7 +78,7 @@ public class NodeWorkerActor extends AbstractActor {
             if (node instanceof DelayWaitNode) {
                 long delayTime = ((DelayWaitNode) node).getDelayTime();
                 log.info("节点 [{}] 进入延迟等待: {}ms", node.getId(), delayTime);
-                flowContext.addTraceLog(StringUtils.format("[{}] 进入延迟等待: {}ms", node.getId(), delayTime));
+                flowContext.addTraceLog(node.getId(),"进入延迟等待: {}ms",  delayTime);
                 // N秒后发送一条特殊的“延迟完成”消息给自己或 Master
                 getContext().getSystem().scheduler().scheduleOnce(
                         Duration.create(delayTime, TimeUnit.MILLISECONDS),
@@ -105,7 +106,7 @@ public class NodeWorkerActor extends AbstractActor {
         if (behavior != null) {
             behavior.execution(flowContext);
         } else {
-            flowContext.addTraceLog(StringUtils.format("[{}] 未找到执行行为类 跳过执行", node.getId()));
+            flowContext.addTraceLog(node.getId(), "未找到执行行为类 跳过执行");
             if (log.isWarnEnabled()) {
                 log.warn("[{}] 未找到执行行为类 跳过执行", node.getId());
             }
@@ -125,7 +126,7 @@ public class NodeWorkerActor extends AbstractActor {
         log.info("节点 [{}] 延迟结束，继续执行", finishMsg.getMsg().getNode().getId());
         DelayWaitNode node = (DelayWaitNode) finishMsg.getMsg().getNode();
         FlowContext flowContext = finishMsg.getMsg().getFlowContext();
-        flowContext.addTraceLog(StringUtils.format("[{}] 延迟{}ms结束，继续执行", node.getId(), node.getDelayTime()));
+        flowContext.addTraceLog(node.getId(),"延迟{}ms结束，继续执行",new Object[]{node.getDelayTime()});
         performWork(finishMsg.getMsg());
     }
 
@@ -133,7 +134,7 @@ public class NodeWorkerActor extends AbstractActor {
         Node node = msg.getNode();
         int currentAttempt = msg.getAttempt();
         if (isExcludeRetryNode(node) || !node.isRetryOnFail()) {
-            flowContext.addTraceLog(StringUtils.format("[{}] 执行异常: {}", node.getId(), e.getMessage()));
+            flowContext.addTraceLog(node.getId(),"执行异常: {}",new Object[]{e.getMessage()});
             if (log.isDebugEnabled()) {
                 log.debug("[{}] 执行异常: {}", node.getId(), e.getMessage());
             }
@@ -143,8 +144,9 @@ public class NodeWorkerActor extends AbstractActor {
             long delaySeconds = node.getRetryDelay();
             if (currentAttempt < maxRetries) {
                 int nextAttempt = currentAttempt + 1;
-                flowContext.addTraceLog(StringUtils.format("[{}] 执行异常 启用重试 准备第{}次重试 最大重试{}次 延迟{}ms",
-                        node.getId(), nextAttempt, maxRetries, delaySeconds));
+                flowContext.addTraceLog(node.getId(),"执行异常 启用重试 准备第{}次重试 最大重试{}次 延迟{}ms",
+                        new Object[]{nextAttempt, maxRetries, delaySeconds}
+                );
                 if (log.isDebugEnabled()) {
                     log.debug("[{}] 执行异常 启用重试 准备第{}次重试 最大重试{}次 延迟{}ms");
                 }
@@ -163,8 +165,7 @@ public class NodeWorkerActor extends AbstractActor {
             if (log.isDebugEnabled()) {
                 log.debug("[{}] 重试次数耗尽 依然执行失败 异常描述: {}", node.getId(), e);
             }
-            flowContext.addTraceLog(StringUtils.format("[{}] 执行失败 耗时{} 异常描述: {}",
-                    node.getId(), TimeFormatUtil.formatNanosToMs(endTime - msg.getStartTotalTime()), e.getMessage()));
+            flowContext.addTraceLog(node.getId(),"执行失败 耗时{} 异常描述: {}",new Object[]{TimeFormatUtil.formatNanosToMs(endTime - msg.getStartTotalTime()), e.getMessage()});
             recordExecution(flowContext, node, msg.getStartTotalTime(), endTime, ExecutStatus.FAILURE, e.getMessage());
         }
 
@@ -192,6 +193,7 @@ public class NodeWorkerActor extends AbstractActor {
     private void recordExecution(FlowContext flowContext, Node node, long start, long end, ExecutStatus status, String error) {
         NodeExcution.NodeExcutionBuilder builder = NodeExcution.builder()
                 .id(node.getId()).name(node.getName()).startTime(start).endTime(end)
+                .nodeType(node.getType())
                 .status(status);
         if (error != null) {
             builder.errorMessage(error);

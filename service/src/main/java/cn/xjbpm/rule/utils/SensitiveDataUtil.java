@@ -1,18 +1,19 @@
-/*
+/**
  * Copyright 2025 threefish.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 package cn.xjbpm.rule.utils;
 
@@ -68,7 +69,9 @@ public class SensitiveDataUtil {
      * 3. 长度 > 6:  保留前 1/4 和 后 1/4，中间使用固定 6 个星号
      */
     private static Object maskValue(Object value) {
-        if (value == null) return null;
+        if (value == null) {
+            return null;
+        }
         String strValue = String.valueOf(value);
         int len = strValue.length();
 
@@ -83,13 +86,14 @@ public class SensitiveDataUtil {
 
         // 计算保留比例：前后各保留约 25% 的长度，但最多不超过 8 位（防止暴露过多）
         int keep = Math.min(len / 4, 8);
-        if (keep < 2) keep = 2; // 至少保留 2 位
+        if (keep < 2) {
+            keep = 2; // 至少保留 2 位
+        }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(strValue.substring(0, keep)); // 保留头部
-        sb.append("******");                    // 中间固定 6 个星号，隐藏真实长度
-        sb.append(strValue.substring(len - keep)); // 保留尾部
+        String sb = strValue.substring(0, keep) + // 保留头部
+                "******" +                    // 中间固定 6 个星号，隐藏真实长度
+                strValue.substring(len - keep); // 保留尾部
 
-        return sb.toString();
+        return sb;
     }
 }

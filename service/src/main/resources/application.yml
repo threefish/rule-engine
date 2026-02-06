@@ -50,3 +50,4 @@ rule:
   akkaGlobalWorkerPoolInitSize: 100
   akkaGlobalWorkerPoolMaxSize: 2000
   akkaDefaultExecuteTimeoutSeconds: 600
+  attachmentPath: F://xj-rule/attachment

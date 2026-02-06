@@ -1,18 +1,19 @@
-/*
+/**
  * Copyright 2025 threefish.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cn.xjbpm.rule.engine.aviator;
 
 import lombok.Builder;
@@ -59,8 +60,7 @@ public class AviatorContext implements Serializable {
         public Object get(Object key) {
             Object val = super.get(key);
             // 如果找不到带 $ 的 key，自动尝试去掉 $
-            if (val == null && key instanceof String) {
-                String sKey = (String) key;
+            if (val == null && key instanceof String sKey) {
                 if (sKey.startsWith("$")) {
                     return super.get(sKey.substring(1));
                 }
@@ -73,8 +73,7 @@ public class AviatorContext implements Serializable {
             if (super.containsKey(key)) {
                 return true;
             }
-            if (key instanceof String) {
-                String sKey = (String) key;
+            if (key instanceof String sKey) {
                 if (sKey.startsWith("$")) {
                     return super.containsKey(sKey.substring(1));
                 }

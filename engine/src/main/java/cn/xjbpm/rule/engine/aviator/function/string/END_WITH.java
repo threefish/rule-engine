@@ -1,18 +1,19 @@
-/*
+/**
  * Copyright 2025 threefish.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cn.xjbpm.rule.engine.aviator.function.string;
 
 import cn.xjbpm.rule.engine.aviator.function.AbstractBaseFunction;
@@ -40,7 +41,7 @@ public class END_WITH extends AbstractBaseFunction {
         Object value1 = arg1.getValue(env);
         Object value2 = arg2.getValue(env);
 
-        
+
         Assert.notNull(value1, String.format("函数 %s 的目标字符串(var1)不能为空", getName()));
         Assert.notNull(value2, String.format("函数 %s 的匹配后缀(var2)不能为空", getName()));
 

@@ -1,12 +1,12 @@
-/*
+/**
  * Copyright 2025 threefish.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,7 @@ package cn.xjbpm.rule.manager;
 import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.common.utils.StringUtils;
 import cn.xjbpm.rule.custom.CredentialsManager;
+import cn.xjbpm.rule.engine.runtime.model.credentials.ApikeyCredential;
 import cn.xjbpm.rule.engine.runtime.model.credentials.HttpCredential;
 import cn.xjbpm.rule.engine.runtime.model.credentials.SshCredential;
 import cn.xjbpm.rule.repository.enums.CredentialsType;
@@ -84,12 +85,14 @@ public class DefaultCredentialsManager implements CredentialsManager {
     }
 
     @Override
-    public String getApiKeyCredential(String credentialId) {
+    public ApikeyCredential getApikeyCredential(String credentialId) {
         if (StringUtils.isNotBlank(credentialId)) {
             CredentialsVO.Details details = credentialsService.details(Long.valueOf(credentialId));
             if (Objects.nonNull(details)) {
                 Map<String, String> authData = JsonUtils.json2Obj(details.getAuthData(), Map.class);
-                return authData.get("apiKey");
+                String apiKey = authData.get("apiKey");
+                String type = details.getType().toString();
+                return ApikeyCredential.builder().type(type).apiKey(apiKey).build();
             }
         }
         return null;

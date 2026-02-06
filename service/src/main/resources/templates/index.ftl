@@ -2,8 +2,22 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XJ-RULE | 产研共振 · 可视化决策中枢</title>
+    <link rel="icon" type="image/svg+xml" href="/icon/logo.svg"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <title>星极规则引擎 |XJ-RULE | - 高性能可视化业务逻辑配置平台</title>
+    <meta name="description"
+          content="星极规则引擎是一款领先的业务逻辑编排工具，提供可视化界面、高性能执行引擎，帮助开发者快速实现复杂的业务决策与规则校验。"/>
+    <meta name="keywords" content="规则引擎, 业务流, 低代码, 决策引擎, 星极引擎, 可视化编程"/>
+    <meta name="author" content="星极团队"/>
+
+    <meta property="og:title" content="星极规则引擎"/>
+    <meta property="og:description" content="高性能可视化业务逻辑配置平台"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="https://github.com/threefish/rule-engine"/>
+
+    <meta name="renderer" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
     <style>:root {
             --brand: #2563eb;
             --brand-soft: #eff6ff;

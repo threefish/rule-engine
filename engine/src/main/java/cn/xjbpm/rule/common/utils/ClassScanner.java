@@ -1,18 +1,19 @@
-/*
+/**
  * Copyright 2025 threefish.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cn.xjbpm.rule.common.utils;
 
 import java.io.File;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -61,7 +63,7 @@ public class ClassScanner {
 
                 if ("file".equals(protocol)) {
                     // 扫描文件系统中的类 (开发环境)
-                    String filePath = URLDecoder.decode(resource.getFile(), "UTF-8");
+                    String filePath = URLDecoder.decode(resource.getFile(), StandardCharsets.UTF_8);
                     findClassesInPackageByFile(packageName, filePath, classes);
                 } else if ("jar".equals(protocol)) {
                     // 扫描 JAR 包中的类 (部署环境)

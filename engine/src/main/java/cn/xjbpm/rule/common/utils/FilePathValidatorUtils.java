@@ -1,20 +1,22 @@
-/*
+/**
  * Copyright 2025 threefish.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cn.xjbpm.rule.common.utils;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,7 +47,7 @@ public final class FilePathValidatorUtils {
      *
      * @param filePath 完整文件路径（包含文件名）
      */
-    public static void validateForWrite(String filePath) {
+    public static void validateForWrite(String filePath) throws IOException {
         if (filePath == null || filePath.trim().isEmpty()) {
             throw new IllegalArgumentException("文件路径不能为空");
         }
@@ -55,10 +57,8 @@ public final class FilePathValidatorUtils {
         Path path = Paths.get(filePath);
         // 1. 校验文件名
         validateFileName(path.getFileName().toString());
-        // 2. 校验父目录
-        validateParentDirectory(path);
-        // 3. 校验目标文件
-        validateTargetFile(path);
+        // 文件路径不存在时，先创建文件夹
+        Files.createDirectories(path.getParent());
     }
 
     private static void validateFileName(String fileName) {
@@ -108,30 +108,12 @@ public final class FilePathValidatorUtils {
         }
     }
 
-    /* ======================= 父目录校验 ======================= */
 
-    private static void validateParentDirectory(Path path) {
-        Path parent = path.getParent();
-        if (parent == null) {
-            throw new IllegalArgumentException("文件路径必须包含父目录");
-        }
 
-        if (!Files.exists(parent)) {
-            throw new IllegalArgumentException("父目录不存在: " + parent);
-        }
-
-        if (!Files.isDirectory(parent)) {
-            throw new IllegalArgumentException("父路径不是目录: " + parent);
-        }
-
-        if (!Files.isWritable(parent)) {
-            throw new IllegalArgumentException("父目录不可写: " + parent);
-        }
-    }
 
     /* ======================= 目标文件校验 ======================= */
 
-    private static void validateTargetFile(Path path) {
+    public static void validateTargetFile(Path path) {
         if (Files.exists(path)) {
             if (!Files.isRegularFile(path)) {
                 throw new IllegalArgumentException("目标路径不是普通文件: " + path);

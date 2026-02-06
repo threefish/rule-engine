@@ -1,18 +1,19 @@
-/*
+/**
  * Copyright 2025 threefish.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cn.xjbpm.rule.engine;
 
 import cn.xjbpm.rule.common.utils.JsonUtils;
@@ -38,12 +39,12 @@ public class FunctionsTest {
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("BEGIN_WITH('hello world','hello')", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("BEGIN_WITH('hello world','world')", env)));
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("BEGIN_WITH('hello','')", env)));
-        
+
         // END_WITH
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("END_WITH('hello world','world')", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("END_WITH('hello world','hello')", env)));
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("END_WITH('hello','')", env)));
-        
+
         // EQUALS
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("EQUALS('hello world','hello world')", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("EQUALS('hello world','hello')", env)));
@@ -51,7 +52,7 @@ public class FunctionsTest {
         // IS_EMPTY
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("IS_EMPTY('')", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("IS_EMPTY('hello')", env)));
-        
+
         // LOWER
         Assert.assertEquals("hello world", AviatorExecutor.execute(AviatorContext.create("LOWER('Hello World')", env)));
 
@@ -62,11 +63,11 @@ public class FunctionsTest {
         // TRIM
         Assert.assertEquals("hello", AviatorExecutor.execute(AviatorContext.create("TRIM('  hello  ')", env)));
         Assert.assertEquals("", AviatorExecutor.execute(AviatorContext.create("TRIM('')", env)));
-        
+
         // UPPER
         Assert.assertEquals("HELLO WORLD", AviatorExecutor.execute(AviatorContext.create("UPPER('hello world')", env)));
     }
-    
+
     // 数字函数测试
     @Test
     void numberFunctions() {
@@ -74,34 +75,34 @@ public class FunctionsTest {
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("NUMBER_BETWEEN(5,1,10)", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("NUMBER_BETWEEN(15,1,10)", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("NUMBER_BETWEEN(5,10,1)", env)));
-        
+
         // NOT_BETWEEN
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("NOT_BETWEEN(15,1,10)", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("NOT_BETWEEN(5,1,10)", env)));
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("NOT_BETWEEN(5,10,1)", env)));
     }
-    
+
     // 日期函数测试
     @Test
     void dateFunctions() {
         // NOW
         Assert.assertNotNull(AviatorExecutor.execute(AviatorContext.create("NOW()", env)));
-        
+
         // TIMESTAMP
         Assert.assertNotNull(AviatorExecutor.execute(AviatorContext.create("TIMESTAMP()", env)));
     }
-    
+
     // 集合函数测试
     @Test
     void collectionFunctions() {
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("coll.contains(seq.list(1,2,3),1)", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("coll.contains(seq.list(1,2,3),4)", env)));
-        
+
         // LIST_IS_EMPTY
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("LIST_IS_EMPTY(seq.list())", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("LIST_IS_EMPTY(seq.list(1,2,3))", env)));
     }
-    
+
     // 加密函数测试
     @Test
     void encryptionFunctions() {
@@ -117,17 +118,17 @@ public class FunctionsTest {
         // VALUE
         Assert.assertEquals("123456", AviatorExecutor.execute(AviatorContext.create("VALUE('123456')", env)).toString());
     }
-    
+
     // 对象函数测试
     @Test
     void objectFunctions() {
         // IS_NULL
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("IS_NULL('hello')", env)));
-        
+
         // IS_NOT_NULL
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("IS_NOT_NULL('hello')", env)));
     }
-    
+
     // 所得税函数测试
     @Test
     void incomeTaxFunctions() {
@@ -141,7 +142,7 @@ public class FunctionsTest {
         Assert.assertEquals(10L, AviatorExecutor.execute(AviatorContext.create("GET_INCOME_TAX_RATE(50000)", env)));
         Assert.assertEquals(20L, AviatorExecutor.execute(AviatorContext.create("GET_INCOME_TAX_RATE(200000)", env)));
     }
-    
+
     // 字符串工具函数测试
     @Test
     void stringUtilsFunctions() {
@@ -155,19 +156,19 @@ public class FunctionsTest {
         // str.matches
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("str.matches('hello world','hello.*')", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("str.matches('hello world','hi.*')", env)));
-        
+
         // str.contains
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("str.contains('hello world','hello')", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("str.contains('hello world','hi')", env)));
-        
+
         // str.startsWith
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("str.startsWith('hello world','hello')", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("str.startsWith('hello world','world')", env)));
-        
+
         // str.endsWith
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("str.endsWith('hello world','world')", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("str.endsWith('hello world','hello')", env)));
-        
+
         // str.trim
         Assert.assertEquals("hello", AviatorExecutor.execute(AviatorContext.create("str.trim('  hello  ')", env)));
 
@@ -183,12 +184,12 @@ public class FunctionsTest {
         // str.isEmpty
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("str.isEmpty('')", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("str.isEmpty('hello')", env)));
-        
+
         // str.isBlank
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("str.isBlank('')", env)));
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("str.isBlank('   ')", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("str.isBlank('hello')", env)));
-        
+
         // str.isNotBlank
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("str.isNotBlank('hello')", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("str.isNotBlank('')", env)));
@@ -201,7 +202,7 @@ public class FunctionsTest {
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("str.isNumeric('123')", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("str.isNumeric('abc')", env)));
     }
-    
+
     // 集合工具函数测试
     @Test
     void collUtilsFunctions() {
@@ -211,21 +212,21 @@ public class FunctionsTest {
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("coll.isEmpty(seq.list(1,2,3))", env)));
         Assert.assertEquals(3L, AviatorExecutor.execute(AviatorContext.create("coll.size(seq.list(1,2,3))", env)));
     }
-    
+
     // BASE64工具函数测试
     @Test
     void base64Functions() {
         Assert.assertEquals("5rWL6K+V", AviatorExecutor.execute(AviatorContext.create("base64.encode('测试')", env)));
         Assert.assertEquals("测试", AviatorExecutor.execute(AviatorContext.create("base64.decode('5rWL6K+V')", env)));
     }
-    
+
     // URL工具函数测试
     @Test
     void urlFunctions() {
         Assert.assertEquals("https%3A%2F%2Fwww.example.com", AviatorExecutor.execute(AviatorContext.create("url.encode('https://www.example.com')", env)));
         Assert.assertEquals("https://www.example.com", AviatorExecutor.execute(AviatorContext.create("url.decode('https%3A%2F%2Fwww.example.com')", env)));
     }
-    
+
     // 所得税工具函数测试
     @Test
     void taxUtilsFunctions() {
@@ -239,7 +240,7 @@ public class FunctionsTest {
         Assert.assertEquals(10L, AviatorExecutor.execute(AviatorContext.create("tax.getIncomeTaxRate(50000)", env)));
         Assert.assertEquals(20L, AviatorExecutor.execute(AviatorContext.create("tax.getIncomeTaxRate(200000)", env)));
     }
-    
+
     // 数字工具函数测试
     @Test
     void numUtilsFunctions() {
@@ -256,7 +257,7 @@ public class FunctionsTest {
         Assert.assertEquals(BigDecimal.valueOf(2), AviatorExecutor.execute(AviatorContext.create("num.div(6,3)", env)));
         try {
             Assert.assertEquals(BigDecimal.valueOf(0), AviatorExecutor.execute(AviatorContext.create("num.div(6,0)", env)));
-        }catch (Exception e){
+        } catch (Exception e) {
             Assert.assertEquals("num.div -> 除数不能为 0", e.getMessage());
         }
 
@@ -283,7 +284,7 @@ public class FunctionsTest {
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("num.isOdd(3)", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("num.isOdd(2)", env)));
     }
-    
+
     // 日期工具函数测试
     @Test
     void dateUtilsFunctions() {
@@ -309,12 +310,12 @@ public class FunctionsTest {
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("date.isAfter('2023-01-01','2023-01-02','yyyy-MM-dd')", env)));
 
         // date.isToday
-        Assert.assertEquals(true,AviatorExecutor.execute(AviatorContext.create("date.isToday(date.now())", env)));
-        Assert.assertEquals(false,AviatorExecutor.execute(AviatorContext.create("date.isToday(date.parse('2023-01-01','yyyy-MM-dd'))", env)));
-        Assert.assertEquals(true,AviatorExecutor.execute(AviatorContext.create("date.isSameDay(date.now(),date.now())", env)));
-        Assert.assertEquals(false,AviatorExecutor.execute(AviatorContext.create("date.isSameDay(date.now(),date.parse('2023-01-01','yyyy-MM-dd'))", env)));
+        Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("date.isToday(date.now())", env)));
+        Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("date.isToday(date.parse('2023-01-01','yyyy-MM-dd'))", env)));
+        Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("date.isSameDay(date.now(),date.now())", env)));
+        Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("date.isSameDay(date.now(),date.parse('2023-01-01','yyyy-MM-dd'))", env)));
     }
-    
+
     // URL工具函数测试
     @Test
     void urlUtilsFunctions() {
@@ -323,7 +324,7 @@ public class FunctionsTest {
         Assert.assertEquals(true, AviatorExecutor.execute(AviatorContext.create("url.isValid('https://www.example.com')", env)));
         Assert.assertEquals(false, AviatorExecutor.execute(AviatorContext.create("url.isValid('invalid-url')", env)));
     }
-    
+
     // 加密工具函数测试
     @Test
     void cryptoUtilsFunctions() {

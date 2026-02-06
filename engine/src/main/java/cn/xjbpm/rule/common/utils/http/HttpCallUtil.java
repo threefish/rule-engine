@@ -1,25 +1,29 @@
-/*
+/**
  * Copyright 2025 threefish.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cn.xjbpm.rule.common.utils.http;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.xjbpm.rule.common.utils.HttpHeaderUtils;
+import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.common.utils.StringUtils;
+import cn.xjbpm.rule.common.utils.TimeFormatUtil;
 import cn.xjbpm.rule.engine.aviator.functions.UrlUtils;
 import jakarta.validation.constraints.NotNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.util.StreamUtils;
@@ -36,6 +40,7 @@ import java.util.function.BiConsumer;
 /**
  * @author 黄川 huchuc@vip.qq.com
  */
+@Slf4j
 public final class HttpCallUtil {
 
     private HttpCallUtil() {
@@ -48,16 +53,13 @@ public final class HttpCallUtil {
             Map<String, String> headers,
             Map<String, ?> uriVariables,
             TimeoutOptions timeout) {
-
+        HttpHeaders httpHeaders = buildHeaders(headers);
+        long currentTimeMillis = System.currentTimeMillis();
         try {
             RestTemplate restTemplate = getRestTemplate(timeout);
-
-            HttpHeaders httpHeaders = buildHeaders(headers);
-
             HttpEntity<?> entity =
                     body == null ? new HttpEntity<>(httpHeaders)
                                  : new HttpEntity<>(body, httpHeaders);
-
             ResponseEntity<String> response = restTemplate.exchange(
                     url,
                     method,
@@ -74,8 +76,11 @@ public final class HttpCallUtil {
         } catch (RestClientException e) {
             throw new HttpCallException(method.name(), url,
                     "HTTP " + method.name() + " failed", e);
+        } finally {
+            log.info("HttpCallCost：{},method:{},url:{},headers:{},body:{}", TimeFormatUtil.formatMs(System.currentTimeMillis() - currentTimeMillis), method, url, httpHeaders, JsonUtils.obj2Json(body));
         }
     }
+
 
     private static RestTemplate getRestTemplate(TimeoutOptions timeout) {
         return timeout == null

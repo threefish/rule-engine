@@ -1,18 +1,19 @@
-/*
+/**
  * Copyright 2025 threefish.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cn.xjbpm.rule.engine.runtime.actor;
 
 import akka.actor.AbstractActor;
@@ -98,11 +99,7 @@ public class WorkflowInstanceActor extends AbstractActor {
     private void handleFatalError(Throwable e, String nodeId) {
         log.error("WorkflowInstanceActor 内部调度发生异常: {}", e.getMessage(), e);
         if (flowContext != null) {
-            if (Objects.isNull(nodeId)) {
-                flowContext.addTraceLog("调度引擎内部异常: " + e.getMessage());
-            } else {
-                flowContext.addTraceLog(String.format("调度引擎内部异常: 节点[%s] %s", nodeId, e.getMessage()));
-            }
+            flowContext.addTraceLog(nodeId,"调度引擎内部异常: {}",new Object[]{e.getMessage()});
         }
         if (caller != null) {
             caller.tell(new Status.Failure(e), getSelf());
@@ -115,7 +112,7 @@ public class WorkflowInstanceActor extends AbstractActor {
         this.caller = getSender();
         this.skipNodeIds = new HashSet<>(msg.getSkipNodeIds());
         Node startNode = msg.getRuleFlowModel().getStartNode();
-        this.flowContext.addTraceLog(StringUtils.format("[{}] 规则流启动", startNode.getId()));
+        this.flowContext.addTraceLog(startNode.getId(),"规则流启动");
         if (log.isInfoEnabled()) {
             log.info("[{}] 规则流启动", startNode.getId());
         }
@@ -131,7 +128,7 @@ public class WorkflowInstanceActor extends AbstractActor {
             handleChildNodeCompleted(msg);
         } else {
             if (currentNode instanceof EndNode) {
-                this.flowContext.addTraceLog(StringUtils.format("[{}] 结束节点,执行完成,规则流分支结束", currentNode.getId()));
+                this.flowContext.addTraceLog( currentNode.getId(),"结束节点,执行完成,规则流分支结束");
                 if (log.isDebugEnabled()) {
                     log.debug("[{}] 结束节点,执行完成,规则流分支结束", currentNode.getId());
                 }
@@ -174,7 +171,7 @@ public class WorkflowInstanceActor extends AbstractActor {
 
     private void finishLoopNode(LoopNode loopNode, Long startTime, Long endTime) {
         log.info("循环节点 [{}] 所有迭代执行完毕", loopNode.getId());
-        flowContext.addTraceLog(StringUtils.format("[{}] 循环处理完成", loopNode.getId()));
+        flowContext.addTraceLog(loopNode.getId(),"循环处理完成");
 
         // 清理状态
         loopActiveChildCount.remove(loopNode.getId());
@@ -198,7 +195,7 @@ public class WorkflowInstanceActor extends AbstractActor {
         if (log.isErrorEnabled()) {
             log.error("执行失败 节点: {} 正在执行节点数:{}", failedNode.getId(), runningNodesCount, msg.getReason());
         }
-        this.flowContext.addTraceLog(StringUtils.format("[{}] 规则流异常中断: {}", failedNode.getId(), msg.getReason().getMessage()));
+        this.flowContext.addTraceLog(failedNode.getId(),"规则流异常中断: {}",new Object[]{msg.getReason().getMessage()});
 
         // 异常中断，直接通知调用者失败并停止规则流
         if (caller != null) {
@@ -212,7 +209,7 @@ public class WorkflowInstanceActor extends AbstractActor {
      */
     private void checkGlobalTermination() {
         if (runningNodesCount == 0) {
-            this.flowContext.addTraceLog("所有节点执行完毕");
+            this.flowContext.addTraceLog(null,"所有节点执行完毕");
             if (log.isDebugEnabled()) {
                 log.debug("所有节点执行完毕");
             }
@@ -227,7 +224,7 @@ public class WorkflowInstanceActor extends AbstractActor {
     private void scheduleNextNodes(Node currentNode) {
         List<Node> nextNodes = nodeNextMap.getOrDefault(currentNode.getId(), new ArrayList<>());
         if (nextNodes.isEmpty()) {
-            this.flowContext.addTraceLog(StringUtils.format("[{}] 无后续节点 规则流分支结束", currentNode.getId()));
+            this.flowContext.addTraceLog(currentNode.getId(),"无后续节点 规则流分支结束");
             if (log.isDebugEnabled()) {
                 log.debug("[{}] 无后续节点 规则流分支结束", currentNode.getId());
             }
@@ -248,7 +245,7 @@ public class WorkflowInstanceActor extends AbstractActor {
             return;
         }
         if (targetNode instanceof ParallelGatewayNode) {
-            this.flowContext.addTraceLog(StringUtils.format("[{}] 并行网关触发后续调度", targetNode.getId()));
+            this.flowContext.addTraceLog(targetNode.getId(),"并行网关触发后续调度");
             if (log.isDebugEnabled()) {
                 log.debug("[{}] 并行网关触发后续调度", targetNode.getId());
             }
@@ -271,7 +268,7 @@ public class WorkflowInstanceActor extends AbstractActor {
     private void handleLoopNode(LoopNode loopNode) {
         Object collectionObj = VariableUtils.getByPathVariable(loopNode.getCollectionVariableName(), flowContext.getVariable());
         List<?> collection = (collectionObj instanceof List) ? (List<?>) collectionObj : Collections.emptyList();
-        flowContext.addTraceLog(StringUtils.format("[{}] 集合大小:{}", loopNode.getId(),collection.size()));
+        flowContext.addTraceLog(loopNode.getId(),"集合大小:{}", new Object[]{collection.size()});
         if (collection.isEmpty()) {
             log.info("循环节点 [{}] 集合为空，跳过执行", loopNode.getId());
             recordVirtualExecution(loopNode, ExecutStatus.SUCCESS);
@@ -334,7 +331,7 @@ public class WorkflowInstanceActor extends AbstractActor {
                 try {
                     isMatch = ConditionUtil.resolve(expr, flowContext.getVariable());
                 } catch (Exception e) {
-                    this.flowContext.addTraceLog(StringUtils.format("[{}] 排他网关条件计算异常: {}", connector.getId(), e.getMessage()));
+                    this.flowContext.addTraceLog(connector.getId(),"排他网关条件计算异常: {}",new Object[]{e.getMessage()});
                     if (log.isDebugEnabled()) {
                         log.debug("[{}] 排他网关条件计算异常: {}", connector.getId(), e.getMessage());
                     }
@@ -350,7 +347,7 @@ public class WorkflowInstanceActor extends AbstractActor {
         boolean hasExecuted = false;
         for (SequenceConnNode connector : nextNodes) {
             if (connector == selectedNode) {
-                this.flowContext.addTraceLog(StringUtils.format("[{}] 排他网关命中节点: {}", gateway.getId(), connector.getId()));
+                this.flowContext.addTraceLog(gateway.getId(),"排他网关命中节点: {}", new Object[]{connector.getId()});
                 if (log.isDebugEnabled()) {
                     log.debug("[{}] 排他网关命中节点: {}", gateway.getId(), connector.getId());
                 }
@@ -366,7 +363,8 @@ public class WorkflowInstanceActor extends AbstractActor {
 
         recordVirtualExecution(gateway, hasExecuted ? ExecutStatus.SUCCESS : ExecutStatus.FAILURE);
         if (!hasExecuted) {
-            this.flowContext.addTraceLog(StringUtils.format("[{}] 排他网关无符合条件路径", gateway.getId()));
+            this.flowContext.addTraceLog(gateway.getId(),"排他网关无符合条件路径");
+
             if (log.isDebugEnabled()) {
                 log.debug("[{}] 排他网关无符合条件路径", gateway.getId());
             }
@@ -375,14 +373,14 @@ public class WorkflowInstanceActor extends AbstractActor {
 
     private void handleSequenceConnector(SequenceConnNode connector) {
         boolean shouldExecute = true;
-        String exprLog = "无条件";
+        String exprLog = "";
         if (connector.getRule() != null) {
             String expr = connector.getRule().getExpressionCacheString();
             exprLog = expr;
             try {
                 shouldExecute = ConditionUtil.resolve(expr, flowContext.getVariable());
             } catch (Exception e) {
-                this.flowContext.addTraceLog(StringUtils.format("[{}] 条件计算异常: {}", connector.getId(), e.getMessage()));
+                this.flowContext.addTraceLog(connector.getId(),"条件计算异常: {}",new Object[]{e.getMessage()});
                 if (log.isDebugEnabled()) {
                     log.debug("[{}] 条件计算异常: {}", connector.getId(), e.getMessage(), e);
                 }
@@ -390,19 +388,15 @@ public class WorkflowInstanceActor extends AbstractActor {
             }
         }
         recordVirtualExecution(connector, ExecutStatus.SUCCESS, shouldExecute);
-        if (shouldExecute) {
-            if (connector.getRule() != null) {
-                this.flowContext.addTraceLog(StringUtils.format("[{}] 条件表达式:\"{}\" 计算结果:true", connector.getId(), exprLog));
-                if (log.isDebugEnabled()) {
-                    log.debug("[{}] 条件表达式:\"{}\" 计算结果:true", connector.getId(), exprLog);
-                }
+        if (StringUtils.isNotBlank(exprLog)) {
+            this.flowContext.addTraceLog(connector.getId(),"条件表达式:\"{}\" 计算结果:{}",new Object[]{exprLog, shouldExecute});
+            if (log.isDebugEnabled()) {
+                log.debug("[{}] 条件表达式:\"{}\" 计算结果:{}", connector.getId(), exprLog, shouldExecute);
             }
+        }
+        if (shouldExecute) {
             scheduleNextNodes(connector);
         } else {
-            this.flowContext.addTraceLog(StringUtils.format("[{}] 条件表达式:\"{}\" 计算结果:false", connector.getId(), exprLog));
-            if (log.isDebugEnabled()) {
-                log.debug("[{}] 条件表达式:\"{}\" 计算结果:false", connector.getId(), exprLog);
-            }
             propagateSkippedPath(connector);
         }
     }
@@ -425,7 +419,8 @@ public class WorkflowInstanceActor extends AbstractActor {
                 if (log.isDebugEnabled()) {
                     log.debug("[{}] 聚合节点,剩余待完成分支:{}", gateway.getId(), pending);
                 }
-                this.flowContext.addTraceLog(StringUtils.format("[{}] 聚合节点,剩余待完成分支:{}", gateway.getId(), pending));
+                this.flowContext.addTraceLog(gateway.getId(),"聚合节点,剩余待完成分支:{}",new Object[]{pending});
+
             }
             // 只有当所有分支（无论是执行还是跳过）都到达时，才进行下一步判断
             if (pending <= 0) {
@@ -434,7 +429,8 @@ public class WorkflowInstanceActor extends AbstractActor {
                     if (log.isDebugEnabled()) {
                         log.debug("[{}] 聚合节点,并行分支完成,继续执行", gateway.getId());
                     }
-                    this.flowContext.addTraceLog(StringUtils.format("[{}] 聚合节点,并行分支完成,继续执行", gateway.getId()));
+                    this.flowContext.addTraceLog(gateway.getId(),"聚合节点,并行分支完成,继续执行");
+
                     recordVirtualExecution(gateway, ExecutStatus.SUCCESS);
                     scheduleNodeExecution(gateway, null);
                 } else {
@@ -482,7 +478,7 @@ public class WorkflowInstanceActor extends AbstractActor {
 
 
     private void recordVirtualExecution(Node node, ExecutStatus status, Boolean condition, Long startTime, Long endTime) {
-        NodeExcution.NodeExcutionBuilder builder = NodeExcution.builder().id(node.getId()).name(node.getName()).startTime(startTime).endTime(endTime).status(status);
+        NodeExcution.NodeExcutionBuilder builder = NodeExcution.builder().id(node.getId()).name(node.getName()).startTime(startTime).endTime(endTime).nodeType(node.getType()).status(status);
         if (condition != null) {
             builder.conditionsMeet(condition);
         }
@@ -509,7 +505,7 @@ public class WorkflowInstanceActor extends AbstractActor {
             if (log.isDebugEnabled()) {
                 log.debug("[{}] 指定跳过节点,跳过执行", node.getId());
             }
-            this.flowContext.addTraceLog(StringUtils.format("[{}] 指定跳过节点,跳过执行", node.getId()));
+            this.flowContext.addTraceLog(node.getId(),"指定跳过节点,跳过执行",new Object[]{});
             // 记录一条虚拟的执行记录，标记为 SUCCESS
             recordVirtualExecution(node, ExecutStatus.SUCCESS);
             // 触发完成从而驱动规则流继续向下 (Sender is self)

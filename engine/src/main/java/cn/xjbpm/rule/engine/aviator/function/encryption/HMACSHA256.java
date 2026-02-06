@@ -1,18 +1,19 @@
-/*
+/**
  * Copyright 2025 threefish.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cn.xjbpm.rule.engine.aviator.function.encryption;
 
 import cn.xjbpm.rule.engine.aviator.function.AbstractBaseFunction;
@@ -24,8 +25,8 @@ import org.springframework.util.Assert;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +47,7 @@ public class HMACSHA256 extends AbstractBaseFunction {
         Object messageObj = arg1.getValue(env);
         Object secretKeyObj = arg2.getValue(env);
 
-        
+
         Assert.notNull(messageObj, String.format("函数 %s 的待加密消息(var1)不能为空", getName()));
         Assert.notNull(secretKeyObj, String.format("函数 %s 的密钥(var2)不能为空", getName()));
 

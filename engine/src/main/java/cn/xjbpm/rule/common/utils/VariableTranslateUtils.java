@@ -1,18 +1,19 @@
-/*
+/**
  * Copyright 2025 threefish.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cn.xjbpm.rule.common.utils;
 
 import cn.hutool.core.collection.CollUtil;
@@ -35,7 +36,6 @@ public class VariableTranslateUtils {
         return translateInternal(businessObjectModels, response, variable);
     }
 
-    @SuppressWarnings("unchecked")
     private static Map<String, Object> translateInternal(List<ObjectModel> models, boolean response, Map<String, Object> sourceMap) {
         Map<String, Object> targetMap = new HashMap<>(models.size());
 
@@ -50,11 +50,12 @@ public class VariableTranslateUtils {
             String sourceKey = response ? model.getLabel() : model.getValue();
             Object sourceValue = sourceMap.get(sourceKey);
 
-            // 3. 非必须且为 null，直接跳过
-            if (!model.isRequired() && sourceValue == null) {
-                continue;
+            if (response == false) {
+                // 3. 非必须且为 null，直接跳过
+                if (!model.isRequired() && sourceValue == null) {
+                    continue;
+                }
             }
-
             // 4. 校验 (优化：避免 String.format 的预计算)
             checkNotNull(model, sourceValue);
 
