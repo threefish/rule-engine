@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <springProperty name="applicationName" source="spring.application.name" scope="context"/>
+    <!-- 基础日志路径 -->
+    <property name="LOG_HOME" value="${user.home}/logs/${applicationName}"/>
+
+    <!-- 日志输出 格式 -->
+    <property name="LOG_PATTERN"
+              value="[%-5level] [%date{yyyy-MM-dd HH:mm:ss:SSS}] [%t] %logger{10}:%line %X{method} - %msg%n"/>
+
+    <!-- 控制台输出 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 文件日志 + 滚动策略（按日期 + 文件大小） -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${LOG_HOME}/app.log</File>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 按日期 + 索引分割 -->
+            <fileNamePattern>${LOG_HOME}/app-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- 单文件最大 100MB -->
+            <maxFileSize>100MB</maxFileSize>
+            <!-- 最多保留 30 天历史 -->
+            <maxHistory>30</maxHistory>
+            <!-- 全部日志总大小限制 10GB -->
+            <totalSizeCap>10GB</totalSizeCap>
+            <!-- 启动清理过期/超量日志 -->
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 异步输出日志到文件（生产更推荐） -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 设置队列大小，避免压力高时丢失日志 -->
+        <queueSize>2048</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="FILE"/>
+    </appender>
+
+    <!-- 异步输出控制台 -->
+    <appender name="ASYNC_STDOUT" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>512</queueSize>
+        <discardingThreshold>5</discardingThreshold>
+        <appender-ref ref="STDOUT"/>
+    </appender>
+
+    <!-- 过滤 Spring 底层日志过多 -->
+    <logger name="org.springframework" level="WARN"/>
+
+    <!-- 不同环境下 主日志级别 + Appender 分配 -->
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="ASYNC_STDOUT"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="test">
+        <root level="INFO">
+            <appender-ref ref="ASYNC_FILE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="ASYNC_FILE"/>
+        </root>
+    </springProfile>
+
+</configuration>
