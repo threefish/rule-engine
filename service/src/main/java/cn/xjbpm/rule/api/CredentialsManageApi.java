@@ -82,6 +82,13 @@ public class CredentialsManageApi {
                 case "aitext" -> Arrays.asList(CredentialsType.volcengine, CredentialsType.deepseek);
                 case "aiimage" -> Arrays.asList(CredentialsType.volcengine, CredentialsType.gemini);
                 case "aitts" -> List.of(CredentialsType.gemini);
+                case "db" -> List.of(CredentialsType.db);
+                case "ftp" -> List.of(CredentialsType.ftp);
+                case "email" -> List.of(CredentialsType.email);
+                case "redis" -> List.of(CredentialsType.redis);
+                case "mqtt" -> List.of(CredentialsType.mqtt);
+                case "rabbitmq" -> List.of(CredentialsType.rabbitmq);
+                case "kafka" -> List.of(CredentialsType.kafka);
                 default -> request.getTypes();
             };
             request.setTypes(types);

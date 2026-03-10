@@ -17,11 +17,14 @@
 package cn.xjbpm.rule.engine.aviator.functions;
 
 import cn.hutool.core.util.StrUtil;
+import cn.xjbpm.rule.common.utils.MarkdownUtils;
 import cn.xjbpm.rule.engine.aviator.annotation.FunctionDoc;
 import cn.xjbpm.rule.engine.aviator.annotation.FunctionNamespace;
 import org.springframework.util.Assert;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 字符串工具类
@@ -144,5 +147,14 @@ public class StringUtils {
     public static boolean isNumeric(Object str) {
         Assert.notNull(str, "str.isNumeric -> str 不能为空");
         return StrUtil.isNumeric(str.toString());
+    }
+
+
+    @FunctionDoc(value = "str.clearMarkdown(text)", description = "清除markdown格式。",
+            example = "str.clearMarkdown('```json\\n{\\n    \\\"test\\\": \\\"12323\\\"\\n}\\n```')",
+            response = "{\"test\": \"12323\"}"
+    )
+    public static String clearMarkdown(String str) {
+        return MarkdownUtils.tryClearMarkdown(str);
     }
 }

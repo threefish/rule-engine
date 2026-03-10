@@ -69,7 +69,7 @@ public class ScoringCardNodeBehavior implements NodeBehavior {
         double sum;
         if (scoringCalcMethod == ScoringCalcMethodEnums.SUM_FRACTIONS) {
             sum = values.stream().mapToDouble(v -> v.getValue()).sum();
-            VariableUtils.setPathVariable(assignmentFiled, "分数求和结果", sum, variable);
+            VariableUtils.setPathVariableByValue(assignmentFiled,  sum, variable);
         } else if (scoringCalcMethod == ScoringCalcMethodEnums.SUM_WEIGHT) {
             List<ScoreRowValue> weightWalues = new ArrayList<>();
             List<ScoringCardWeight> weights = this.node.getWeights();
@@ -84,7 +84,7 @@ public class ScoringCardNodeBehavior implements NodeBehavior {
                     // 计算分数与权重的乘积
                     .mapToDouble(row -> row.getValue() * row.getWeight() / 100)
                     .sum();
-            VariableUtils.setPathVariable(assignmentFiled, "加权求和结果", sum, variable);
+            VariableUtils.setPathVariableByValue(assignmentFiled,  sum, variable);
         } else {
             throw new UnsupportedOperationException(String.format("评分卡不支持[%s]", scoringCalcMethod.getLabel()));
         }

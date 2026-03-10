@@ -69,7 +69,7 @@ public class SshNodeBehavior implements NodeBehavior {
         context.put(node.getId(), resultMap);
 
         if (context.isDebugModel()) {
-            context.addTraceLog(node.getId(), "SSH result: {}", new Object[]{resultMap.get("result")});
+            context.addTraceLog(node.getId(), "SSH result: {}", new Object[]{resultMap.get(RESULT)});
         }
     }
 
@@ -162,7 +162,7 @@ public class SshNodeBehavior implements NodeBehavior {
      */
     private Map<String, Object> buildResultMap(String result, String fileName, String localSaveFilePath, String remoteDirectoryFilePath) {
         Map<String, Object> resultMap = new HashMap<>();
-        resultMap.put("result", result);
+        resultMap.put(RESULT, result);
         resultMap.put("fileName", fileName);
 
         if (Objects.nonNull(localSaveFilePath)) {

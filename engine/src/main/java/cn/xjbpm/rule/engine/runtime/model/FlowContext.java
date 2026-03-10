@@ -19,6 +19,7 @@ package cn.xjbpm.rule.engine.runtime.model;
 import cn.xjbpm.rule.common.utils.StringUtils;
 import cn.xjbpm.rule.custom.BeanContextManager;
 import cn.xjbpm.rule.dto.ExcuteRuleFlowResult;
+import cn.xjbpm.rule.engine.aviator.SmartEnvMap;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -63,7 +64,7 @@ public class FlowContext {
 
     public FlowContext(ExcuteRuleFlowResult processInstance, Map<String, Object> variable, boolean debugModel, BeanContextManager beanContextManager) {
         this.processInstance = processInstance;
-        this.variable = new ConcurrentHashMap<>(variable);
+        this.variable = new SmartEnvMap(variable);
         this.debugModel = debugModel;
         this.beanContextManager = beanContextManager;
     }
@@ -102,6 +103,10 @@ public class FlowContext {
             return;
         }
         variable.put(nodeId, value);
+    }
+
+    public Object get(String nodeId) {
+        return variable.get(nodeId);
     }
 
     public void addTraceLog(String nodeId, String message, Object... args) {

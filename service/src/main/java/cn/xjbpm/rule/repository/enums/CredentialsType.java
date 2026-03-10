@@ -32,9 +32,16 @@ public enum CredentialsType {
     header_auth("Header Auth"),
     shh_password("SSH Password"),
     shh_private_key("SSH Private Key"),
+    ftp("FTP"),
+    email("Email"),
+    redis("Redis"),
     deepseek("DeepSeek"),
     volcengine("火山引擎"),
     gemini("Google Gemini"),
+    db("数据库"),
+    rabbitmq("RabbitMQ"),
+    kafka("Kafka"),
+    mqtt("MQTT"),
     ;
 
     private String name;

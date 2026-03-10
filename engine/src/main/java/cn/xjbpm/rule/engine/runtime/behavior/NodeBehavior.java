@@ -23,7 +23,9 @@ import cn.xjbpm.rule.engine.runtime.model.FlowContext;
  * @author 黄川 huchuc@vip.qq.com
  * date: 2022/9/30
  */
-public interface NodeBehavior {
+public interface NodeBehavior<T> {
+
+    String RESULT="result";
 
     /**
      * 执行方法

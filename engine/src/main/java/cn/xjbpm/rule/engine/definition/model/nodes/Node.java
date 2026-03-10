@@ -86,6 +86,10 @@ public abstract class Node implements java.io.Serializable, NodeParser{
      * 错误处理策略
      */
     protected ErrorStrategy errorStrategy;
+    /**
+     * 固定使用上次节点结果
+     */
+    protected boolean pinned;
 
     /**
      * 传入节点

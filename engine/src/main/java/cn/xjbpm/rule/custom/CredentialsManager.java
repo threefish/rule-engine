@@ -17,7 +17,14 @@
 package cn.xjbpm.rule.custom;
 
 import cn.xjbpm.rule.engine.runtime.model.credentials.ApikeyCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.DataBaseCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.EmailCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.FtpCredential;
 import cn.xjbpm.rule.engine.runtime.model.credentials.HttpCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.KafkaCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.MQTTCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.RabbitMQCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.RedisCredential;
 import cn.xjbpm.rule.engine.runtime.model.credentials.SshCredential;
 
 /**
@@ -32,4 +39,17 @@ public interface CredentialsManager {
 
     ApikeyCredential getApikeyCredential(String credentialId);
 
+    DataBaseCredential getDataBaseCredential(String credentialId);
+
+    FtpCredential getFtpCredential(String credentialId);
+
+    EmailCredential getEmailCredential(String credentialId);
+
+    RedisCredential getRedisCredential(String credentialId);
+
+    RabbitMQCredential getRabbitMQCredential(String credentialId);
+
+    KafkaCredential getKafkaCredential(String credentialId);
+
+    MQTTCredential getMQTTCredential(String credentialId);
 }

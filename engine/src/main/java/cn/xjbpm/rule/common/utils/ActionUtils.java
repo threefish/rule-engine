@@ -16,11 +16,14 @@
 
 package cn.xjbpm.rule.common.utils;
 
+import cn.hutool.core.date.DateUtil;
 import cn.xjbpm.rule.engine.aviator.AviatorContext;
 import cn.xjbpm.rule.engine.aviator.AviatorExecutor;
 import cn.xjbpm.rule.engine.rule.Action;
 import cn.xjbpm.rule.engine.rule.enums.AssignmentType;
+import cn.xjbpm.rule.engine.rule.enums.VariableType;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -35,13 +38,41 @@ public class ActionUtils {
      * @param variable
      */
     public static void assignment(Action action, Map<String, Object> variable) {
-        AviatorContext aviatorContext = AviatorContext.builder().cached(true).env(variable).build();
-        aviatorContext.setExpression(String.format("%s=%s", action.getLeft(), action.getValue()));
         if (action.getAssignmentType() == AssignmentType.CALC) {
-            aviatorContext.setExpression(String.format("%s=%s", action.getLeft(), action.getExpressionValue()));
+            setCalcValue(action, variable);
         } else if (action.getAssignmentType() == AssignmentType.VAR) {
-            aviatorContext.setExpression(String.format("%s=%s", action.getLeft(), action.getFieldValue()));
+            setVarValue(action, variable);
+        } else if (action.getAssignmentType() == AssignmentType.FIXED) {
+            setFixedValue(action, variable);
         }
+    }
+
+    private static void setCalcValue(Action action, Map<String, Object> variable) {
+        AviatorContext aviatorContext = AviatorContext.builder().cached(true).env(variable).build();
+        aviatorContext.setExpression(String.format("%s=(%s)", action.getLeft(), action.getExpressionValue()));
         AviatorExecutor.execute(aviatorContext);
+    }
+
+    private static void setVarValue(Action action, Map<String, Object> variable) {
+        AviatorContext aviatorContext = AviatorContext.builder().cached(true).env(variable).build();
+        aviatorContext.setExpression(String.format("%s=(%s)", action.getLeft(), action.getFieldValue()));
+        AviatorExecutor.execute(aviatorContext);
+    }
+
+    private static void setFixedValue(Action action, Map<String, Object> variable) {
+        VariableType varType = action.getVarType();
+        if (Arrays.asList(VariableType.STRING, VariableType.NUMBER, VariableType.BOOLEAN).contains(varType)) {
+            VariableUtils.setPathVariableByValue(action.getLeft(), action.getValue(), variable);
+            return;
+        }
+        if (VariableType.DATE_TIME == varType) {
+            VariableUtils.setPathVariableByValue(action.getLeft(), DateUtil.parse(String.valueOf(action.getValue()), "yyyy-MM-dd HH:mm:ss"), variable);
+            return;
+        }
+        if (VariableType.DATE == varType) {
+            VariableUtils.setPathVariableByValue(action.getLeft(), DateUtil.parse(String.valueOf(action.getValue()), "yyyy-MM-dd"), variable);
+            return;
+        }
+        throw new RuntimeException(String.format("[%s]类型变量不支持赋值!", varType));
     }
 }

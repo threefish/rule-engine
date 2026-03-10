@@ -21,6 +21,7 @@ import cn.xjbpm.rule.engine.definition.model.nodes.gateway.ExclusiveGatewayNode;
 import cn.xjbpm.rule.engine.definition.model.nodes.gateway.InclusiveGatewayNode;
 import cn.xjbpm.rule.engine.definition.model.nodes.gateway.ParallelGatewayNode;
 import cn.xjbpm.rule.engine.definition.validator.*;
+import cn.xjbpm.rule.engine.definition.validator.AssignmentNodeValidator;
 import cn.xjbpm.rule.engine.runtime.behavior.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,6 +36,7 @@ public enum NodeType {
     StartNode(StartNode.class, BaseNodeValidator.class, StartNodeBehavior.class),
     EndNode(EndNode.class, BaseNodeValidator.class, EndNodeBehavior.class),
     SequenceConnNode(SequenceConnNode.class, BaseNodeValidator.class, SequenceConnNodeBehavior.class),
+    AssignmentNode(AssignmentNode.class, AssignmentNodeValidator.class, AssignmentNodeBehavior.class),
     ExclusiveGatewayNode(ExclusiveGatewayNode.class, BaseNodeValidator.class, ExclusiveGatewayNodeBehavior.class),
     InclusiveGatewayNode(InclusiveGatewayNode.class, BaseNodeValidator.class, InclusiveGatewayNodeBehavior.class),
     ParallelGatewayNode(ParallelGatewayNode.class, BaseNodeValidator.class, ParallelGatewayNodeBehavior.class),
@@ -52,6 +54,16 @@ public enum NodeType {
     AITextNode(AITextNode.class, AITextNodeValidator.class, AITextNodeBehavior.class),
     AIImageNode(AIImageNode.class, AIImageNodeValidator.class, AIImageNodeBehavior.class),
     AITTSNode(AITTSNode.class, AITTSNodeValidator.class, AITTSNodeBehavior.class),
+    DBNode(DBNode.class, DBNodeValidator.class, DBNodeBehavior.class),
+    FTPNode(FTPNode.class, FTPNodeValidator.class, FTPNodeBehavior.class),
+    EmailNode(EmailNode.class, EmailNodeValidator.class, EmailNodeBehavior.class),
+    ExcelReadNode(ExcelReadNode.class, ExcelReadNodeValidator.class, ExcelReadNodeBehavior.class),
+    ExcelWriteNode(ExcelWriteNode.class, ExcelWriteNodeValidator.class, ExcelWriteNodeBehavior.class),
+    CSVNode(CSVNode.class, CSVNodeValidator.class, CSVNodeBehavior.class),
+    RedisNode(RedisNode.class, RedisNodeValidator.class, RedisNodeBehavior.class),
+    RabbitMQNode(RabbitMQNode.class, RabbitMQNodeValidator.class, RabbitMQNodeBehavior.class),
+    KafkaNode(KafkaNode.class, KafkaNodeValidator.class, KafkaNodeBehavior.class),
+    MQTTNode(MQTTNode.class, MQTTNodeValidator.class, MQTTNodeBehavior.class),
     ;
 
     Class<? extends Node> nodeClass;

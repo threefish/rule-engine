@@ -21,20 +21,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 /**
  * @author 黄川 huchuc@vip.qq.com
  */
 @Repository
 public interface RuleFlowScheduledRepository extends JpaRepository<RuleFlowScheduledEntity, Long>, JpaSpecificationExecutor<RuleFlowScheduledEntity> {
 
-    /**
-     * 根据规则流的唯一标识 key 获取实体
-     *
-     * @param key
-     */
-    List<RuleFlowScheduledEntity> findAllByRuleFlowKey(String key);
 
     /**
      * 根据规则流的唯一标识 key 删除实体

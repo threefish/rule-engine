@@ -94,7 +94,7 @@ public class HttpNodeBehavior implements NodeBehavior {
         }
         HttpCallResult httpCallResult = HttpCallUtil.execute(node.getMethod(), node.getUrl(), body, headers, queryParams, timeout);
         if (context.isDebugModel()) {
-            context.addTraceLog(node.getId(), "http call params:'{}' header:'{}' body:'{}' result:'{}'", new Object[]{JsonUtils.obj2Json(queryParams), JsonUtils.obj2Json(headers), body, JsonUtils.obj2Json(httpCallResult)});
+            context.addTraceLog(node.getId(), "http call params:'{}' header:'{}' body:'{}' result:'{}'", JsonUtils.obj2Json(queryParams), JsonUtils.obj2Json(headers), body, JsonUtils.obj2Json(httpCallResult));
         }
         if (log.isInfoEnabled()) {
             log.info("HttpNode Http Call Result:{}", JsonUtils.obj2Json(httpCallResult));

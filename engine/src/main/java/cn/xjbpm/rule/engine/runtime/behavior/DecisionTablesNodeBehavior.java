@@ -57,7 +57,7 @@ public class DecisionTablesNodeBehavior implements NodeBehavior {
                         List<DecisionTablesRowAssignColumn> assignColumns = tableRow.getAssignColumns();
                         if (CollUtil.isNotEmpty(assignColumns)) {
                             for (DecisionTablesRowAssignColumn assignColumn : assignColumns) {
-                                VariableUtils.setPathVariable(assignColumn.getName(), assignColumn.getExpression(), assignColumn.getExpression(), variable);
+                                VariableUtils.setPathVariableByExpression(assignColumn.getName(), assignColumn.getExpression(), variable);
                             }
                         }
                     }

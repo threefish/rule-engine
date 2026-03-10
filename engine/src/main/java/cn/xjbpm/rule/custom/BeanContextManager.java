@@ -23,6 +23,9 @@ import org.springframework.context.ApplicationEventPublisher;
  * date: 2025/12/18
  */
 public interface BeanContextManager {
+
+    NodeExcutionPinnedCacheManager getNodePinnedCacheManager();
+
     CredentialsManager getCredentialsManager();
 
     ApplicationEventPublisher getEventPublishManager();

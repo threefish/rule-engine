@@ -21,5 +21,9 @@ package cn.xjbpm.rule.node.enums;
  * date: 2025/12/9
  */
 public enum TriggerMode {
-    MANUAL, SCHEDULED
+    MANUAL,
+    SCHEDULED,
+    KAFKA,
+    RABBIT_MQ,
+    MQTT,
 }

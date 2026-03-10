@@ -68,7 +68,6 @@ public class SchedulerService {
             }
         } catch (SchedulerException e) {
             log.error("清除定时任务失败 ruleFlowKey={}", ruleFlowKey, e);
-            throw new RuntimeException("清除定时任务失败", e);
         }
     }
 

@@ -49,9 +49,7 @@ public class Main {
         AkkaRuleFlowScheduler scheduler = new AkkaRuleFlowScheduler(actorSystem, 30, 200, 2000);
         try {
             for (int i = 0; i < 3; i++) {
-                Map<String, Object> runtimeVar = new HashMap<>();
-                runtimeVar.put(RuleFlowConstant.BUSINESS_OBJECTS, VariableTranslateUtils.translate(ruleFlowModel.getBusinessObjectModels(),
-                        false, JsonUtils.json2Obj(requestJson, Map.class)));
+                Map<String, Object> runtimeVar = VariableTranslateUtils.translate(ruleFlowModel.getBusinessObjectModels(), false, JsonUtils.json2Obj(requestJson, Map.class));
                 long startTime = System.currentTimeMillis();
                 FlowContext flowContext = new FlowContext(null, runtimeVar, true, null);
                 scheduler.startFlow(ruleFlowModel, flowContext);

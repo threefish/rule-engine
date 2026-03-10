@@ -50,7 +50,7 @@ public class FunctionNodeBehavior implements NodeBehavior {
                     .build();
             Map<String, Object> resultMap = new HashMap<>();
             Object result = AviatorExecutor.execute(aviatorContext);
-            resultMap.put("result", result);
+            resultMap.put(RESULT, result);
             context.put(node.getId(), resultMap);
         } else {
             log.info("未实现脚本类型:{}", node.getScriptType());

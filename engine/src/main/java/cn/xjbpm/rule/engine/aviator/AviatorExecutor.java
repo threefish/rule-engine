@@ -59,21 +59,15 @@ public class AviatorExecutor {
 //        AviatorEvaluator.addOpFunction(OperatorType.INDEX, new AviatorFunction());
         ClassScanner classScanner = new ClassScanner(AviatorExecutor.class.getPackage().getName());
         Set<Class<?>> scans = classScanner.scan();
-        scans.stream()
-                .filter(clazz -> AviatorFunction.class.isAssignableFrom(clazz))
-                .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
-                .filter(clazz -> !Modifier.isInterface(clazz.getModifiers()))
-                .forEach(clazz -> {
-                    try {
-                        AviatorFunction aviatorFunction = (AviatorFunction) clazz.getDeclaredConstructor().newInstance();
-                        AviatorEvaluator.addFunction(aviatorFunction);
-                    } catch (Exception e) {
-                        log.error("Error loading custom function", e);
-                    }
-                });
-        List<Class<?>> aviatorFunctionClasses = scans.stream()
-                .filter(clazz -> clazz.isAnnotationPresent(FunctionNamespace.class))
-                .collect(Collectors.toList());
+        scans.stream().filter(clazz -> AviatorFunction.class.isAssignableFrom(clazz)).filter(clazz -> !Modifier.isAbstract(clazz.getModifiers())).filter(clazz -> !Modifier.isInterface(clazz.getModifiers())).forEach(clazz -> {
+            try {
+                AviatorFunction aviatorFunction = (AviatorFunction) clazz.getDeclaredConstructor().newInstance();
+                AviatorEvaluator.addFunction(aviatorFunction);
+            } catch (Exception e) {
+                log.error("Error loading custom function", e);
+            }
+        });
+        List<Class<?>> aviatorFunctionClasses = scans.stream().filter(clazz -> clazz.isAnnotationPresent(FunctionNamespace.class)).collect(Collectors.toList());
         for (Class<?> clazz : aviatorFunctionClasses) {
             try {
                 FunctionNamespace aviatorFunction = clazz.getAnnotation(FunctionNamespace.class);
@@ -105,9 +99,16 @@ public class AviatorExecutor {
      * @return
      */
     public static Object execute(AviatorContext context) {
-        Object result = AviatorEvaluator.execute(context.getExpression(), context.getEnv(), context.isCached());
-        if (log.isDebugEnabled()) {
-            log.debug("表达式执行器  表达式:{} 计算结果:{} 上下文:{}", context.getExpression(), result, JsonUtils.obj2Json(context));
+        if (context.getEnv() instanceof SmartEnvMap == false) {
+            log.warn("env 应该为 SmartEnvMap 请检查  表达式:{}", context.getExpression());
+        }
+        Object result = null;
+        try {
+            result = AviatorEvaluator.execute(context.getExpression(), context.getEnv(), context.isCached());
+        } finally {
+            if (log.isInfoEnabled()) {
+                log.info("表达式执行器  表达式:{} 计算结果:{} 上下文:{}", context.getExpression(), result, JsonUtils.obj2Json(context));
+            }
         }
         return result;
     }
@@ -115,42 +116,17 @@ public class AviatorExecutor {
     public static void main(String[] args) {
         Map<String, Object> env = JsonUtils.json2Obj("{\"用户\":{\"年龄\":38},\"list\":[{\"a\":1}]}", Map.class);
         // 正确的表达式示例
-        String[] expressions = {
-                "list[0]['a']",              // 圆括号语法
+        String[] expressions = {"{{$list[0]['a']}}",              // 圆括号语法
         };
         for (String expr : expressions) {
             try {
-                Object result = AviatorEvaluator.execute(expr, env);
+                Object result = AviatorEvaluator.execute(expr, new SmartEnvMap(env));
                 System.out.println(expr + " = " + result);
             } catch (Exception e) {
                 System.err.println(expr + " 执行失败: " + e.getMessage());
             }
         }
 
-    }
-
-    /**
-     * example: year: ${NOW('yyyy-MM-dd HH:mm:ss')} ${EQUALS(用户.年龄,1)} ${用户.年龄}
-     *
-     * @param context
-     * @return
-     */
-    public static String evaluateAndReplace2(AviatorContext context) {
-        StringBuffer sb = new StringBuffer();
-        Matcher matcher = FUNCTION_PATTERN.matcher(context.getExpression());
-        while (matcher.find()) {
-            String expressionContent = matcher.group(1);
-            String resultValue;
-            try {
-                Object result = AviatorEvaluator.compile(expressionContent, true).execute(context.getEnv());
-                resultValue = JsonUtils.escapeJsonString(result.toString());
-            } catch (Exception e) {
-                throw new RuntimeException(String.format("表达式:%s %s", expressionContent, e.getMessage()));
-            }
-            matcher.appendReplacement(sb, resultValue);
-        }
-        matcher.appendTail(sb);
-        return sb.toString();
     }
 
     /**

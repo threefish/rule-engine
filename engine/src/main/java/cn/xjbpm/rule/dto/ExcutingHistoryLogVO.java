@@ -54,6 +54,7 @@ public class ExcutingHistoryLogVO {
 
     private Map<String, NodeExcution> nodeExcutions;
 
+    private Map<String, Object> nodesData;
 
     private Long retryOriginId;
 
@@ -72,6 +73,7 @@ public class ExcutingHistoryLogVO {
         excutingHistoryLogVO.setRequestId(response.getRequestId());
         excutingHistoryLogVO.setRuleFlowKey(response.getRuleFlowKey());
         excutingHistoryLogVO.setRetryOriginId(retryOriginId);
+        excutingHistoryLogVO.setNodesData(response.getNodesData());
         return excutingHistoryLogVO;
     }
 }

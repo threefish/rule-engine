@@ -18,6 +18,7 @@ package cn.xjbpm.rule.manager;
 
 import cn.xjbpm.rule.custom.BeanContextManager;
 import cn.xjbpm.rule.custom.CredentialsManager;
+import cn.xjbpm.rule.custom.NodeExcutionPinnedCacheManager;
 import cn.xjbpm.rule.properties.RuleProperties;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -33,7 +34,13 @@ public class DefaultBeanContextManager implements BeanContextManager {
 
     private final CredentialsManager credentialsManager;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final NodeExcutionPinnedCacheManager nodeExcutionPinnedCacheManager;
     private final RuleProperties ruleProperties;
+
+    @Override
+    public NodeExcutionPinnedCacheManager getNodePinnedCacheManager() {
+        return nodeExcutionPinnedCacheManager;
+    }
 
     @Override
     public CredentialsManager getCredentialsManager() {

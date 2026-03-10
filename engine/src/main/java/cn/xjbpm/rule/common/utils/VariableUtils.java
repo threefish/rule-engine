@@ -45,28 +45,40 @@ public class VariableUtils {
         return current;
     }
 
-    /**
-     * 设置字段值
-     *
-     * @param assignmentFiled
-     * @param valueFiled
-     * @param value
-     * @param variable
-     */
-    public static void setPathVariable(String assignmentFiled, String valueFiled, Object value, Map<String, Object> variable) {
-        String valueKey = valueFiled;
-        String expression;
-        if (Objects.nonNull(value)) {
-            variable.put(valueKey, value);
-            expression = String.format("%s=%s", assignmentFiled, valueKey);
-        } else {
-            expression = String.format("%s=nil", assignmentFiled);
-        }
+
+    public static void setPathVariableByExpression(String assignmentFiled, String expressionField, Map<String, Object> variable) {
+        String expression = String.format("%s=%s", assignmentFiled, expressionField);
         AviatorContext aviatorContext = AviatorContext.builder().cached(true)
                 .expression(expression)
                 .env(variable)
                 .build();
         AviatorExecutor.execute(aviatorContext);
-        variable.remove(valueKey);
+    }
+
+    /**
+     * 直接设置基本字段值
+     *
+     * @param assignmentFiled
+     * @param value
+     * @param variable
+     */
+    public static void setPathVariableByValue(String assignmentFiled, Object value, Map<String, Object> variable) {
+        String key = "temp";
+        String expression;
+        try {
+            if (Objects.nonNull(value)) {
+                variable.put(key, value);
+                expression = String.format("%s=%s", assignmentFiled, key);
+            } else {
+                expression = String.format("%s=nil", assignmentFiled);
+            }
+            AviatorContext aviatorContext = AviatorContext.builder().cached(true)
+                    .expression(expression)
+                    .env(variable)
+                    .build();
+            AviatorExecutor.execute(aviatorContext);
+        } finally {
+            variable.remove(key);
+        }
     }
 }

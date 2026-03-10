@@ -54,7 +54,7 @@ public class DmnDecisionTableNodeBehavior implements NodeBehavior {
             String assignmentField = outputColumn.getAssignmentField();
             String field = outputColumn.getField();
             if (StringUtils.isNotBlank(assignmentField)) {
-                VariableUtils.setPathVariable(assignmentField, String.format("t_%s", field), result.get(field), variable);
+                VariableUtils.setPathVariableByValue(assignmentField,  result.get(field), variable);
             }
         }
     }
@@ -73,7 +73,7 @@ public class DmnDecisionTableNodeBehavior implements NodeBehavior {
         // 保持规则定义的原始顺序 (Rule Order)
         for (DmnDecisionTablePolicy.Row row : policy.getRules()) {
             if (matchRow(row, input, context)) {
-                context.addTraceLog(node.getId(), "命中规则[{}]: {}", new Object[]{rowIndex.getAndIncrement(), row.getDescription()});
+                context.addTraceLog(node.getId(), "命中规则[{}]: {}", rowIndex.getAndIncrement(), row.getDescription());
                 result.add(row);
                 // 优化：如果是 FIRST，且不需要收集所有命中，可以提前返回
                 // 但为了代码结构的统一性，这里先收集所有，在 applyHitPolicy 处理
@@ -81,7 +81,7 @@ public class DmnDecisionTableNodeBehavior implements NodeBehavior {
                     return result;
                 }
             } else {
-                context.addTraceLog(node.getId(), "未命中规则[{}]: {}", new Object[]{rowIndex.getAndIncrement(), row.getDescription()});
+                context.addTraceLog(node.getId(), "未命中规则[{}]: {}", rowIndex.getAndIncrement(), row.getDescription());
             }
         }
         return result;
@@ -108,7 +108,7 @@ public class DmnDecisionTableNodeBehavior implements NodeBehavior {
             result = AviatorExecutor.execute(AviatorContext.create(aviatorExpr, Collections.singletonMap("x", value)));
         } finally {
             if (context.isDebugModel()) {
-                context.addTraceLog(node.getId(), "表达式: {} 执行结果：{}", new Object[]{aviatorExpr, result});
+                context.addTraceLog(node.getId(), "表达式: {} 执行结果：{}", aviatorExpr, result);
             }
         }
         return Boolean.TRUE.equals(result);

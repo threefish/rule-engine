@@ -19,13 +19,22 @@ import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.common.utils.StringUtils;
 import cn.xjbpm.rule.custom.CredentialsManager;
 import cn.xjbpm.rule.engine.runtime.model.credentials.ApikeyCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.DataBaseCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.EmailCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.FtpCredential;
 import cn.xjbpm.rule.engine.runtime.model.credentials.HttpCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.KafkaCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.MQTTCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.RabbitMQCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.RedisCredential;
 import cn.xjbpm.rule.engine.runtime.model.credentials.SshCredential;
 import cn.xjbpm.rule.repository.enums.CredentialsType;
 import cn.xjbpm.rule.service.CredentialsService;
 import cn.xjbpm.rule.vo.CredentialsVO;
 import lombok.AllArgsConstructor;
+import org.nutz.dao.Dao;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.util.Base64;
 import java.util.HashMap;
@@ -41,6 +50,7 @@ import java.util.Objects;
 public class DefaultCredentialsManager implements CredentialsManager {
 
     private final CredentialsService credentialsService;
+    private final DataBaseManager dataBaseManager;
 
     public HttpCredential getHttpCredential(String credentialId) {
         HttpCredential httpCredentials = new HttpCredential();
@@ -97,4 +107,87 @@ public class DefaultCredentialsManager implements CredentialsManager {
         }
         return null;
     }
+
+    @Override
+    public DataBaseCredential getDataBaseCredential(String credentialId) {
+        CredentialsVO.Details details = credentialsService.details(Long.valueOf(credentialId));
+        Assert.notNull(details, "credential is null");
+        Map<String, String> authData = JsonUtils.json2Obj(details.getAuthData(), Map.class);
+        Dao dao = dataBaseManager.getOrCreateDao(authData);
+        return DataBaseCredential.builder().dao(dao).build();
+    }
+
+    @Override
+    public FtpCredential getFtpCredential(String credentialId) {
+        FtpCredential ftpCredential = new FtpCredential();
+        if (StringUtils.isNotBlank(credentialId)) {
+            CredentialsVO.Details details = credentialsService.details(Long.valueOf(credentialId));
+            if (Objects.nonNull(details)) {
+                ftpCredential = JsonUtils.json2Obj(details.getAuthData(), FtpCredential.class);
+            }
+        }
+        return ftpCredential;
+    }
+
+    @Override
+    public EmailCredential getEmailCredential(String credentialId) {
+        EmailCredential emailCredential = new EmailCredential();
+        if (StringUtils.isNotBlank(credentialId)) {
+            CredentialsVO.Details details = credentialsService.details(Long.valueOf(credentialId));
+            if (Objects.nonNull(details)) {
+                emailCredential = JsonUtils.json2Obj(details.getAuthData(), EmailCredential.class);
+            }
+        }
+        return emailCredential;
+    }
+
+    @Override
+    public RedisCredential getRedisCredential(String credentialId) {
+        RedisCredential redisCredential = new RedisCredential();
+        if (StringUtils.isNotBlank(credentialId)) {
+            CredentialsVO.Details details = credentialsService.details(Long.valueOf(credentialId));
+            if (Objects.nonNull(details)) {
+                redisCredential = JsonUtils.json2Obj(details.getAuthData(), RedisCredential.class);
+            }
+        }
+        return redisCredential;
+    }
+
+    @Override
+    public RabbitMQCredential getRabbitMQCredential(String credentialId) {
+        RabbitMQCredential rabbitMQCredential = new RabbitMQCredential();
+        if (StringUtils.isNotBlank(credentialId)) {
+            CredentialsVO.Details details = credentialsService.details(Long.valueOf(credentialId));
+            if (Objects.nonNull(details)) {
+                rabbitMQCredential = JsonUtils.json2Obj(details.getAuthData(), RabbitMQCredential.class);
+            }
+        }
+        return rabbitMQCredential;
+    }
+
+    @Override
+    public KafkaCredential getKafkaCredential(String credentialId) {
+        KafkaCredential kafkaCredential = new KafkaCredential();
+        if (StringUtils.isNotBlank(credentialId)) {
+            CredentialsVO.Details details = credentialsService.details(Long.valueOf(credentialId));
+            if (Objects.nonNull(details)) {
+                kafkaCredential = JsonUtils.json2Obj(details.getAuthData(), KafkaCredential.class);
+            }
+        }
+        return kafkaCredential;
+    }
+
+    @Override
+    public MQTTCredential getMQTTCredential(String credentialId) {
+        MQTTCredential mqttCredential = new MQTTCredential();
+        if (StringUtils.isNotBlank(credentialId)) {
+            CredentialsVO.Details details = credentialsService.details(Long.valueOf(credentialId));
+            if (Objects.nonNull(details)) {
+                mqttCredential = JsonUtils.json2Obj(details.getAuthData(), MQTTCredential.class);
+            }
+        }
+        return mqttCredential;
+    }
+
+
 }

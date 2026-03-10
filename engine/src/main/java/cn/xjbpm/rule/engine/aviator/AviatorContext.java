@@ -45,40 +45,7 @@ public class AviatorContext implements Serializable {
 
 
     public static AviatorContext create(String expression, Map<String, Object> env) {
-        return AviatorContext.builder().expression(expression).cached(true).env(new SmartEnvMap(env)).build();
+        return AviatorContext.builder().expression(expression).cached(true).env(env).build();
     }
 
-
-    private static class SmartEnvMap extends HashMap<String, Object> {
-        public SmartEnvMap(Map<String, Object> map) {
-            if (map != null) {
-                this.putAll(map);
-            }
-        }
-
-        @Override
-        public Object get(Object key) {
-            Object val = super.get(key);
-            // 如果找不到带 $ 的 key，自动尝试去掉 $
-            if (val == null && key instanceof String sKey) {
-                if (sKey.startsWith("$")) {
-                    return super.get(sKey.substring(1));
-                }
-            }
-            return val;
-        }
-
-        @Override
-        public boolean containsKey(Object key) {
-            if (super.containsKey(key)) {
-                return true;
-            }
-            if (key instanceof String sKey) {
-                if (sKey.startsWith("$")) {
-                    return super.containsKey(sKey.substring(1));
-                }
-            }
-            return false;
-        }
-    }
 }
