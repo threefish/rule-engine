@@ -159,14 +159,15 @@
 
 ### 规则引擎界面
 
+![规则引擎界面](screenshot/NODES.png)
 ![规则引擎界面](screenshot/规则引擎0.png)
-![规则引擎界面2](screenshot/规则引擎1.png)
-![规则引擎界面3](screenshot/规则引擎2.png)
-![规则引擎界面4](screenshot/规则引擎3.png)
-![规则引擎界面5](screenshot/规则引擎4.png)
-![规则引擎界面6](screenshot/规则引擎5.png)
-![规则引擎界面7](screenshot/规则引擎6.png)
-![规则引擎界面8](screenshot/规则引擎7.png)
+![规则引擎界面](screenshot/规则引擎1.png)
+![规则引擎界面](screenshot/规则引擎2.png)
+![规则引擎界面](screenshot/规则引擎3.png)
+![规则引擎界面](screenshot/规则引擎4.png)
+![规则引擎界面](screenshot/规则引擎5.png)
+![规则引擎界面](screenshot/规则引擎6.png)
+![规则引擎界面](screenshot/规则引擎7.png)
 
 ### 条件构造界面
 

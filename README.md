@@ -152,14 +152,15 @@ The system provides **30+ node types**, covering common business scenarios:
 
 ### Rule Engine Interface
 
+![Rule Engine Interface](screenshot/NODES.png)
 ![Rule Engine Interface](screenshot/规则引擎0.png)
-![Rule Engine Interface 2](screenshot/规则引擎1.png)
-![Rule Engine Interface 3](screenshot/规则引擎2.png)
-![Rule Engine Interface 4](screenshot/规则引擎3.png)
-![Rule Engine Interface 5](screenshot/规则引擎4.png)
-![Rule Engine Interface 6](screenshot/规则引擎5.png)
-![Rule Engine Interface 7](screenshot/规则引擎6.png)
-![Rule Engine Interface 8](screenshot/规则引擎7.png)
+![Rule Engine Interface](screenshot/规则引擎1.png)
+![Rule Engine Interface](screenshot/规则引擎2.png)
+![Rule Engine Interface](screenshot/规则引擎3.png)
+![Rule Engine Interface](screenshot/规则引擎4.png)
+![Rule Engine Interface](screenshot/规则引擎5.png)
+![Rule Engine Interface](screenshot/规则引擎6.png)
+![Rule Engine Interface](screenshot/规则引擎7.png)
 
 ### Condition Construction Interface
 
