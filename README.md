@@ -2,7 +2,7 @@
 
 🔥 **High-performance, High-concurrency, Visualized Enterprise-level Rule Engine System** 🔥
 
-A flexible and powerful rule engine built on Java, Akka Actor model, and Aviator expression engine, focusing on complex business rule definition, combination, and execution in high-concurrency scenarios, providing enterprises with fast decision-making and elastic scheduling capabilities.
+A flexible and powerful rule engine built on Java 21, Akka Actor model, and Aviator expression engine, focusing on complex business rule definition, combination, and execution in high-concurrency scenarios, providing enterprises with fast decision-making and elastic scheduling capabilities.
 
 [![GitHub stars](https://img.shields.io/github/stars/threefish/rule-engine.svg?style=social&label=Star)](https://github.com/threefish/rule-engine)
 [![GitHub forks](https://img.shields.io/github/forks/threefish/rule-engine.svg?style=social&label=Fork)](https://github.com/threefish/rule-engine)
@@ -12,116 +12,116 @@ English | [简体中文](README_ZH.md)
 
 **[Frontend Source Code](https://github.com/threefish/rule-engine-web)**
 
-## 🎯 Core Advantages
+## ✨ Core Features
 
-- **🚀 High Performance**: Based on Akka Actor model for high concurrency design, supporting large-scale rule parallel execution
-- **🎨 Visualization**: Provides intuitive rule definition and process orchestration interface, lowering the threshold for business personnel
-- **⚡ High Flexibility**: Supports complex rule condition combinations and multiple operators, adapting to various business scenarios
-- **🔄 High Reliability**: Complete error handling and automatic retry mechanism to ensure the reliability of rule execution
-- **📊 Monitorable**: Detailed execution logs and monitoring mechanisms for easy problem locating and performance optimization
-- **🔧 Easy to Extend**: Modular design, supporting custom extensions and secondary development
-- **🤖 IO Node Scheduling**: Supports scheduling capabilities for IO nodes (AI, SSH, HTTP, etc.)
-- **🎯 Precise Calculation**: Based on Aviator expression engine for high-precision calculation, supporting Decimal type to ensure numerical accuracy
+- **🚀 High-Performance Scheduling**: Based on Akka Actor model for high-concurrency, asynchronous, and fault-tolerant rule flow scheduling, supporting large-scale parallel node execution with dynamic Worker pool scaling (initial 100, max 2000)
+- **🎨 Visual Design**: Provides intuitive rule definition and process orchestration interface, supports visual editing of process models, lowering the barrier for business users
+- **⚡ Flexible Rule Engine**: Based on Aviator expression engine, supports complex condition combinations, multiple operators, Decimal high-precision calculation, with rich custom function extensions
+- **🔄 High-Reliability Execution**: Complete error handling strategies, automatic retry mechanism, thread-safe FlowContext context management, supports synchronous/asynchronous execution modes
+- **📦 Rich Node Types**: Provides 30+ node types, covering process control, data processing, rule processing, message queues, file operations, AI capabilities, and more
+- **🔌 Multiple Trigger Methods**: Supports manual trigger, scheduled trigger (Quartz), message queue trigger (RabbitMQ/Kafka/MQTT)
+- **📊 Comprehensive Monitoring**: Execution logs, trace logs, debug mode, performance monitoring, exception monitoring, audit logs, full observability
+- **🔧 Easy to Extend**: Modular design, supports custom node, function, and credential extensions, can be embedded or independently deployed
+- **🔐 Secure and Reliable**: JWT Token authentication, API Key authorization, rule flow level permission control, credential encryption storage, sensitive data masking, SQL injection protection
 
-## ✨ Project Features
+## 📦 Core Node Types
 
-- **Core Scheduling: Based on Akka Actor Model**: Utilizes Akka's high concurrency, asynchronous, and fault-tolerant capabilities to achieve flexible scheduling of parallel, branch, and aggregation between rule flow nodes
-- **Expression Core: Based on Aviator Engine**: Provides high-performance expression parsing and execution, supporting complex logical calculations
-- **Flexible Rule Definition**: Supports multiple operators, combination methods, and condition types
-- **Process-driven**: Orchestrates the logic and order of rule execution based on process models
-- **Automatic Retry Mechanism**: Supports configurable automatic retry strategies when node execution fails
-- **Thread-safe Context Management**: Achieves safe data sharing between nodes through FlowContext
-- **Support for Synchronous and Asynchronous Execution**: Can flexibly choose execution mode according to business needs
-- **Complete Rule Execution Logs**: Detailed records of rule execution process and results, facilitating auditing and debugging
+The system provides **30+ node types**, covering common business scenarios:
 
-## 🏗️ Project Structure
+### Process Control Nodes
+
+| Node Type | Description | Features |
+| --------- | ----------- | -------- |
+| StartNode | Rule flow entry point | Supports multiple trigger modes (manual, scheduled, message queue) |
+| EndNode | Rule flow termination point | Marks process branch end |
+| SequenceConnNode | Sequence connection node | Supports condition judgment |
+| ExclusiveGatewayNode | Exclusive gateway | Selects the first matching branch by priority |
+| ParallelGatewayNode | Parallel gateway | Triggers all subsequent branches simultaneously |
+| InclusiveGatewayNode | Inclusive gateway | Supports multi-branch convergence |
+| LoopNode | Loop node | Iterates over collection to execute sub-process |
+| DelayWaitNode | Delay wait node | Supports delayed execution |
+
+### Data Processing Nodes
+
+| Node Type | Description | Implementation |
+| --------- | ----------- | -------------- |
+| AssignmentNode | Variable assignment | Aviator expression |
+| DBNode | Database operations | Nutz DAO framework |
+| RedisNode | Redis cache operations | Jedis client, supports 25+ operation types |
+| CSVNode | CSV file read/write | Hutool utility |
+| ExcelReadNode | Excel reading | Apache POI |
+| ExcelWriteNode | Excel writing | Apache POI |
+
+### Rule Processing Nodes
+
+| Node Type | Description | Features |
+| --------- | ----------- | -------- |
+| RuleSetNode | Rule set judgment | Supports loop, conditional branch, action execution |
+| ScoringCardNode | Scoring card calculation | Supports weight calculation, score aggregation |
+| DecisionTablesNode | Decision table matching | Tabular rule matching |
+| DmnDecisionTableNode | DMN decision table | Supports DMN specification |
+
+### Interface Invocation Nodes
+
+| Node Type | Description | Features |
+| --------- | ----------- | -------- |
+| HttpNode | HTTP request | Supports multiple timeout configurations, response condition judgment |
+| FunctionNode | Custom expression | Aviator script execution |
+
+### Message Queue Nodes
+
+| Node Type | Description | Features |
+| --------- | ----------- | -------- |
+| RabbitMQNode | RabbitMQ message sending | Supports multiple exchange types |
+| KafkaNode | Kafka message sending | Supports partitioning, message acknowledgment mode |
+| MQTTNode | MQTT message publishing | Supports QoS configuration |
+
+### File Operation Nodes
+
+| Node Type | Description | Implementation |
+| --------- | ----------- | -------------- |
+| FTPNode | FTP file transfer | Apache Commons Net |
+| DownloadFileNode | HTTP file download | - |
+| SshNode | SSH remote command execution | JSch |
+| ShellNode | Shell command execution | - |
+
+### Communication Nodes
+
+| Node Type | Description | Features |
+| --------- | ----------- | -------- |
+| EmailNode | Email sending | Supports HTML/plain text, attachments, SSL |
+
+### AI Nodes
+
+| Node Type | Description | Supported Platforms |
+| --------- | ----------- | ------------------- |
+| AITextNode | AI text generation | Deepseek, Volcengine |
+| AIImageNode | AI image generation | Gemini, Volcengine |
+| AITTSNode | AI text-to-speech | Gemini |
 
 ## 🛠️ Technology Stack
 
-| Technology      | Version | Purpose                                                  |
-| --------------- | ------- | -------------------------------------------------------- |
-| Java            | 1.8     | Main development language                                |
-| Spring Boot     | 3.5.7   | Service framework                                        |
-| Akka            | 2.6.20  | Actor model for high concurrency process scheduling      |
-| Aviator         | 5.3.3   | High-performance expression parsing and execution engine |
-| Quartz          | 2.5.0   | Scheduled task framework                                 |
-| Spring Data JPA | 3.5.7   | Persistence framework                                    |
-| MySQL           | 8.0.33  | Database                                                 |
-| Hutool          | 5.7.18  | Java tool library                                        |
-| Lombok          | 1.18.42 | Simplify Java code                                       |
-
-### Overall Architecture
-
-```
-rule-engine/
-├── engine/             # Rule engine core module
-│   ├── common/         # Common tools and constants
-│   ├── custom/         # Custom services
-│   ├── engine/         # Engine core implementation
-│   │   ├── aviator/    # Aviator expression executor
-│   │   ├── rule/       # Rule definition
-│   │   └── runtime/    # Runtime services
-│   ├── event/          # Event definition
-│   └── exception/      # Exception definition
-└── service/            # Rule engine service module
-    ├── api/            # API interface definition
-    ├── config/         # Configuration classes
-    ├── job/            # Dynamic tasks
-    ├── listener/       # Listeners
-    ├── node/           # Node-related definitions
-    ├── repository/     # Data access layer
-    ├── runner/         # Startup loaders
-    ├── service/        # Business service implementation
-    └── utils/          # Utility classes
-```
-
-## 🔄 Rule Engine Workflow
-
-1. **Rule Definition**: Create rule objects, set conditions and operators
-2. **Process Construction**: Define process models, orchestrate serial, parallel, branch, and aggregation logic through gateway nodes
-3. **Process Execution**: Call RuleFlowExcuteService to start process instances
-4. **Actor Scheduling**: AkkaRuleFlowScheduler creates Actors to control the process
-5. **Node Execution**: Schedule NodeWorkerActor to execute each node
-6. **Dependency Handling**: Manage dependencies between nodes through NodeDependencyBuilder, supporting serial and parallel execution
-7. **Convergence Processing**: Handle the convergence logic of multiple parallel branches
-8. **Automatic Retry**: Automatically trigger configured retry strategies when node execution fails
-9. **Result Processing**: Execute corresponding actions or output decisions based on rule execution results
-10. **Log Recording**: Record complete execution logs for monitoring and auditing
-
-## 📝 Expression Execution
-
-The rule engine uses Aviator expression engine to execute rule expressions:
-
-- **Automatic Type Conversion**: Supports precise calculation of numbers, strings, etc.
-- **Caching Mechanism**: Supports expression caching to improve performance
-- **Custom Functions**: Extensible custom function support
-- **Context Management**: Provides context environment for expression execution
-
-## 🔌 Extension Points
-
-1. **Custom Functions**: Implement the `AviatorFunction` interface to add custom expression functions
-2. **Node Behavior**: Custom node execution behavior
-3. **Rule Flow Model Cache Service**: Implement the `RuleFlowModelCacheService` interface to customize the cache strategy for rule flow models
+| Technology      | Version | Purpose                                      |
+| --------------- | ------- | -------------------------------------------- |
+| Java            | 21      | Main development language (LTS version)      |
+| Spring Boot     | 3.5.7   | Service framework                            |
+| Akka            | 2.6.20  | Actor model for high-concurrency scheduling  |
+| Aviator         | 5.4.3   | High-performance expression engine           |
+| Quartz          | -       | Scheduled task framework                     |
+| Spring Data JPA | 3.5.7   | Persistence framework                        |
+| MySQL           | 8.0     | Primary database                             |
+| Redis           | -       | Cache support                                |
+| RabbitMQ        | 5.20.0  | Message queue                                |
+| Kafka           | 3.7.0   | Message queue                                |
+| MQTT            | 1.2.5   | IoT messaging protocol                       |
+| Hutool          | 5.7.18  | Java utility library                         |
+| Lombok          | 1.18.42 | Simplify Java code                           |
 
 ## 🔧 Deployment Methods
 
 - **Independent Deployment**: Deploy as an independent service, providing REST API interfaces for other systems to call
 - **Embedded Deployment**: Can be embedded into other Java applications for use as part of the application
-- **Cluster Deployment**: Supports multi-instance deployment, achieving high availability and horizontal expansion through load balancing
-
-## 📈 Performance Indicators
-
-- **Single Node QPS**: Supports thousands of rule executions per second
-- **Rule Execution Delay**: Millisecond-level response
-- **Number of Supported Rules**: A single rule flow supports hundreds of rule nodes
-- **Supported Concurrent Requests**: Based on Akka Actor model, supporting high concurrent processing
-
-## 🔍 Monitoring and Logs
-
-- **Execution Logs**: Detailed records of rule execution process, parameters, and results
-- **Performance Monitoring**: Records rule execution time, success rate, and other indicators
-- **Exception Monitoring**: Captures and records exceptions during rule execution
-- **Audit Logs**: Records the creation, modification, deletion, and other operations of rules
+- **Cluster Deployment**: Supports multi-instance deployment, achieving high availability and horizontal scaling through load balancing
 
 ## 📋 Development Specifications
 
@@ -134,56 +134,31 @@ The rule engine uses Aviator expression engine to execute rule expressions:
 
 ✅ **Applicable Scenarios (High Concurrency, Fast Decision Making, Complex Conditions)**
 
-| Scenario                          | Core Features                                                                                                                                   | Example                                                                                                                                                                                                                                   |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Real-time Risk Assessment         | Needs to make multi-dimensional, parallel judgments on a large number of requests at millisecond level to quickly make "yes" or "no" decisions. | Credit Approval: When a user submits a loan application, the engine simultaneously checks multiple rules such as "credit score > 600?", "work experience > 1 year?", "debt ratio < 50%?", and quickly decides whether to approve.         |
-| Complex Cost Calculation          | Involves multiple condition branches, and the calculation process requires complex sequential and parallel operations.                          | Order Discount: When calculating the final price of an order, the engine simultaneously runs rules such as "member discount", "regional shipping fee", "full reduction activity", and merges the results to get the final payable amount. |
-| Dynamic Marketing Recommendations | Triggers a series of personalized actions or recommendation logic in a short time based on the user's current state or behavior.                | App Message Push: When a user opens the App, the engine quickly judges: "last login time exceeds 7 days" or "shopping cart has unpaid items", and immediately pushes corresponding recall messages or coupons.                            |
-| Business Rule Management          | Needs to separate business rules from code for easy maintenance and modification by business personnel.                                         | Insurance Claims: Automatically calculates claim amounts and processing flows based on different claim types, amounts, customer levels, etc.                                                                                              |
-| Compliance Checking               | Needs to conduct multi-dimensional compliance checks on business data to ensure business operations comply with regulatory requirements.        | Financial Transactions: Conducts anti-money laundering, anti-fraud, and compliance checks on each transaction to ensure the legality and compliance of the transaction.                                                                   |
+| Scenario | Core Features | Example |
+| -------- | ------------- | ------- |
+| Real-time Risk Assessment | Millisecond-level multi-dimensional parallel judgment | Credit Approval: Simultaneously checks credit score, work experience, debt ratio rules |
+| Complex Cost Calculation | Multi-condition branches, complex calculation | Order Discount: Simultaneously calculates member discount, regional shipping, promotional activities |
+| Dynamic Marketing Recommendations | Short-time triggered personalized actions | App Push: Judges login time, shopping cart status, pushes corresponding messages |
+| Business Rule Management | Separation of rules from code | Insurance Claims: Automatically calculates based on type, amount, customer level |
+| Compliance Checking | Multi-dimensional compliance checks | Financial Transactions: Anti-money laundering, anti-fraud, compliance checks |
 
-❌ **Not Applicable Scenarios (Long Transactions, Manual Intervention, Pure Data Operations)**
+❌ **Not Applicable Scenarios (Transactional, Manual Intervention)**
 
-| Scenario                                | Core Features                                                                                                                                         | Example                                                                                                                                                                                                                           |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Long Transactions/Manual Approval Flows | The process involves steps that require long-term (hours to days) waiting for manual input or approval, and Akka's advantages are difficult to exert. | Employee Reimbursement: When an employee submits a reimbursement form, the process needs to wait for financial personnel to review and leadership to sign, which takes a long time and involves resource locking and persistence. |
-| Pure Data Storage and Query             | The main purpose of the process is simply to perform CRUD (create, read, update, delete) operations without complex business judgment logic.          | Data Archiving: Regularly migrate order records from a year ago from the online database to the historical database, with the core being data migration rather than business decision-making.                                     |
-| Large-scale Data Batch ETL              | Cleans, transforms, and loads TB-level data, with the focus on data throughput and resource management rather than process orchestration.             | Log Processing: Runs a program every night to read millions of server logs, clean the format, and then uniformly import them into the big data platform.                                                                          |
+| Scenario | Core Features | Example |
+| -------- | ------------- | ------- |
+| Manual Approval Flow | Requires long wait for manual input | Employee Reimbursement: Waiting for financial review, leadership signature |
 
 ## 📸 Screenshot Display
 
-The following are the main function screenshots of the rule engine:
-
-### Rule Engine Interface 1
+### Rule Engine Interface
 
 ![Rule Engine Interface](screenshot/规则引擎0.png)
-
-### Rule Engine Interface 2
-
 ![Rule Engine Interface 2](screenshot/规则引擎1.png)
-
-### Rule Engine Interface 3
-
 ![Rule Engine Interface 3](screenshot/规则引擎2.png)
-
-### Rule Engine Interface 4
-
 ![Rule Engine Interface 4](screenshot/规则引擎3.png)
-
-### Rule Engine Interface 5
-
 ![Rule Engine Interface 5](screenshot/规则引擎4.png)
-
-### Rule Engine Interface 6
-
 ![Rule Engine Interface 6](screenshot/规则引擎5.png)
-
-### Rule Engine Interface 7
-
 ![Rule Engine Interface 7](screenshot/规则引擎6.png)
-
-### Rule Engine Interface 8
-
 ![Rule Engine Interface 8](screenshot/规则引擎7.png)
 
 ### Condition Construction Interface
@@ -198,9 +173,9 @@ The following are the main function screenshots of the rule engine:
 
 ### Environment Requirements
 
-- JDK 8+
+- JDK 21+
 - Maven 3.6+
-- MySQL 5.7+
+- MySQL 8.0+
 
 ### Installation and Running
 
@@ -213,24 +188,42 @@ The following are the main function screenshots of the rule engine:
 
 2. **Configure the database**
 
-   - Modify the database configuration in the `service/src/main/resources/application.yml` file
+   Modify the database configuration in `service/src/main/resources/application.yml`:
+
+   ```yaml
+   spring:
+     datasource:
+       url: jdbc:mysql://127.0.0.1:3306/rule
+       username: root
+       password: 123456
+   ```
 
 3. **Build the project**
 
    ```bash
-   mvn clean install -DskipTests
+   mvn clean package -DskipTests
    ```
 
 4. **Start the service**
 
    ```bash
-   cd service
-   mvn spring-boot:run
+   java -jar service/target/service-0.0.1-SNAPSHOT.jar
    ```
 
 5. **Access the frontend page**
 
-   - The console will output the frontend access address, click to access
+   The console will output the frontend access address, click to access
+
+### Core Configuration
+
+```yaml
+rule:
+  akkaSystemName: xj-rule                    # Akka system name
+  akkaDefaultExecuteTimeoutSeconds: 600      # Default execution timeout (seconds)
+  akkaGlobalWorkerPoolInitSize: 100          # Worker pool initial size
+  akkaGlobalWorkerPoolMaxSize: 2000          # Worker pool max size
+  attachmentPath: /path/to/attachment        # Attachment storage path
+```
 
 ### Usage Examples
 
@@ -262,10 +255,10 @@ if (result.isSuccess()) {
 
 ```shell
 curl -X POST \
--H "token: YOUR_TOKEN" \
+-H "Authorization: YOUR_TOKEN" \
 -H "Content-Type: application/json" \
--d '{"appCode": "test", "key": "grsdsjs", "requestId": "1111111", "variables": {"key1": "value1", "key2": "value2"}}' \
-https://host:port/openapi/v1/ruleflow/excute
+-d '{"key": "myRuleKey", "requestId": "1111111", "variables": {"key1": "value1", "key2": "value2"}}' \
+http://host:port/openapi/v1/ruleflow/excute
 ```
 
 ## 🤝 Contribution Guide
@@ -284,10 +277,10 @@ This project uses the Apache 2.0 license, see the [LICENSE](LICENSE) file for de
 
 ## 🔮 Future Planning
 
-- [ ]  Support more node types
-- [ ]  Support distributed deployment and horizontal scaling
-- [ ]  Enhance real-time monitoring and alerting functions for rule execution
-- [ ]  Provide visualized analysis tools for rule execution
+- [ ] Support more node types
+- [ ] Support distributed deployment and horizontal scaling
+- [ ] Enhance real-time monitoring and alerting functions for rule execution
+- [ ] Provide visualized analysis tools for rule execution
 
 ## 📞 Contact Information
 

@@ -26,4 +26,5 @@ public enum TriggerMode {
     KAFKA,
     RABBIT_MQ,
     MQTT,
+    DINGTALK,
 }

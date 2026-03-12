@@ -16,16 +16,7 @@
 
 package cn.xjbpm.rule.custom;
 
-import cn.xjbpm.rule.engine.runtime.model.credentials.ApikeyCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.DataBaseCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.EmailCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.FtpCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.HttpCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.KafkaCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.MQTTCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.RabbitMQCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.RedisCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.SshCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.*;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -52,4 +43,6 @@ public interface CredentialsManager {
     KafkaCredential getKafkaCredential(String credentialId);
 
     MQTTCredential getMQTTCredential(String credentialId);
+
+    DingtalkCredential getDingtalkCredential(String credentialId);
 }

@@ -17,7 +17,7 @@
 package cn.xjbpm.rule.service;
 
 import cn.xjbpm.rule.job.DynamicJob;
-import cn.xjbpm.rule.repository.entity.RuleFlowScheduledEntity;
+import cn.xjbpm.rule.repository.entity.ScheduledEntity;
 import cn.xjbpm.rule.utils.FieldUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +43,7 @@ public class SchedulerService {
      * 扩展功能：重置指定 ruleFlowKey 的所有任务（先删后加）
      * 通常业务更新时调用此方法
      */
-    public void refreshRuleFlowTasks(String ruleFlowKey, List<RuleFlowScheduledEntity> newTasks) {
+    public void refreshRuleFlowTasks(String ruleFlowKey, List<ScheduledEntity> newTasks) {
         // 1. 先清理
         clearScheduledTasks(ruleFlowKey);
         // 2. 再添加
@@ -76,11 +76,11 @@ public class SchedulerService {
      *
      * @param taskList 定时任务实体列表
      */
-    public void addScheduledTasks(List<RuleFlowScheduledEntity> taskList) {
+    public void addScheduledTasks(List<ScheduledEntity> taskList) {
         if (taskList == null || taskList.isEmpty()) {
             return;
         }
-        for (RuleFlowScheduledEntity task : taskList) {
+        for (ScheduledEntity task : taskList) {
             try {
                 // 校验 Cron 表达式是否有效
                 if (!CronExpression.isValidExpression(task.getCronExpression())) {
@@ -98,7 +98,7 @@ public class SchedulerService {
     /**
      * 辅助方法：构建并调度单个任务
      */
-    private void scheduleJob(RuleFlowScheduledEntity task) throws SchedulerException {
+    private void scheduleJob(ScheduledEntity task) throws SchedulerException {
         // 策略：
         // JobName = "JOB_" + 数据库主键ID (保证唯一)
         // GroupName = ruleFlowKey (便于按组管理)
@@ -108,10 +108,10 @@ public class SchedulerService {
         // 1. 创建 JobDetail
         JobDetail jobDetail = JobBuilder.newJob(DynamicJob.class)
                 .withIdentity(jobId, groupName)
-                .usingJobData(FieldUtil.name(RuleFlowScheduledEntity::getId), task.getId())
-                .usingJobData(FieldUtil.name(RuleFlowScheduledEntity::getRuleFlowKey), task.getRuleFlowKey())
-                .usingJobData(FieldUtil.name(RuleFlowScheduledEntity::getCronExpression), task.getCronExpression())
-                .usingJobData(FieldUtil.name(RuleFlowScheduledEntity::getRequestParams), task.getRequestParams())
+                .usingJobData(FieldUtil.name(ScheduledEntity::getId), task.getId())
+                .usingJobData(FieldUtil.name(ScheduledEntity::getRuleFlowKey), task.getRuleFlowKey())
+                .usingJobData(FieldUtil.name(ScheduledEntity::getCronExpression), task.getCronExpression())
+                .usingJobData(FieldUtil.name(ScheduledEntity::getRequestParams), task.getRequestParams())
                 .build();
 
         // 2. 创建 CronTrigger

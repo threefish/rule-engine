@@ -16,7 +16,6 @@
 
 package cn.xjbpm.rule.engine.runtime.behavior;
 
-import cn.xjbpm.rule.common.constant.RuleFlowConstant;
 import cn.xjbpm.rule.common.utils.CsvUtils;
 import cn.xjbpm.rule.engine.aviator.AviatorContext;
 import cn.xjbpm.rule.engine.aviator.AviatorExecutor;
@@ -49,10 +48,6 @@ public class CSVNodeBehavior implements NodeBehavior {
 
     @Override
     public void execution(FlowContext context) throws Exception {
-        if (RuleFlowConstant.DEMO_MODE) {
-            handleDemoMode(context);
-            return;
-        }
 
         log.info("执行CSV节点: {}", node.getName());
 
@@ -75,7 +70,7 @@ public class CSVNodeBehavior implements NodeBehavior {
         RuleProperties ruleProperties = context.getBeanContextManager().getRuleProperties();
         String ruleFlowKey = context.getProcessInstance().getRuleFlowKey();
         String filePath = evaluateString(node.getFilePath(), variable);
-        Path path = Paths.get(ruleProperties.getAttachmentPath(),filePath );
+        Path path = Paths.get(ruleProperties.getAttachmentPath(), filePath);
         return CsvExecutionContext.builder()
                 .filePath(path.toString())
                 .build();
@@ -103,16 +98,6 @@ public class CSVNodeBehavior implements NodeBehavior {
         return AviatorExecutor.evaluateString(AviatorContext.create(expression, variable));
     }
 
-    /**
-     * 处理演示模式
-     */
-    private void handleDemoMode(FlowContext context) {
-        context.addTraceLog(node.getId(), "演示模式不允许执行,已跳过");
-        Map<String, Object> data = new HashMap<>();
-        data.put("data", "演示模式不允许执行");
-        data.put("errorCode", 0);
-        context.put(node.getId(), data);
-    }
 
     /**
      * 读取CSV

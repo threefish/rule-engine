@@ -24,13 +24,13 @@ import cn.xjbpm.rule.listener.event.RemoveRuleFlowCacheEvent;
 import cn.xjbpm.rule.node.StartNodeProperties;
 import cn.xjbpm.rule.node.enums.TriggerMode;
 import cn.xjbpm.rule.node.model.TriggerRule;
-import cn.xjbpm.rule.repository.RuleFlowMQRepository;
+import cn.xjbpm.rule.repository.ExcuteLogRepository;
 import cn.xjbpm.rule.repository.RuleFlowRepository;
-import cn.xjbpm.rule.repository.RuleFlowScheduledRepository;
+import cn.xjbpm.rule.repository.ScheduledRepository;
+import cn.xjbpm.rule.repository.TriggerStartRepository;
 import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
-import cn.xjbpm.rule.repository.entity.RuleFlowMQEntity;
-import cn.xjbpm.rule.repository.entity.RuleFlowScheduledEntity;
-import cn.xjbpm.rule.repository.enums.MQType;
+import cn.xjbpm.rule.repository.entity.ScheduledEntity;
+import cn.xjbpm.rule.repository.entity.StartTriggerEntity;
 import cn.xjbpm.rule.repository.enums.RuleFlowStatus;
 import cn.xjbpm.rule.utils.FieldUtil;
 import cn.xjbpm.rule.utils.RuleParserUtil;
@@ -38,6 +38,7 @@ import cn.xjbpm.rule.utils.SpringContextUtil;
 import cn.xjbpm.rule.utils.TransactionOptDelayerHolder;
 import cn.xjbpm.rule.vo.RuleFlowVO;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -50,7 +51,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -63,10 +63,11 @@ public class RuleFlowService {
 
     private final RuleFlowRepository ruleFlowRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final RuleFlowScheduledRepository ruleFlowScheduledRepository;
-    private final RuleFlowMQRepository ruleFlowMQRepository;
+    private final ScheduledRepository scheduledRepository;
+    private final TriggerStartRepository triggerStartRepository;
     private final SchedulerService schedulerService;
-    private final MessageQueueService messageQueueService;
+    private final TriggerConsumerService triggerConsumerService;
+    private final ExcuteLogRepository ruleFlowExcuteLogRepository;
 
 
     public RuleFlowVO findByKey(String key) {
@@ -75,10 +76,10 @@ public class RuleFlowService {
     }
 
     /**
-     * 根据Key获取规则规则流实体的引用。
+     * 根据Key获取已部署状态的规则流
      *
-     * @param key
-     * @return
+     * @param key 规则流唯一标识
+     * @return 规则流视图对象
      */
     public RuleFlowVO findByKeyAndDeployed(String key) {
         RuleFlowEntity entity = ruleFlowRepository.findByKeyAndStatus(key, RuleFlowStatus.DEPLOYED).orElse(null);
@@ -139,15 +140,29 @@ public class RuleFlowService {
     public boolean disableById(Long id) {
         RuleFlowEntity baseEntity = ruleFlowRepository.findById(id).orElse(null);
         if (Objects.nonNull(baseEntity)) {
-            TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> applicationEventPublisher.publishEvent(RemoveRuleFlowCacheEvent.create(baseEntity.getKey())));
             baseEntity.setStatus(RuleFlowStatus.DISABLED);
             ruleFlowRepository.save(baseEntity);
-            ruleFlowScheduledRepository.deleteAllByRuleFlowKey(baseEntity.getKey());
+            scheduledRepository.deleteAllByRuleFlowKey(baseEntity.getKey());
+            triggerStartRepository.deleteAllByRuleFlowKey(baseEntity.getKey());
             TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> {
+                applicationEventPublisher.publishEvent(RemoveRuleFlowCacheEvent.create(baseEntity.getKey()));
                 schedulerService.clearScheduledTasks(baseEntity.getKey());
-                messageQueueService.clearMessageQueue(baseEntity.getKey());
+                triggerConsumerService.clearResource(baseEntity.getKey());
             });
             return true;
+        }
+        return false;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean deleteById(@NotNull Long id) {
+        RuleFlowEntity baseEntity = ruleFlowRepository.findById(id).orElse(null);
+        if (Objects.nonNull(baseEntity)) {
+            if (disableById(id)) {
+                ruleFlowRepository.deleteById(baseEntity.getId());
+                ruleFlowExcuteLogRepository.deleteByRuleFlowKey(baseEntity.getKey());
+                return true;
+            }
         }
         return false;
     }
@@ -175,12 +190,27 @@ public class RuleFlowService {
                     deployKafka(baseEntity.getKey(), startNodeProperties);
                 } else if (triggerMode == TriggerMode.MQTT) {
                     deployMQTT(baseEntity.getKey(), startNodeProperties);
+                } else if (triggerMode == TriggerMode.DINGTALK) {
+                    deployDingtalk(baseEntity.getKey(), startNodeProperties);
                 }
             }
             ruleFlowRepository.save(baseEntity);
             TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> applicationEventPublisher.publishEvent(RemoveRuleFlowCacheEvent.create(baseEntity.getKey())));
         }
         return true;
+    }
+
+    private void deployDingtalk(String ruleFlowKey, StartNodeProperties startNodeProperties) {
+        Map<String, String> map = new HashMap<>();
+        map.put("credentialId", startNodeProperties.getDingtalkCredentialId());
+
+        StartTriggerEntity ruleFlowMQEntity = new StartTriggerEntity();
+        ruleFlowMQEntity.setContent(JsonUtils.obj2Json(map));
+        ruleFlowMQEntity.setRuleFlowKey(ruleFlowKey);
+        ruleFlowMQEntity.setType(TriggerMode.DINGTALK);
+        triggerStartRepository.deleteAllByRuleFlowKey(ruleFlowKey);
+        triggerStartRepository.save(ruleFlowMQEntity);
+        TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> triggerConsumerService.refreshResource(ruleFlowKey, Arrays.asList(ruleFlowMQEntity)));
     }
 
 
@@ -200,13 +230,13 @@ public class RuleFlowService {
         map.put("timeout", String.valueOf(startNodeProperties.isMqttTimeout()));
         map.put("maxMessages", String.valueOf(startNodeProperties.getMqttMaxMessages()));
 
-        RuleFlowMQEntity ruleFlowMQEntity = new RuleFlowMQEntity();
+        StartTriggerEntity ruleFlowMQEntity = new StartTriggerEntity();
         ruleFlowMQEntity.setContent(JsonUtils.obj2Json(map));
         ruleFlowMQEntity.setRuleFlowKey(ruleFlowKey);
-        ruleFlowMQEntity.setType(MQType.MQTT);
-        ruleFlowMQRepository.deleteAllByRuleFlowKey(ruleFlowKey);
-        ruleFlowMQRepository.save(ruleFlowMQEntity);
-        TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> messageQueueService.refreshMessageQueue(ruleFlowKey, Arrays.asList(ruleFlowMQEntity)));
+        ruleFlowMQEntity.setType(TriggerMode.MQTT);
+        triggerStartRepository.deleteAllByRuleFlowKey(ruleFlowKey);
+        triggerStartRepository.save(ruleFlowMQEntity);
+        TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> triggerConsumerService.refreshResource(ruleFlowKey, Arrays.asList(ruleFlowMQEntity)));
     }
 
     /**
@@ -225,13 +255,13 @@ public class RuleFlowService {
         map.put("timeout", String.valueOf(startNodeProperties.getKafkaTimeout()));
         map.put("maxPollRecords", String.valueOf(startNodeProperties.getKafkaMaxPollRecords()));
 
-        RuleFlowMQEntity ruleFlowMQEntity = new RuleFlowMQEntity();
+        StartTriggerEntity ruleFlowMQEntity = new StartTriggerEntity();
         ruleFlowMQEntity.setContent(JsonUtils.obj2Json(map));
         ruleFlowMQEntity.setRuleFlowKey(ruleFlowKey);
-        ruleFlowMQEntity.setType(MQType.KAFKA);
-        ruleFlowMQRepository.deleteAllByRuleFlowKey(ruleFlowKey);
-        ruleFlowMQRepository.save(ruleFlowMQEntity);
-        TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> messageQueueService.refreshMessageQueue(ruleFlowKey, Arrays.asList(ruleFlowMQEntity)));
+        ruleFlowMQEntity.setType(TriggerMode.KAFKA);
+        triggerStartRepository.deleteAllByRuleFlowKey(ruleFlowKey);
+        triggerStartRepository.save(ruleFlowMQEntity);
+        TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> triggerConsumerService.refreshResource(ruleFlowKey, Arrays.asList(ruleFlowMQEntity)));
     }
 
 
@@ -248,28 +278,28 @@ public class RuleFlowService {
         map.put("autoAck", String.valueOf(startNodeProperties.isRabbitMQAutoAck()));
         map.put("prefetchCount", String.valueOf(startNodeProperties.getRabbitMQPrefetchCount()));
 
-        RuleFlowMQEntity ruleFlowMQEntity = new RuleFlowMQEntity();
+        StartTriggerEntity ruleFlowMQEntity = new StartTriggerEntity();
         ruleFlowMQEntity.setContent(JsonUtils.obj2Json(map));
         ruleFlowMQEntity.setRuleFlowKey(ruleFlowKey);
-        ruleFlowMQEntity.setType(MQType.RABBITMQ);
-        ruleFlowMQRepository.deleteAllByRuleFlowKey(ruleFlowKey);
-        ruleFlowMQRepository.save(ruleFlowMQEntity);
-        TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> messageQueueService.refreshMessageQueue(ruleFlowKey, Arrays.asList(ruleFlowMQEntity)));
+        ruleFlowMQEntity.setType(TriggerMode.RABBIT_MQ);
+        triggerStartRepository.deleteAllByRuleFlowKey(ruleFlowKey);
+        triggerStartRepository.save(ruleFlowMQEntity);
+        TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> triggerConsumerService.refreshResource(ruleFlowKey, Arrays.asList(ruleFlowMQEntity)));
     }
 
     private void deployScheduled(String ruleFlowKey, StartNodeProperties startNodeProperties) {
-        List<RuleFlowScheduledEntity> ruleFlowScheduledEntities = new ArrayList<>();
+        List<ScheduledEntity> ruleFlowScheduledEntities = new ArrayList<>();
         if (!CollectionUtils.isEmpty(startNodeProperties.getTriggers())) {
             List<TriggerRule> triggers = startNodeProperties.getTriggers();
             for (TriggerRule rule : triggers) {
-                RuleFlowScheduledEntity scheduledEntity = new RuleFlowScheduledEntity();
+                ScheduledEntity scheduledEntity = new ScheduledEntity();
                 scheduledEntity.setRuleFlowKey(ruleFlowKey);
                 scheduledEntity.setRequestParams(JsonUtils.obj2Json(JsonUtils.json2Obj(startNodeProperties.getRequestParams(), Map.class)));
                 scheduledEntity.setCronExpression(RuleParserUtil.generateCronExpression(rule));
                 ruleFlowScheduledEntities.add(scheduledEntity);
             }
-            ruleFlowScheduledRepository.deleteAllByRuleFlowKey(ruleFlowKey);
-            ruleFlowScheduledRepository.saveAll(ruleFlowScheduledEntities);
+            scheduledRepository.deleteAllByRuleFlowKey(ruleFlowKey);
+            scheduledRepository.saveAll(ruleFlowScheduledEntities);
         }
         TransactionOptDelayerHolder.executeAfterTransactionCommit(() -> schedulerService.refreshRuleFlowTasks(ruleFlowKey, ruleFlowScheduledEntities));
     }

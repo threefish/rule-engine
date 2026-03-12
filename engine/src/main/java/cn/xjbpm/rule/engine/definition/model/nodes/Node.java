@@ -32,7 +32,7 @@ import java.util.Map;
  * date: 2022/9/28 活动
  */
 @Data
-public abstract class Node implements java.io.Serializable, NodeParser{
+public abstract class Node implements java.io.Serializable, NodeParser {
     /**
      * key
      */

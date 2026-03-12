@@ -54,7 +54,7 @@ public class DmnDecisionTableNodeBehavior implements NodeBehavior {
             String assignmentField = outputColumn.getAssignmentField();
             String field = outputColumn.getField();
             if (StringUtils.isNotBlank(assignmentField)) {
-                VariableUtils.setPathVariableByValue(assignmentField,  result.get(field), variable);
+                VariableUtils.setPathVariableByValue(assignmentField, result.get(field), variable);
             }
         }
     }

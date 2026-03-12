@@ -43,12 +43,12 @@ public class FtpUtils {
     /**
      * 上传文件或目录
      *
-     * @param credential   FTP凭据
-     * @param localPath    本地路径（文件或目录）
-     * @param remotePath   远程路径（文件或目录完整路径）
-     * @param passiveMode  被动模式
-     * @param binaryMode   二进制模式
-     * @param directory    是否为目录操作
+     * @param credential  FTP凭据
+     * @param localPath   本地路径（文件或目录）
+     * @param remotePath  远程路径（文件或目录完整路径）
+     * @param passiveMode 被动模式
+     * @param binaryMode  二进制模式
+     * @param directory   是否为目录操作
      */
     public static String upload(FtpCredential credential, String localPath, String remotePath, boolean passiveMode, boolean binaryMode, boolean directory) throws Exception {
         return withClient(credential, passiveMode, binaryMode, client -> {
@@ -63,12 +63,12 @@ public class FtpUtils {
     /**
      * 下载文件或目录
      *
-     * @param credential   FTP凭据
-     * @param remotePath   远程路径（文件或目录完整路径）
-     * @param localPath    本地路径（文件或目录）
-     * @param passiveMode  被动模式
-     * @param binaryMode   二进制模式
-     * @param directory    是否为目录操作
+     * @param credential  FTP凭据
+     * @param remotePath  远程路径（文件或目录完整路径）
+     * @param localPath   本地路径（文件或目录）
+     * @param passiveMode 被动模式
+     * @param binaryMode  二进制模式
+     * @param directory   是否为目录操作
      */
     public static String download(FtpCredential credential, String remotePath, String localPath, boolean passiveMode, boolean binaryMode, boolean directory) throws Exception {
         return withClient(credential, passiveMode, binaryMode, client -> {

@@ -23,6 +23,7 @@ package cn.xjbpm.rule.engine.definition.parse;
 public interface NodeParser {
     /**
      * 转换
+     *
      * @throws Exception
      */
     default void parse() throws Exception {

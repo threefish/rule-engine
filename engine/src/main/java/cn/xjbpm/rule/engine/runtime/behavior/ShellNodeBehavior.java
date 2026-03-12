@@ -46,7 +46,7 @@ public class ShellNodeBehavior implements NodeBehavior {
     @Override
     public void execution(FlowContext context) {
         if (RuleFlowConstant.DEMO_MODE) {
-            context.addTraceLog(node.getId(),"演示模式不允执行,已跳过");
+            context.addTraceLog(node.getId(), "演示模式不允执行,已跳过");
             Map<String, Object> data = new HashMap<>();
             data.put("data", "演示模式不允执行");
             data.put("errorCode", 0);

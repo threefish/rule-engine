@@ -17,7 +17,10 @@ package cn.xjbpm.rule.common.utils;
 
 import cn.xjbpm.rule.engine.runtime.model.credentials.MQTTCredential;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.paho.client.mqttv3.*;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.nio.charset.StandardCharsets;
@@ -35,14 +38,14 @@ public class MQTTUtils {
      * 发布消息到MQTT
      *
      * @param credential MQTT凭据
-     * @param topic 主题
-     * @param message 消息内容
-     * @param qos 服务质量等级
-     * @param retained 是否保留消息
+     * @param topic      主题
+     * @param message    消息内容
+     * @param qos        服务质量等级
+     * @param retained   是否保留消息
      * @return 操作结果
      */
     public static MQTTResult publish(MQTTCredential credential, String topic, String message,
-                                      int qos, boolean retained) {
+                                     int qos, boolean retained) {
         String clientId = "mqtt-publisher-" + UUID.randomUUID().toString().substring(0, 8);
         MqttClient client = null;
 

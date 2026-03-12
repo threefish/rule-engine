@@ -45,7 +45,7 @@ public class AssignmentNode extends Node {
 
 
     @Data
-    public static class Assignment{
+    public static class Assignment {
         private String field;
         private String expression;
     }

@@ -21,7 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Redis 工具类
@@ -35,9 +36,9 @@ public class RedisUtils {
      * 执行Redis操作
      */
     public static RedisResult execute(RedisCredential credential, RedisNode.OperationType operationType,
-                                        String key, String field, String value, Integer ttl,
-                                        Integer start, Integer stop,
-                                        String luaScript, Integer keyCount, String keys, String args) {
+                                      String key, String field, String value, Integer ttl,
+                                      Integer start, Integer stop,
+                                      String luaScript, Integer keyCount, String keys, String args) {
         try (Jedis jedis = createJedis(credential)) {
             Object result = doExecute(jedis, operationType, key, field, value, ttl, start, stop, luaScript, keyCount, keys, args);
             return RedisResult.builder()
@@ -82,9 +83,9 @@ public class RedisUtils {
      * 执行具体操作
      */
     private static Object doExecute(Jedis jedis, RedisNode.OperationType operationType,
-                                      String key, String field, String value, Integer ttl,
-                                      Integer start, Integer stop,
-                                      String luaScript, Integer keyCount, String keys, String args) {
+                                    String key, String field, String value, Integer ttl,
+                                    Integer start, Integer stop,
+                                    String luaScript, Integer keyCount, String keys, String args) {
         switch (operationType) {
             case GET:
                 return jedis.get(key);

@@ -51,6 +51,5 @@ public class AssignmentNodeBehavior implements NodeBehavior {
         for (AssignmentNode.Assignment assignment : assignments) {
             VariableUtils.setPathVariableByExpression(assignment.getField(), assignment.getExpression(), context.getVariable());
         }
-        context.getVariable().remove(node.getId());
     }
 }

@@ -71,7 +71,7 @@ public class AIImageNodeBehavior implements NodeBehavior {
         }
         HttpCallResult httpCallResult = HttpCallUtil.execute(HttpMethod.POST, url, body, headers, null, timeout);
         if (context.isDebugModel()) {
-            context.addTraceLog(node.getId(),StringUtils.format("http call result:{}",  JsonUtils.obj2Json(httpCallResult)));
+            context.addTraceLog(node.getId(), StringUtils.format("http call result:{}", JsonUtils.obj2Json(httpCallResult)));
         }
         if (log.isInfoEnabled()) {
             log.info("AIImageNodeBehavior Http Call Result:{}", JsonUtils.obj2Json(httpCallResult));

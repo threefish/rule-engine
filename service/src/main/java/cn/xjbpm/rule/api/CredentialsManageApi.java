@@ -16,6 +16,7 @@
 
 package cn.xjbpm.rule.api;
 
+import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.common.utils.StringUtils;
 import cn.xjbpm.rule.repository.entity.CredentialsEntity;
 import cn.xjbpm.rule.repository.enums.CredentialsType;
@@ -35,8 +36,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -61,7 +62,6 @@ public class CredentialsManageApi {
     @PostMapping("/details")
     public ResultVO<CredentialsVO.Details> details(@Validated @RequestBody IDRequestVO request) {
         CredentialsVO.Details details = credentialsService.details(request.getId());
-        // 不返回原始信息
         details.setAuthData(null);
         details.setAuthDataMap(SensitiveDataUtil.maskSensitiveData(details.getAuthDataMap()));
         return ResultVO.success(details);
@@ -69,7 +69,24 @@ public class CredentialsManageApi {
 
     @PostMapping("/save")
     public ResultVO<String> save(@Validated @RequestBody CredentialsVO.Save request) {
-        return ResultVO.success(String.valueOf(credentialsService.save(request)));
+        String authDataToSave = request.getAuthData();
+
+        if (request.getId() != null) {
+            CredentialsVO.Details details = credentialsService.details(request.getId());
+            Map<String, Object> oldAuthDataMap = details.getAuthDataMap();
+            Map<String, Object> newAuthDataMap = JsonUtils.json2Obj(request.getAuthData(), Map.class);
+
+            Map<String, Object> mergedAuthDataMap = SensitiveDataUtil.mergeAuthData(oldAuthDataMap, newAuthDataMap);
+            authDataToSave = JsonUtils.obj2Json(mergedAuthDataMap);
+        }
+
+        CredentialsVO.Save saveRequest = new CredentialsVO.Save();
+        saveRequest.setId(request.getId());
+        saveRequest.setName(request.getName());
+        saveRequest.setType(request.getType());
+        saveRequest.setAuthData(authDataToSave);
+
+        return ResultVO.success(String.valueOf(credentialsService.save(saveRequest)));
     }
 
     @PostMapping("/options")
@@ -77,10 +94,10 @@ public class CredentialsManageApi {
         String type = request.getType();
         if (StringUtils.isNotBlank(type)) {
             List<CredentialsType> types = switch (type) {
-                case "http" -> Arrays.asList(CredentialsType.basic_auth, CredentialsType.bearer_auth, CredentialsType.header_auth);
-                case "ssh" -> Arrays.asList(CredentialsType.shh_password, CredentialsType.shh_private_key);
-                case "aitext" -> Arrays.asList(CredentialsType.volcengine, CredentialsType.deepseek);
-                case "aiimage" -> Arrays.asList(CredentialsType.volcengine, CredentialsType.gemini);
+                case "http" -> List.of(CredentialsType.basic_auth, CredentialsType.bearer_auth, CredentialsType.header_auth);
+                case "ssh" -> List.of(CredentialsType.shh_password, CredentialsType.shh_private_key);
+                case "aitext" -> List.of(CredentialsType.volcengine, CredentialsType.deepseek);
+                case "aiimage" -> List.of(CredentialsType.volcengine, CredentialsType.gemini);
                 case "aitts" -> List.of(CredentialsType.gemini);
                 case "db" -> List.of(CredentialsType.db);
                 case "ftp" -> List.of(CredentialsType.ftp);
@@ -89,6 +106,7 @@ public class CredentialsManageApi {
                 case "mqtt" -> List.of(CredentialsType.mqtt);
                 case "rabbitmq" -> List.of(CredentialsType.rabbitmq);
                 case "kafka" -> List.of(CredentialsType.kafka);
+                case "dingtalk" -> List.of(CredentialsType.dingtalk);
                 default -> request.getTypes();
             };
             request.setTypes(types);

@@ -23,8 +23,6 @@ import cn.xjbpm.rule.engine.aviator.annotation.FunctionNamespace;
 import org.springframework.util.Assert;
 
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 字符串工具类

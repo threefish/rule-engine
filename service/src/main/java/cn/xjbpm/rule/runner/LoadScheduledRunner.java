@@ -16,7 +16,7 @@
 
 package cn.xjbpm.rule.runner;
 
-import cn.xjbpm.rule.repository.RuleFlowScheduledRepository;
+import cn.xjbpm.rule.repository.ScheduledRepository;
 import cn.xjbpm.rule.service.SchedulerService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,13 +34,13 @@ public class LoadScheduledRunner implements CommandLineRunner {
 
     private final SchedulerService schedulerService;
 
-    private final RuleFlowScheduledRepository ruleFlowScheduledRepository;
+    private final ScheduledRepository scheduledRepository;
 
     @Override
     public void run(String... args) {
         try {
             log.info("开始加载定时任务...");
-            schedulerService.addScheduledTasks(ruleFlowScheduledRepository.findAll());
+            schedulerService.addScheduledTasks(scheduledRepository.findAll());
         } catch (Exception e) {
             log.error("加载定时任务失败", e);
         } finally {

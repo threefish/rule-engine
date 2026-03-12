@@ -1,0 +1,55 @@
+/**
+ * Copyright 2025 threefish.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package cn.xjbpm.rule.utils;
+
+import com.dingtalk.api.DefaultDingTalkClient;
+import com.dingtalk.api.DingTalkClient;
+import com.dingtalk.api.request.OapiRobotSendRequest;
+import com.dingtalk.api.response.OapiRobotSendResponse;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.Collections;
+
+/**
+ * @author 黄川 huchuc@vip.qq.com
+ * date: 2026/3/12
+ */
+@Slf4j
+public class DingtalkUtil {
+
+    /**
+     * 发送钉钉消息（通过Webhook）
+     */
+    public static void sendMessageWebhook(String sessionWebhook, String senderStaffId, String content) {
+        try {
+            DingTalkClient client = new DefaultDingTalkClient(sessionWebhook);
+            OapiRobotSendRequest request = new OapiRobotSendRequest();
+            request.setMsgtype("text");
+            OapiRobotSendRequest.Text text = new OapiRobotSendRequest.Text();
+            text.setContent(content);
+            request.setText(text);
+            OapiRobotSendRequest.At at = new OapiRobotSendRequest.At();
+            at.setAtUserIds(Collections.singletonList(senderStaffId));
+            at.setIsAtAll(false);
+            request.setAt(at);
+            OapiRobotSendResponse response = client.execute(request);
+            log.info("钉钉消息发送结果: {}", response.getBody());
+        } catch (Exception e) {
+            log.error("钉钉消息发送失败: {}", e.getMessage(), e);
+        }
+    }
+
+}

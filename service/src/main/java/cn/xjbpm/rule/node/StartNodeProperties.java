@@ -97,6 +97,7 @@ public class StartNodeProperties {
      */
     private String mqttCredentialId;
 
+
     /**
      * Topic--TriggerMode.MQTT
      */
@@ -126,5 +127,9 @@ public class StartNodeProperties {
      */
     private int mqttMaxMessages;
 
+    /**
+     * 链接凭据--TriggerMode.DINGTALK
+     */
+    private String dingtalkCredentialId;
 
 }

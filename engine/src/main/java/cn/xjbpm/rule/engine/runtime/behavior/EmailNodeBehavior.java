@@ -27,8 +27,6 @@ import cn.xjbpm.rule.properties.RuleProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,7 +58,7 @@ public class EmailNodeBehavior implements NodeBehavior {
 
         log.info("执行邮件节点: {}", node.getName());
 
-        EmailExecutionContext execContext = resolveExpressions(context,baseAttachmentPath);
+        EmailExecutionContext execContext = resolveExpressions(context, baseAttachmentPath);
 
         String result = sendEmail(emailCredential, execContext);
 
@@ -75,7 +73,7 @@ public class EmailNodeBehavior implements NodeBehavior {
     /**
      * 一次性解析所有表达式，避免重复执行
      */
-    private EmailExecutionContext resolveExpressions(FlowContext context,String baseAttachmentPath) {
+    private EmailExecutionContext resolveExpressions(FlowContext context, String baseAttachmentPath) {
         Map<String, Object> variable = context.getVariable();
         return EmailExecutionContext.builder()
                 .to(evaluateString(node.getTo(), variable))

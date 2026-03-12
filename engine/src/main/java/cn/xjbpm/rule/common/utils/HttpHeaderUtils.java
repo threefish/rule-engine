@@ -32,7 +32,7 @@ public final class HttpHeaderUtils {
 
     /**
      * 将 HttpHeaders 转换为 Map（Key 为 CamelCase，兼容多值 Header）
-     *
+     * <p>
      * 规则：
      * - 单值 Header -> String
      * - 多值 Header -> List<String>

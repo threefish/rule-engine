@@ -81,7 +81,7 @@ public class AITTSNodeBehavior implements NodeBehavior {
         }
         HttpCallResult httpCallResult = HttpCallUtil.execute(HttpMethod.POST, url, body, headers, null, timeout);
         if (context.isDebugModel()) {
-            context.addTraceLog(node.getId(),"http call result:{}",  new Object[]{JsonUtils.obj2Json(httpCallResult)});
+            context.addTraceLog(node.getId(), "http call result:{}", new Object[]{JsonUtils.obj2Json(httpCallResult)});
         }
         Map<String, Object> resultMap = httpCallResult.toMap();
         DocumentContext parse = JsonPathUtil.parse(httpCallResult.getBody());

@@ -22,7 +22,7 @@ import cn.xjbpm.rule.dto.ExcuteRuleFlow;
 import cn.xjbpm.rule.engine.aviator.AviatorContext;
 import cn.xjbpm.rule.engine.aviator.AviatorExecutor;
 import cn.xjbpm.rule.engine.runtime.RuleFlowExcuteService;
-import cn.xjbpm.rule.repository.entity.RuleFlowScheduledEntity;
+import cn.xjbpm.rule.repository.entity.ScheduledEntity;
 import cn.xjbpm.rule.utils.FieldUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,10 +49,10 @@ public class DynamicJob implements Job {
     @Override
     public void execute(JobExecutionContext context) {
         JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
-        Long id = jobDataMap.getLong(FieldUtil.name(RuleFlowScheduledEntity::getId));
-        String ruleFlowKey = jobDataMap.getString(FieldUtil.name(RuleFlowScheduledEntity::getRuleFlowKey));
-        String cronExpression = jobDataMap.getString(FieldUtil.name(RuleFlowScheduledEntity::getCronExpression));
-        String requestParams = jobDataMap.getString(FieldUtil.name(RuleFlowScheduledEntity::getRequestParams));
+        Long id = jobDataMap.getLong(FieldUtil.name(ScheduledEntity::getId));
+        String ruleFlowKey = jobDataMap.getString(FieldUtil.name(ScheduledEntity::getRuleFlowKey));
+        String cronExpression = jobDataMap.getString(FieldUtil.name(ScheduledEntity::getCronExpression));
+        String requestParams = jobDataMap.getString(FieldUtil.name(ScheduledEntity::getRequestParams));
         log.info("任务ID:{} 调度:{} 表达式:{}", id, ruleFlowKey, cronExpression);
         String realRequestParams = AviatorExecutor.evaluateString(AviatorContext.create(requestParams, null));
         ExcuteRuleFlow excuteRuleFlow = new ExcuteRuleFlow();

@@ -51,3 +51,6 @@ rule:
   akkaGlobalWorkerPoolMaxSize: 2000
   akkaDefaultExecuteTimeoutSeconds: 600
   attachmentPath: F://xj-rule/attachment
+  encryption:
+    enabled: true
+    secretKey: "xj-rule-encryption-secret-key-32byte"

@@ -53,4 +53,7 @@ public interface ExcuteLogRepository extends JpaRepository<ExcuteLogEntity, Long
     Optional<ExcuteLogEntity> findByRequestId(@Param("requestId") String requestId);
 
 
+    Integer deleteByRuleFlowKey(String ruleFlowKey);
+
+
 }

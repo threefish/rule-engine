@@ -16,19 +16,20 @@
 
 package cn.xjbpm.rule.engine;
 
-import akka.actor.ActorSystem;
-import cn.hutool.core.io.IoUtil;
-import cn.xjbpm.rule.common.constant.RuleFlowConstant;
 import cn.xjbpm.rule.common.utils.JsonUtils;
-import cn.xjbpm.rule.common.utils.VariableTranslateUtils;
-import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
-import cn.xjbpm.rule.engine.definition.parse.RuleFlowModelParse;
-import cn.xjbpm.rule.engine.runtime.actor.AkkaRuleFlowScheduler;
-import cn.xjbpm.rule.engine.runtime.model.FlowContext;
+import com.dingtalk.api.DefaultDingTalkClient;
+import com.dingtalk.api.DingTalkClient;
+import com.dingtalk.api.request.OapiRobotSendRequest;
+import com.dingtalk.api.response.OapiRobotSendResponse;
+import com.dingtalk.open.app.api.OpenDingTalkClient;
+import com.dingtalk.open.app.api.OpenDingTalkStreamClientBuilder;
+import com.dingtalk.open.app.api.callback.OpenDingTalkCallbackListener;
+import com.dingtalk.open.app.api.security.AuthClientCredential;
+import com.taobao.api.ApiException;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.InputStream;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
 
 
@@ -38,29 +39,41 @@ import java.util.Map;
  */
 @Slf4j
 public class Main {
-    private static final RuleFlowModelParse PROCESS_MODEL_JSON_CONVERTER = new RuleFlowModelParse();
 
-    public static void main(String[] args) {
-        InputStream resourceAsStream = Main.class.getResourceAsStream("/process/个人所得税计算.json");
-        String processDefinitionContent = IoUtil.readUtf8(resourceAsStream);
-        RuleFlowModel ruleFlowModel = PROCESS_MODEL_JSON_CONVERTER.convertToModel(processDefinitionContent);
-        String requestJson = IoUtil.readUtf8(ProcessRunServiceTest.class.getResourceAsStream("/process/个人所得税计算_request.json"));
-        ActorSystem actorSystem = ActorSystem.create("FlowSystem");
-        AkkaRuleFlowScheduler scheduler = new AkkaRuleFlowScheduler(actorSystem, 30, 200, 2000);
-        try {
-            for (int i = 0; i < 3; i++) {
-                Map<String, Object> runtimeVar = VariableTranslateUtils.translate(ruleFlowModel.getBusinessObjectModels(), false, JsonUtils.json2Obj(requestJson, Map.class));
-                long startTime = System.currentTimeMillis();
-                FlowContext flowContext = new FlowContext(null, runtimeVar, true, null);
-                scheduler.startFlow(ruleFlowModel, flowContext);
-                log.info("总耗时：{}ms", (System.currentTimeMillis() - startTime));
-                log.info("规则流执行完成！");
-            }
-        } catch (Exception e) {
-            log.error("规则流执行出错：{}", e.getMessage(), e);
-        } finally {
-            // 4. 关闭 Akka 系统
-            actorSystem.terminate();
+    public static void main(String[] args) throws Exception {
+
+        OpenDingTalkClient client = OpenDingTalkStreamClientBuilder
+                .custom()
+                .credential(new AuthClientCredential("ding0gmtosk95ghgqprj", "g7oQb89orRuPV5MSDvubhtazleH_nganlCqnKdanKScYG3MITN1886F-ZIQDGQB-"))
+                .registerCallbackListener("/v1.0/im/bot/messages/get", new RobotMsgCallbackConsumer())
+                .build();
+        client.start();
+    }
+
+    public static class RobotMsgCallbackConsumer implements OpenDingTalkCallbackListener<Map, Map> {
+
+
+        @SneakyThrows
+        @Override
+        public Map execute(Map request) {
+            System.out.println(JsonUtils.obj2Json(request));
+            sendMessageWebhook(String.valueOf(request.get("sessionWebhook")),String.valueOf(request.get("senderStaffId")));
+            return request;
         }
+    }
+
+    public static void sendMessageWebhook(String sessionWebhook,String senderStaffId) throws ApiException {
+        DingTalkClient client = new DefaultDingTalkClient(sessionWebhook);
+        OapiRobotSendRequest request = new OapiRobotSendRequest();
+        request.setMsgtype("text");
+        OapiRobotSendRequest.Text text = new OapiRobotSendRequest.Text();
+        text.setContent("测试文本消息");
+        request.setText(text);
+        OapiRobotSendRequest.At at = new OapiRobotSendRequest.At();
+        at.setAtUserIds(Arrays.asList(senderStaffId));
+        at.setIsAtAll(false);
+        request.setAt(at);
+        OapiRobotSendResponse response = client.execute(request);
+        System.out.println(response.getBody());
     }
 }

@@ -21,7 +21,6 @@ import cn.xjbpm.rule.engine.definition.model.nodes.gateway.ExclusiveGatewayNode;
 import cn.xjbpm.rule.engine.definition.model.nodes.gateway.InclusiveGatewayNode;
 import cn.xjbpm.rule.engine.definition.model.nodes.gateway.ParallelGatewayNode;
 import cn.xjbpm.rule.engine.definition.validator.*;
-import cn.xjbpm.rule.engine.definition.validator.AssignmentNodeValidator;
 import cn.xjbpm.rule.engine.runtime.behavior.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -64,6 +63,7 @@ public enum NodeType {
     RabbitMQNode(RabbitMQNode.class, RabbitMQNodeValidator.class, RabbitMQNodeBehavior.class),
     KafkaNode(KafkaNode.class, KafkaNodeValidator.class, KafkaNodeBehavior.class),
     MQTTNode(MQTTNode.class, MQTTNodeValidator.class, MQTTNodeBehavior.class),
+    DingTalkNode(DingTalkNode.class, DingTalkNodeValidator.class, DingTalkNodeBehavior.class),
     ;
 
     Class<? extends Node> nodeClass;

@@ -49,13 +49,12 @@ public class OpenApiAuthoriztionService {
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
     /**
-     * 验证规则
+     * 验证API密钥是否有权限访问指定规则流
      *
-     * @param apiKey
-     * @param ruleFlowKey
-     * @return
+     * @param apiKey      API密钥
+     * @param ruleFlowKey 规则流唯一标识
+     * @return 是否有权限
      */
-
     public boolean validate(String apiKey, String ruleFlowKey) {
         TokenAuth tokenAuth = getTokenAuth(apiKey);
         for (String rule : tokenAuth.getRules()) {

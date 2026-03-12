@@ -25,7 +25,7 @@ import cn.xjbpm.rule.engine.runtime.model.FlowContext;
  */
 public interface NodeBehavior<T> {
 
-    String RESULT="result";
+    String RESULT = "result";
 
     /**
      * 执行方法

@@ -36,25 +36,27 @@ public class RabbitMQUtils {
     /**
      * 发布消息到RabbitMQ
      *
-     * @param credential RabbitMQ凭据
+     * @param credential   RabbitMQ凭据
      * @param exchangeName 交换机名称
      * @param exchangeType 交换机类型
-     * @param routingKey 路由键
-     * @param messageBody 消息体
+     * @param routingKey   路由键
+     * @param messageBody  消息体
      * @param deliveryMode 投递模式
-     * @param properties 消息属性JSON
+     * @param properties   消息属性JSON
      * @return 操作结果
      */
     public static RabbitMQResult publish(RabbitMQCredential credential, String exchangeName,
-                                          RabbitMQNode.ExchangeType exchangeType, String routingKey,
-                                          String messageBody, RabbitMQNode.DeliveryMode deliveryMode,
-                                          String properties) {
+                                         RabbitMQNode.ExchangeType exchangeType, String routingKey,
+                                         String messageBody, RabbitMQNode.DeliveryMode deliveryMode,
+                                         String properties) {
         ConnectionFactory factory = createConnectionFactory(credential);
 
-        try (Connection connection = factory.newConnection();
-             Channel channel = connection.createChannel()) {
+        try (
+                Connection connection = factory.newConnection();
+                Channel channel = connection.createChannel()
+        ) {
 
-            if(StringUtils.isNotBlank(exchangeName)){
+            if (StringUtils.isNotBlank(exchangeName)) {
                 declareExchange(channel, exchangeName, exchangeType);
             }
 

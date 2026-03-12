@@ -20,6 +20,8 @@ package cn.xjbpm.rule.utils;
 import java.util.*;
 
 /**
+ * 敏感数据处理工具类
+ *
  * @author 黄川 huchuc@vip.qq.com
  */
 public class SensitiveDataUtil {
@@ -27,6 +29,8 @@ public class SensitiveDataUtil {
     private static final Set<String> SENSITIVE_KEYS = new HashSet<>(Arrays.asList(
             "password", "passphrase", "privatekey", "secret", "token", "apikey", "credential", "username", "key", "value", "host"
     ));
+
+    private static final String MASK_PATTERN = "******";
 
     /**
      * 对 Map 中的敏感信息进行脱敏处理
@@ -39,7 +43,6 @@ public class SensitiveDataUtil {
             return null;
         }
 
-        // 使用 LinkedHashMap 保持原始插入顺序
         Map<String, Object> maskedMap = new LinkedHashMap<>();
 
         authDataMap.forEach((key, value) -> {
@@ -60,7 +63,6 @@ public class SensitiveDataUtil {
         return SENSITIVE_KEYS.contains(key.toLowerCase().replaceAll("[_-]", ""));
     }
 
-
     /**
      * 脱敏逻辑：根据长度动态调整保留位数
      * 策略：
@@ -76,24 +78,77 @@ public class SensitiveDataUtil {
         int len = strValue.length();
 
         if (len <= 2) {
-            return "******";
+            return MASK_PATTERN;
         }
 
         if (len <= 6) {
-            // 保留首尾各 1 位，中间 4 个星号
-            return strValue.charAt(0) + "****" + strValue.charAt(len - 1);
+            return strValue.charAt(0) + MASK_PATTERN + strValue.charAt(len - 1);
         }
 
-        // 计算保留比例：前后各保留约 25% 的长度，但最多不超过 8 位（防止暴露过多）
         int keep = Math.min(len / 4, 8);
         if (keep < 2) {
-            keep = 2; // 至少保留 2 位
+            keep = 2;
         }
 
-        String sb = strValue.substring(0, keep) + // 保留头部
-                "******" +                    // 中间固定 6 个星号，隐藏真实长度
-                strValue.substring(len - keep); // 保留尾部
+        return strValue.substring(0, keep) + MASK_PATTERN + strValue.substring(len - keep);
+    }
 
-        return sb;
+    /**
+     * 判断值是否为脱敏后的值
+     *
+     * @param value 待检测的值
+     * @return 是否为脱敏值
+     */
+    public static boolean isMaskedValue(Object value) {
+        if (value == null) {
+            return false;
+        }
+        String strValue = String.valueOf(value);
+        return strValue.contains(MASK_PATTERN);
+    }
+
+    /**
+     * 智能合并新旧数据
+     * 对于敏感字段，如果新值是脱敏值则保留旧值，否则使用新值
+     * 对于非敏感字段，直接使用新值
+     *
+     * @param oldData 旧数据（原始明文）
+     * @param newData 新数据（可能包含脱敏值）
+     * @return 合并后的数据
+     */
+    public static Map<String, Object> mergeAuthData(Map<String, Object> oldData, Map<String, Object> newData) {
+        if (oldData == null && newData == null) {
+            return new LinkedHashMap<>();
+        }
+        if (oldData == null) {
+            return new LinkedHashMap<>(newData);
+        }
+        if (newData == null) {
+            return new LinkedHashMap<>(oldData);
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+
+        Set<String> allKeys = new LinkedHashSet<>();
+        allKeys.addAll(oldData.keySet());
+        allKeys.addAll(newData.keySet());
+
+        for (String key : allKeys) {
+            Object oldValue = oldData.get(key);
+            Object newValue = newData.get(key);
+
+            if (isSensitiveKey(key)) {
+                if (newValue == null) {
+                    result.put(key, null);
+                } else if (isMaskedValue(newValue)) {
+                    result.put(key, oldValue);
+                } else {
+                    result.put(key, newValue);
+                }
+            } else {
+                result.put(key, newValue != null ? newValue : oldValue);
+            }
+        }
+        return result;
     }
 }

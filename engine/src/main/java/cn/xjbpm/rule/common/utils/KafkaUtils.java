@@ -18,13 +18,17 @@ package cn.xjbpm.rule.common.utils;
 import cn.xjbpm.rule.engine.definition.model.nodes.KafkaNode;
 import cn.xjbpm.rule.engine.runtime.model.credentials.KafkaCredential;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Kafka 工具类（消息生产者）
@@ -37,18 +41,18 @@ public class KafkaUtils {
     /**
      * 生产消息到Kafka
      *
-     * @param credential Kafka凭据
-     * @param topic 主题
-     * @param messageKey 消息键
+     * @param credential   Kafka凭据
+     * @param topic        主题
+     * @param messageKey   消息键
      * @param messageValue 消息值
-     * @param ackMode 确认模式
-     * @param partition 分区
-     * @param headers 消息头JSON
+     * @param ackMode      确认模式
+     * @param partition    分区
+     * @param headers      消息头JSON
      * @return 操作结果
      */
     public static KafkaResult produce(KafkaCredential credential, String topic, String messageKey,
-                                       String messageValue, KafkaNode.AckMode ackMode,
-                                       Integer partition, String headers) {
+                                      String messageValue, KafkaNode.AckMode ackMode,
+                                      Integer partition, String headers) {
         Properties props = createProducerProperties(credential, ackMode);
 
         try (KafkaProducer<String, String> producer = new KafkaProducer<>(props)) {
@@ -127,8 +131,8 @@ public class KafkaUtils {
      * 创建生产者记录
      */
     private static ProducerRecord<String, String> createProducerRecord(String topic, String key,
-                                                                         String value, Integer partition,
-                                                                         String headers) {
+                                                                       String value, Integer partition,
+                                                                       String headers) {
         Headers kafkaHeaders = parseHeaders(headers);
 
         if (partition != null) {

@@ -42,6 +42,7 @@ public enum CredentialsType {
     rabbitmq("RabbitMQ"),
     kafka("Kafka"),
     mqtt("MQTT"),
+    dingtalk("dingtalk"),
     ;
 
     private String name;

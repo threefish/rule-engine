@@ -68,6 +68,7 @@ public class DBUtil {
         List<NutMap> list = sql.getList(NutMap.class);
         return list == null ? Collections.emptyList() : list;
     }
+
     public static List<NutMap> queryList(Dao dao, String sqlstr, Map<String, Object> params, Pager page) {
         Sql sql = Sqls.create(sqlstr);
         sql.setCallback(Sqls.callback.maps());

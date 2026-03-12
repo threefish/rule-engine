@@ -15,13 +15,15 @@
  */
 package cn.xjbpm.rule.common.utils;
 
-import cn.xjbpm.rule.engine.definition.model.nodes.CSVNode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * CSV 工具类
@@ -34,12 +36,12 @@ public class CsvUtils {
     /**
      * 读取CSV文件
      *
-     * @param filePath     文件路径
-     * @param delimiter    分隔符
-     * @param encoding     文件编码
-     * @param hasHeader    首行为表头
-     * @param startRow     起始行（从1开始）
-     * @param maxRowCount  最大读取行数
+     * @param filePath    文件路径
+     * @param delimiter   分隔符
+     * @param encoding    文件编码
+     * @param hasHeader   首行为表头
+     * @param startRow    起始行（从1开始）
+     * @param maxRowCount 最大读取行数
      * @return 读取结果
      */
     public static CsvReadResult read(String filePath, String delimiter, String encoding,
@@ -100,12 +102,12 @@ public class CsvUtils {
     /**
      * 写入CSV文件
      *
-     * @param filePath      文件路径
-     * @param delimiter     分隔符
-     * @param encoding      文件编码
-     * @param data          数据列表
-     * @param appendMode    追加模式
-     * @param writeHeader   写入表头
+     * @param filePath        文件路径
+     * @param delimiter       分隔符
+     * @param encoding        文件编码
+     * @param data            数据列表
+     * @param appendMode      追加模式
+     * @param writeHeader     写入表头
      * @param createDirectory 自动创建目录
      * @return 写入结果
      */
@@ -131,8 +133,10 @@ public class CsvUtils {
         boolean fileExists = file.exists() && file.length() > 0;
         boolean shouldWriteHeader = writeHeader && (!appendMode || !fileExists);
 
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(file, appendMode && fileExists), charset))) {
+        try (
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream(file, appendMode && fileExists), charset))
+        ) {
 
             if (shouldWriteHeader && !orderedColumns.isEmpty()) {
                 writer.write(String.join(actualDelimiter, orderedColumns));

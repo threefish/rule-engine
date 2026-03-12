@@ -71,6 +71,11 @@ public class DefinitionManageApi {
         return ResultVO.success(ruleFlowService.disableById(request.getId()));
     }
 
+    @PostMapping("/delete")
+    public ResultVO<Boolean> delete(@Validated @RequestBody IDRequestVO request) {
+        return ResultVO.success(ruleFlowService.deleteById(request.getId()));
+    }
+
     @PostMapping("/enable")
     public ResultVO<Boolean> enable(@Validated @RequestBody IDRequestVO request) {
         return ResultVO.success(ruleFlowService.deployById(request.getId(), false));

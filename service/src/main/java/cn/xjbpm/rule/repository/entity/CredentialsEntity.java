@@ -16,6 +16,7 @@
 
 package cn.xjbpm.rule.repository.entity;
 
+import cn.xjbpm.rule.converter.EncryptedStringConverter;
 import cn.xjbpm.rule.repository.enums.CredentialsType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -60,9 +61,11 @@ public class CredentialsEntity {
 
     /**
      * 核心凭据数据
-     * 建议存储：经过 AES 加密后的明文 JSON 字符串
+     * 存储时自动加密，读取时自动解密
+     * 建议存储：JSON格式的凭据信息
      */
     @Column(name = "auth_data", nullable = false, columnDefinition = "LONGTEXT")
+    @Convert(converter = EncryptedStringConverter.class)
     private String authData;
 
     /**

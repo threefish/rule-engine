@@ -38,7 +38,9 @@ import java.util.Map;
 @SuppressWarnings("all")
 public class NOW extends AbstractBaseFunction {
 
-    /** 默认日期格式 */
+    /**
+     * 默认日期格式
+     */
     private static final String DEFAULT_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     @Override

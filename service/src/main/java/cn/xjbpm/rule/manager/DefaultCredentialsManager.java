@@ -18,16 +18,7 @@ package cn.xjbpm.rule.manager;
 import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.common.utils.StringUtils;
 import cn.xjbpm.rule.custom.CredentialsManager;
-import cn.xjbpm.rule.engine.runtime.model.credentials.ApikeyCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.DataBaseCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.EmailCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.FtpCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.HttpCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.KafkaCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.MQTTCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.RabbitMQCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.RedisCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.SshCredential;
+import cn.xjbpm.rule.engine.runtime.model.credentials.*;
 import cn.xjbpm.rule.repository.enums.CredentialsType;
 import cn.xjbpm.rule.service.CredentialsService;
 import cn.xjbpm.rule.vo.CredentialsVO;
@@ -189,5 +180,15 @@ public class DefaultCredentialsManager implements CredentialsManager {
         return mqttCredential;
     }
 
-
+    @Override
+    public DingtalkCredential getDingtalkCredential(String credentialId) {
+        DingtalkCredential dingtalkCredential = new DingtalkCredential();
+        if (StringUtils.isNotBlank(credentialId)) {
+            CredentialsVO.Details details = credentialsService.details(Long.valueOf(credentialId));
+            if (Objects.nonNull(details)) {
+                dingtalkCredential = JsonUtils.json2Obj(details.getAuthData(), DingtalkCredential.class);
+            }
+        }
+        return dingtalkCredential;
+    }
 }
