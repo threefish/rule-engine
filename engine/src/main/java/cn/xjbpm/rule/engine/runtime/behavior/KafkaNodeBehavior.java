@@ -46,7 +46,7 @@ public class KafkaNodeBehavior implements NodeBehavior {
     @Override
     public void execution(FlowContext context) throws Exception {
 
-        KafkaCredential kafkaCredential = context.getBeanContextManager()
+        KafkaCredential kafkaCredential = context.getEngineServices()
                 .getCredentialsManager()
                 .getKafkaCredential(node.getCredentialId());
 
@@ -55,7 +55,7 @@ public class KafkaNodeBehavior implements NodeBehavior {
         KafkaExecutionContext execContext = resolveExpressions(context);
         KafkaUtils.KafkaResult result = executeKafka(kafkaCredential, execContext);
         Map<String, Object> resultMap = buildResultMap(result, execContext);
-        context.put(node.getId(), resultMap);
+        context.setNodeOutput(node.getId(), resultMap);
 
         if (context.isDebugModel()) {
             context.addTraceLog(node.getId(), "Kafka消息生产操作完成: {}",

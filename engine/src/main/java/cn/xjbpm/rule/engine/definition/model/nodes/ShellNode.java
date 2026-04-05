@@ -18,12 +18,14 @@ package cn.xjbpm.rule.engine.definition.model.nodes;
 
 import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
  * date: 2022/9/28
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ShellNode extends Node {
 
 

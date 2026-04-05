@@ -18,6 +18,7 @@ package cn.xjbpm.rule.service;
 
 import cn.xjbpm.rule.repository.ExcuteLogRepository;
 import cn.xjbpm.rule.repository.entity.ExcuteLogEntity;
+import cn.xjbpm.rule.service.storage.StorageProvider;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -35,32 +37,43 @@ import java.util.Collections;
 @AllArgsConstructor
 public class ExcuteLogService {
 
-    private final ExcuteLogRepository ruleFlowExcuteLogRepository;
+    private final ExcuteLogRepository excuteLogRepository;
+
+    private final StorageProvider storageProvider;
 
     /**
      * 保存执行日志
      *
      * @param entity
      */
-    public void save(ExcuteLogEntity entity) {
-        ruleFlowExcuteLogRepository.save(entity);
+    public void save(ExcuteLogEntity entity, String content) {
+        String storePath = storageProvider.store(entity.getId().toString(), content);
+        entity.setSnapshotPath(storePath);
+        excuteLogRepository.save(entity);
     }
 
     public Page<ExcuteLogEntity> findPage(Pageable pageable, String key, String requestId) {
         if (StringUtils.hasText(requestId)) {
-            return ruleFlowExcuteLogRepository.findAllByRequestId(requestId, pageable);
+            return excuteLogRepository.findAllByRequestId(requestId, pageable);
         }
         if (StringUtils.hasText(key)) {
-            return ruleFlowExcuteLogRepository.findAllByRuleFlowKey(key, pageable);
+            return excuteLogRepository.findAllByRuleFlowKey(key, pageable);
         }
         return new PageImpl<>(Collections.emptyList());
     }
 
     public ExcuteLogEntity findById(Long id) {
-        return ruleFlowExcuteLogRepository.findById(id).orElse(null);
+        return process(excuteLogRepository.findById(id).orElse(null));
     }
 
     public ExcuteLogEntity findByRequestId(String id) {
-        return ruleFlowExcuteLogRepository.findByRequestId(id).orElse(null);
+        return process(excuteLogRepository.findByRequestId(id).orElse(null));
+    }
+
+    private ExcuteLogEntity process(ExcuteLogEntity entity) {
+        if (Objects.nonNull(entity)) {
+            entity.setContent(storageProvider.fetch(entity.getSnapshotPath()));
+        }
+        return entity;
     }
 }

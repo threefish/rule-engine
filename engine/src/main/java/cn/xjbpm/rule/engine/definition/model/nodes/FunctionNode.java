@@ -17,17 +17,24 @@
 package cn.xjbpm.rule.engine.definition.model.nodes;
 
 import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.util.stream.Stream;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
  * date: 2022/9/28
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class FunctionNode extends Node {
 
 
-    String scriptType;
+    ScriptType scriptType;
 
     String scriptContent;
 
@@ -36,4 +43,27 @@ public class FunctionNode extends Node {
     public NodeType getType() {
         return NodeType.FunctionNode;
     }
+
+
+    @AllArgsConstructor
+    public static enum ScriptType {
+        AVIATOR("aviator"),
+        GROOVY("groovy"),
+        JAVASCRIPT("javascript"),
+        QLExpress("QLExpress"),
+        ;
+
+        @JsonValue
+        String value;
+
+        @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+        public static ScriptType fromValue(String value) {
+            return Stream.of(ScriptType.values())
+                    .filter(r -> r.value.equals(value))
+                    .findFirst()
+                    .orElse(AVIATOR);
+        }
+    }
+
+
 }

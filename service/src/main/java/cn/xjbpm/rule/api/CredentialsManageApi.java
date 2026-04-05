@@ -36,8 +36,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -93,22 +95,22 @@ public class CredentialsManageApi {
     public ResultVO<List<OptionsVO>> options(@Validated @RequestBody CredentialsVO.SelectQuery request) {
         String type = request.getType();
         if (StringUtils.isNotBlank(type)) {
-            List<CredentialsType> types = switch (type) {
-                case "http" -> List.of(CredentialsType.basic_auth, CredentialsType.bearer_auth, CredentialsType.header_auth);
-                case "ssh" -> List.of(CredentialsType.shh_password, CredentialsType.shh_private_key);
-                case "aitext" -> List.of(CredentialsType.volcengine, CredentialsType.deepseek);
-                case "aiimage" -> List.of(CredentialsType.volcengine, CredentialsType.gemini);
-                case "aitts" -> List.of(CredentialsType.gemini);
-                case "db" -> List.of(CredentialsType.db);
-                case "ftp" -> List.of(CredentialsType.ftp);
-                case "email" -> List.of(CredentialsType.email);
-                case "redis" -> List.of(CredentialsType.redis);
-                case "mqtt" -> List.of(CredentialsType.mqtt);
-                case "rabbitmq" -> List.of(CredentialsType.rabbitmq);
-                case "kafka" -> List.of(CredentialsType.kafka);
-                case "dingtalk" -> List.of(CredentialsType.dingtalk);
-                default -> request.getTypes();
-            };
+            List<CredentialsType> types;
+            Optional<CredentialsType> autoMatched = Arrays.stream(CredentialsType.values())
+                    .filter(e -> e.name().equalsIgnoreCase(type))
+                    .findFirst();
+            if (autoMatched.isPresent()) {
+                types = List.of(autoMatched.get());
+            } else {
+                types = switch (type) {
+                    case "http" -> List.of(CredentialsType.basic_auth, CredentialsType.bearer_auth, CredentialsType.header_auth);
+                    case "ssh" -> List.of(CredentialsType.shh_password, CredentialsType.shh_private_key);
+                    case "aitext" -> List.of(CredentialsType.volcengine, CredentialsType.deepseek);
+                    case "aiimage" -> List.of(CredentialsType.volcengine, CredentialsType.gemini);
+                    case "aitts" -> List.of(CredentialsType.gemini);
+                    default -> request.getTypes();
+                };
+            }
             request.setTypes(types);
         }
         return ResultVO.success(credentialsService.options(request));

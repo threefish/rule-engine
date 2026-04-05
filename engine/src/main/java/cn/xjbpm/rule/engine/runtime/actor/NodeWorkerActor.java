@@ -19,7 +19,7 @@ package cn.xjbpm.rule.engine.runtime.actor;
 import akka.actor.AbstractActor;
 import akka.actor.Props;
 import cn.xjbpm.rule.common.utils.TimeFormatUtil;
-import cn.xjbpm.rule.custom.BeanContextManager;
+import cn.xjbpm.rule.custom.EngineServices;
 import cn.xjbpm.rule.custom.NodeExcutionPinnedCacheManager;
 import cn.xjbpm.rule.engine.definition.model.enums.ErrorStrategy;
 import cn.xjbpm.rule.engine.definition.model.nodes.*;
@@ -30,15 +30,14 @@ import cn.xjbpm.rule.engine.runtime.behavior.NodeBehavior;
 import cn.xjbpm.rule.engine.runtime.model.ExecutStatus;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
 import cn.xjbpm.rule.engine.runtime.model.NodeExcution;
-import cn.xjbpm.rule.event.RuleFlowDebugEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * 全局共享节点工作 Actor (无状态)
@@ -48,12 +47,18 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class NodeWorkerActor extends AbstractActor {
 
+    /**
+     * 调试事件发布回调，由 service 层注入，引擎本身不感知 Spring。
+     * 仅在 {@code flowContext.isDebugModel()} 为 true 时实际发布事件。
+     */
+    private final Consumer<FlowContext> debugPublisher;
 
-    public static Props props() {
-        return Props.create(NodeWorkerActor.class, NodeWorkerActor::new);
+    public static Props props(Consumer<FlowContext> debugPublisher) {
+        return Props.create(NodeWorkerActor.class, () -> new NodeWorkerActor(debugPublisher));
     }
 
-    public NodeWorkerActor() {
+    public NodeWorkerActor(Consumer<FlowContext> debugPublisher) {
+        this.debugPublisher = debugPublisher;
     }
 
     @Override
@@ -66,7 +71,7 @@ public class NodeWorkerActor extends AbstractActor {
 
     private void handleExecute(WorkflowProtocol.ExecuteNode msg) {
         Node node = msg.getNode();
-        FlowContext flowContext = msg.getFlowContext(); // 从消息中获取上下文
+        FlowContext flowContext = msg.getFlowContext();
 
         try {
             if (!(node instanceof SequenceConnNode) && msg.getAttempt() > 0) {
@@ -81,7 +86,6 @@ public class NodeWorkerActor extends AbstractActor {
                 long delayTime = ((DelayWaitNode) node).getDelayTime();
                 log.info("节点 [{}] 进入延迟等待: {}ms", node.getId(), delayTime);
                 flowContext.addTraceLog(node.getId(), "进入延迟等待: {}ms", delayTime);
-                // N秒后发送一条特殊的“延迟完成”消息给自己或 Master
                 getContext().getSystem().scheduler().scheduleOnce(
                         Duration.create(delayTime, TimeUnit.MILLISECONDS),
                         getSelf(),
@@ -99,29 +103,28 @@ public class NodeWorkerActor extends AbstractActor {
 
     private void performWork(WorkflowProtocol.ExecuteNode msg) throws Exception {
         Node node = msg.getNode();
-        FlowContext flowContext = msg.getFlowContext(); // 从消息中获取上下文
+        FlowContext flowContext = msg.getFlowContext();
         NodeBehavior behavior = node.getBehavior();
         long startTime = System.nanoTime();
         if (msg.getNode() instanceof DelayWaitNode) {
             startTime = msg.getStartTotalTime();
         }
         if (behavior != null) {
-            BeanContextManager beanContextManager = flowContext.getBeanContextManager();
-            NodeExcutionPinnedCacheManager nodePindCacheManager = beanContextManager.getNodePinnedCacheManager();
+            EngineServices engineServices = flowContext.getEngineServices();
+            NodeExcutionPinnedCacheManager nodePindCacheManager = engineServices.getNodePinnedCacheManager();
             String ruleFlowKey = flowContext.getProcessInstance().getRuleFlowKey();
             if (node.isPinned()) {
-                // 使用上次执行结果
                 Map result = nodePindCacheManager.getNodeLatestPinnedResult(ruleFlowKey, node.getId());
                 if (Objects.nonNull(result)) {
                     flowContext.addTraceLog(node.getId(), "使用上次执行结果");
-                    flowContext.put(node.getId(), result);
+                    flowContext.setNodeOutput(node.getId(), result);
                 } else {
                     behavior.execution(flowContext);
                 }
             } else {
                 behavior.execution(flowContext);
             }
-            Object nodeResult = flowContext.get(node.getId());
+            Object nodeResult = flowContext.getNodeOutput(node.getId());
             if (Objects.nonNull(nodeResult)) {
                 nodePindCacheManager.setNodeLatestPinnedResult(ruleFlowKey, node.getId(), nodeResult);
             }
@@ -135,7 +138,6 @@ public class NodeWorkerActor extends AbstractActor {
         long endTime = System.nanoTime();
         recordExecution(flowContext, node, startTime, endTime, ExecutStatus.SUCCESS, null);
 
-        // 通知 Master 任务完成
         getSender().tell(new WorkflowProtocol.NodeCompleted(node.getId(), node, true, msg.getScope(), startTime), getSelf());
     }
 
@@ -154,9 +156,9 @@ public class NodeWorkerActor extends AbstractActor {
         Node node = msg.getNode();
         int currentAttempt = msg.getAttempt();
         if (isExcludeRetryNode(node) || !node.isRetryOnFail()) {
-            flowContext.addTraceLog(node.getId(), "执行异常: {}", e.getMessage());
+            flowContext.addTraceLog(node.getId(), "节点执行异常: {}", e.getMessage());
             if (log.isDebugEnabled()) {
-                log.debug("[{}] 执行异常: {}", node.getId(), e.getMessage());
+                log.debug("[{}] 节点执行异常: {}", node.getId(), e.getMessage());
             }
             recordExecution(flowContext, node, msg.getStartTotalTime(), System.nanoTime(), ExecutStatus.FAILURE, e.getMessage());
         } else {
@@ -164,22 +166,20 @@ public class NodeWorkerActor extends AbstractActor {
             long delaySeconds = node.getRetryDelay();
             if (currentAttempt < maxRetries) {
                 int nextAttempt = currentAttempt + 1;
-                flowContext.addTraceLog(node.getId(), "执行异常 启用重试 准备第{}次重试 最大重试{}次 延迟{}ms",
+                flowContext.addTraceLog(node.getId(), "节点执行异常 启用重试 准备第{}次重试 最大重试{}次 延迟{}ms",
                         nextAttempt, maxRetries, delaySeconds);
                 if (log.isDebugEnabled()) {
-                    log.debug("[{}] 执行异常 启用重试 准备第{}次重试 最大重试{}次 延迟{}ms");
+                    log.debug("[{}] 节点执行异常 启用重试 准备第{}次重试 最大重试{}次 延迟{}ms");
                 }
-                // 重试时，务必将 flowContext 继续传递下去
                 getContext().system().scheduler().scheduleOnce(
                         FiniteDuration.create(delaySeconds, TimeUnit.MILLISECONDS),
-                        getContext().parent(), // 发送给 Router (实际上是 Global Router)
+                        getContext().parent(),
                         new WorkflowProtocol.ExecuteNode(node, nextAttempt, msg.getStartTotalTime(), flowContext, msg.getScope()),
                         getContext().dispatcher(),
-                        getSender() // Sender 保持为 Master (WorkflowInstanceActor)
+                        getSender()
                 );
                 return;
             }
-            // 重试耗尽
             long endTime = System.nanoTime();
             if (log.isErrorEnabled()) {
                 log.error("[{}] 重试次数耗尽 依然执行失败 异常描述: ", node.getId(), e);
@@ -218,17 +218,12 @@ public class NodeWorkerActor extends AbstractActor {
             builder.errorMessage(error);
         }
         flowContext.putNodeExcution(node.getId(), builder.build());
-        if (flowContext.isDebugModel()) {
-            ApplicationEventPublisher publishManager = flowContext.getBeanContextManager().getEventPublishManager();
-            if (Objects.nonNull(publishManager)) {
-                publishManager.publishEvent(RuleFlowDebugEvent.create(flowContext));
-            }
-        }
+        debugPublisher.accept(flowContext);
     }
 
     private static class InternalDelayFinish {
         private final WorkflowProtocol.ExecuteNode msg;
-        private final akka.actor.ActorRef master; // 需要记住 Master 是谁，否则延迟回来不知道报给谁
+        private final akka.actor.ActorRef master;
 
         public InternalDelayFinish(WorkflowProtocol.ExecuteNode msg, akka.actor.ActorRef master) {
             this.msg = msg;

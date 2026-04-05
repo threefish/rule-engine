@@ -42,7 +42,13 @@ public enum CredentialsType {
     rabbitmq("RabbitMQ"),
     kafka("Kafka"),
     mqtt("MQTT"),
-    dingtalk("dingtalk"),
+    dingtalk("钉钉"),
+    feishu("飞书"),
+    crypto("密钥"),
+    baidu_ocr("百度OCR"),
+    rocketmq("RocketMQ"),
+    wxpay("微信支付"),
+    git("Git"),
     ;
 
     private String name;

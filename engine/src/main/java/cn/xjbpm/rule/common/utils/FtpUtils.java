@@ -25,6 +25,7 @@ import org.apache.commons.net.ftp.FTPReply;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -115,7 +116,7 @@ public class FtpUtils {
      */
     private static void connect(FTPClient client, FtpCredential credential, boolean passiveMode, boolean binaryMode) throws Exception {
         client.setConnectTimeout(CONNECT_TIMEOUT);
-        client.setDataTimeout(DATA_TIMEOUT);
+        client.setDataTimeout(Duration.ofMillis(DATA_TIMEOUT));
         client.setAutodetectUTF8(true);
 
         int port = credential.getPort() > 0 ? credential.getPort() : 21;

@@ -51,7 +51,7 @@ public class RedisNodeBehavior implements NodeBehavior {
             return;
         }
 
-        RedisCredential redisCredential = context.getBeanContextManager()
+        RedisCredential redisCredential = context.getEngineServices()
                 .getCredentialsManager()
                 .getRedisCredential(node.getCredentialId());
 
@@ -60,7 +60,7 @@ public class RedisNodeBehavior implements NodeBehavior {
         RedisExecutionContext execContext = resolveExpressions(context);
         RedisUtils.RedisResult result = executeRedis(redisCredential, execContext);
         Map<String, Object> resultMap = buildResultMap(result, execContext);
-        context.put(node.getId(), resultMap);
+        context.setNodeOutput(node.getId(), resultMap);
         if (context.isDebugModel()) {
             context.addTraceLog(node.getId(), "Redis {} 操作完成: {}",
                     new Object[]{node.getOperationType().name(), result.isSuccess() ? "成功" : "失败"});
@@ -91,7 +91,7 @@ public class RedisNodeBehavior implements NodeBehavior {
         Map<String, Object> data = new HashMap<>();
         data.put("data", "演示模式不允许执行");
         data.put("errorCode", 0);
-        context.put(node.getId(), data);
+        context.setNodeOutput(node.getId(), data);
     }
 
     private RedisUtils.RedisResult executeRedis(RedisCredential credential, RedisExecutionContext execContext) {

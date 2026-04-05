@@ -49,7 +49,7 @@ public class DmnDecisionTableNodeBehavior implements NodeBehavior {
         Map<String, Object> variable = context.getVariable();
         DmnDecisionTablePolicy tablePolicy = node.getDmnPolicy();
         Map<String, Object> result = this.execute(tablePolicy, variable, context);
-        context.put(this.node.getId(), result);
+        context.setNodeOutput(this.node.getId(), result);
         for (DmnDecisionTablePolicy.Column outputColumn : tablePolicy.getOutputColumns()) {
             String assignmentField = outputColumn.getAssignmentField();
             String field = outputColumn.getField();

@@ -18,6 +18,7 @@ package cn.xjbpm.rule.engine.definition.model.nodes;
 
 import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ import java.util.List;
  * date: 2022/9/28
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class DBNode extends Node {
 
     private String credentialId;
@@ -54,6 +56,7 @@ public class DBNode extends Node {
     public static class Param {
         private String field;
         private String expression;
+        private boolean nullable;
     }
 
 }

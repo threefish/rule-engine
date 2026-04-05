@@ -21,6 +21,7 @@ import cn.xjbpm.rule.engine.definition.model.nodes.scoringcard.ScoringCalcMethod
 import cn.xjbpm.rule.engine.definition.model.nodes.scoringcard.ScoringCardRow;
 import cn.xjbpm.rule.engine.definition.model.nodes.scoringcard.ScoringCardWeight;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
@@ -29,6 +30,7 @@ import java.util.List;
  * date: 2022/9/28
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ScoringCardNode extends Node {
     /**
      * 条件列

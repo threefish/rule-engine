@@ -18,6 +18,7 @@ package cn.xjbpm.rule.engine.definition.model.nodes.gateway;
 
 import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -25,6 +26,7 @@ import lombok.Data;
  * 包容网关(聚合节点)
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class InclusiveGatewayNode extends GatewayNode {
 
 

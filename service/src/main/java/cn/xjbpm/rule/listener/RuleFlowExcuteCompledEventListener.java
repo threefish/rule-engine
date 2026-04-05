@@ -37,7 +37,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class RuleFlowExcuteCompledEventListener implements ApplicationListener<RuleFlowExcuteCompledEvent> {
 
-    private final ExcuteLogService ruleFlowExcuteLogService;
+    private final ExcuteLogService excuteLogService;
 
     /**
      * 监听规则流执行完成事件
@@ -63,8 +63,7 @@ public class RuleFlowExcuteCompledEventListener implements ApplicationListener<R
             logEntity.setTimeConsuming(data.getTimeConsuming());
             logEntity.setErrorMessage(data.getErrorMessage());
             logEntity.setStatus(data.getStatus());
-            logEntity.setContent(JsonUtils.obj2Json(data));
-            ruleFlowExcuteLogService.save(logEntity);
+            excuteLogService.save(logEntity,JsonUtils.obj2Json(data));
         } catch (Exception e) {
             log.error("存储执行日志出错：{}", e.getMessage(), e);
         }

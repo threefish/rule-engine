@@ -19,6 +19,7 @@ package cn.xjbpm.rule.engine.definition.model.nodes;
 import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
 import cn.xjbpm.rule.engine.rule.RuleSet;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ import java.util.List;
  * date: 2022/9/28
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class RuleSetNode extends Node {
 
     private List<RuleSet> ruleSet;

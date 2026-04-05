@@ -16,7 +16,11 @@
 
 package cn.xjbpm.rule.api;
 
+import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.custom.RuleFlowModelCacheManager;
+import cn.xjbpm.rule.engine.definition.model.RuleFlowModel;
+import cn.xjbpm.rule.engine.definition.model.nodes.StartNode;
+import cn.xjbpm.rule.node.StartNodeProperties;
 import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
 import cn.xjbpm.rule.service.RuleFlowService;
 import cn.xjbpm.rule.vo.RuleFlowVO;
@@ -35,6 +39,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -57,7 +63,15 @@ public class DefinitionManageApi {
 
     @PostMapping("/save")
     public ResultVO<Boolean> save(@Validated @RequestBody RuleFlowVO request) {
-        ruleFlowModelCacheManager.convertToModel(request.getDraftContent());
+        RuleFlowModel ruleFlowModel = ruleFlowModelCacheManager.convertToModel(request.getDraftContent());
+        StartNode startNode = ruleFlowModel.getStartNode();
+        if (Objects.nonNull(startNode)) {
+            Map<String, Object> properties = startNode.getProperties();
+            if (Objects.nonNull(properties)) {
+                StartNodeProperties startNodeProperties = JsonUtils.json2Obj(JsonUtils.obj2Json(properties), StartNodeProperties.class);
+                request.setTriggerMode(startNodeProperties.getTriggerMode());
+            }
+        }
         return ResultVO.success(ruleFlowService.update(request));
     }
 

@@ -59,14 +59,14 @@ public class SshNodeBehavior implements NodeBehavior {
             return;
         }
 
-        RuleProperties ruleProperties = context.getBeanContextManager().getRuleProperties();
-        CredentialsManager credentialsManager = context.getBeanContextManager().getCredentialsManager();
+        RuleProperties ruleProperties = context.getEngineServices().getRuleProperties();
+        CredentialsManager credentialsManager = context.getEngineServices().getCredentialsManager();
         SshCredential sshCredential = credentialsManager.getSshCredential(node.getCredentialId());
 
         log.info("执行SSH节点: {}", node.getName());
 
         Map<String, Object> resultMap = executeSshOperation(context, ruleProperties, sshCredential);
-        context.put(node.getId(), resultMap);
+        context.setNodeOutput(node.getId(), resultMap);
 
         if (context.isDebugModel()) {
             context.addTraceLog(node.getId(), "SSH result: {}", new Object[]{resultMap.get(RESULT)});
@@ -81,7 +81,7 @@ public class SshNodeBehavior implements NodeBehavior {
         Map<String, Object> data = new HashMap<>();
         data.put("data", "演示模式不允许执行");
         data.put("errorCode", 0);
-        context.put(node.getId(), data);
+        context.setNodeOutput(node.getId(), data);
     }
 
     /**
@@ -121,7 +121,7 @@ public class SshNodeBehavior implements NodeBehavior {
      */
     private String executeCommand(FlowContext context) throws Exception {
         String commandStr = AviatorExecutor.evaluateString(AviatorContext.create(node.getCommandStr(), context.getVariable()));
-        SshCredential sshCredential = context.getBeanContextManager().getCredentialsManager().getSshCredential(node.getCredentialId());
+        SshCredential sshCredential = context.getEngineServices().getCredentialsManager().getSshCredential(node.getCredentialId());
         return SSHUtils.execute(sshCredential, commandStr);
     }
 
@@ -138,7 +138,7 @@ public class SshNodeBehavior implements NodeBehavior {
         String ruleFlowKey = context.getProcessInstance().getRuleFlowKey();
         Path filePath = Paths.get(ruleProperties.getAttachmentPath(), ruleFlowKey, node.getId(), localSaveFilePath);
 
-        SshCredential sshCredential = context.getBeanContextManager().getCredentialsManager().getSshCredential(node.getCredentialId());
+        SshCredential sshCredential = context.getEngineServices().getCredentialsManager().getSshCredential(node.getCredentialId());
         return SSHUtils.download(sshCredential, remoteDirectoryFilePath, filePath.toFile().getAbsolutePath());
     }
 
@@ -153,7 +153,7 @@ public class SshNodeBehavior implements NodeBehavior {
         Assert.hasText(localSaveFilePath, "本地存储文件路径不能为空");
         Assert.hasText(remoteDirectoryFilePath, "远程文件路径不能为空");
 
-        SshCredential sshCredential = context.getBeanContextManager().getCredentialsManager().getSshCredential(node.getCredentialId());
+        SshCredential sshCredential = context.getEngineServices().getCredentialsManager().getSshCredential(node.getCredentialId());
         return SSHUtils.upload(sshCredential, localSaveFilePath, remoteDirectoryFilePath, fileName);
     }
 

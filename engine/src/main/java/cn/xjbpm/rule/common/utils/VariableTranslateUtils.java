@@ -33,7 +33,19 @@ public class VariableTranslateUtils {
         if (variable == null) {
             return new HashMap<>();
         }
-        return translateInternal(businessObjectModels, response, variable);
+        Map<String, Object> result = translateInternal(businessObjectModels, response, variable);
+        if (response == false) {
+            // 安全处理
+            variable.entrySet().removeIf(entry -> entry.getKey().startsWith("N"));
+            // 动态端点请求进来的数据需要保留数据
+            result.put("headers", variable.get("headers"));
+            result.put("jsonBody", variable.get("jsonBody"));
+            result.put("body", variable.get("body"));
+            result.put("parameters", variable.get("parameters"));
+            // 移除 null 值
+            result.entrySet().removeIf(entry -> Objects.isNull(entry.getValue()));
+        }
+        return result;
     }
 
     private static Map<String, Object> translateInternal(List<ObjectModel> models, boolean response, Map<String, Object> sourceMap) {

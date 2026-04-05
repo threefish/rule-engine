@@ -52,7 +52,7 @@ public class ExcelReadNodeBehavior implements NodeBehavior {
         ExcelUtils.ExcelReadResult result = readExcel(execContext);
 
         Map<String, Object> resultMap = buildResultMap(result, execContext);
-        context.put(node.getId(), resultMap);
+        context.setNodeOutput(node.getId(), resultMap);
 
         if (context.isDebugModel()) {
             context.addTraceLog(node.getId(), "Excel读取完成: {} 行数据", new Object[]{result.getRowCount()});

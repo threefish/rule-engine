@@ -47,7 +47,7 @@ public class MQTTNodeBehavior implements NodeBehavior {
     public void execution(FlowContext context) throws Exception {
 
 
-        MQTTCredential mqttCredential = context.getBeanContextManager()
+        MQTTCredential mqttCredential = context.getEngineServices()
                 .getCredentialsManager()
                 .getMQTTCredential(node.getCredentialId());
 
@@ -56,7 +56,7 @@ public class MQTTNodeBehavior implements NodeBehavior {
         MQTTExecutionContext execContext = resolveExpressions(context);
         MQTTUtils.MQTTResult result = executeMQTT(mqttCredential, execContext);
         Map<String, Object> resultMap = buildResultMap(result, execContext);
-        context.put(node.getId(), resultMap);
+        context.setNodeOutput(node.getId(), resultMap);
 
         if (context.isDebugModel()) {
             context.addTraceLog(node.getId(), "MQTT消息发布操作完成: {}",

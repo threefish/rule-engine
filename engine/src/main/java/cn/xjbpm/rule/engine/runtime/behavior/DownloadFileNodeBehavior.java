@@ -58,7 +58,7 @@ public class DownloadFileNodeBehavior implements NodeBehavior {
     @Override
     public void execution(FlowContext context) throws Exception {
         log.info("Starting Excute HttpNode");
-        RuleProperties ruleProperties = context.getBeanContextManager().getRuleProperties();
+        RuleProperties ruleProperties = context.getEngineServices().getRuleProperties();
         Map<String, String> headers = new HashMap<>();
         if (CollUtil.isNotEmpty(node.getHeaders())) {
             for (DownloadFileNode.Header header : node.getHeaders()) {
@@ -75,7 +75,7 @@ public class DownloadFileNodeBehavior implements NodeBehavior {
                 }
             }
         }
-        CredentialsManager credentialsManager = context.getBeanContextManager().getCredentialsManager();
+        CredentialsManager credentialsManager = context.getEngineServices().getCredentialsManager();
         HttpCredential httpCredentials = credentialsManager.getHttpCredential(node.getCredentialId());
         if (httpCredentials.getQuerys() != null) {
             queryParams.putAll(httpCredentials.getQuerys());
@@ -109,7 +109,7 @@ public class DownloadFileNodeBehavior implements NodeBehavior {
         }
         Map<String, Object> response = httpCallResult.toMap();
         response.put("file", FileModel.of(file));
-        context.put(node.getId(), response);
+        context.setNodeOutput(node.getId(), response);
         if (httpCallResult.is2xx() == false) {
             throw new RuntimeException(String.format("调用失败！状态码:%s 请求地址:%s", httpCallResult.getStatusCode(), url));
         }

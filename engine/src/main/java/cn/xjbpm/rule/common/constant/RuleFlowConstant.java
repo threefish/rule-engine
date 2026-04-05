@@ -21,7 +21,6 @@ package cn.xjbpm.rule.common.constant;
  * date: 2023/7/22
  */
 public class RuleFlowConstant {
-    public static final String BUSINESS_OBJECTS = "业务对象";
 
     /**
      * 演示模式

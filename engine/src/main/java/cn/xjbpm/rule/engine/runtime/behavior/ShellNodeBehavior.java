@@ -50,7 +50,7 @@ public class ShellNodeBehavior implements NodeBehavior {
             Map<String, Object> data = new HashMap<>();
             data.put("data", "演示模式不允执行");
             data.put("errorCode", 0);
-            context.put(node.getId(), data);
+            context.setNodeOutput(node.getId(), data);
             return;
         }
         try {
@@ -91,7 +91,7 @@ public class ShellNodeBehavior implements NodeBehavior {
                 Map<String, Object> data = new HashMap<>();
                 data.put("data", output);
                 data.put("errorCode", Integer.toString(errorCode));
-                context.put(node.getId(), data);
+                context.setNodeOutput(node.getId(), data);
                 if (log.isInfoEnabled()) {
                     log.info("命令执行结束，退出码: {}", errorCode);
                 }

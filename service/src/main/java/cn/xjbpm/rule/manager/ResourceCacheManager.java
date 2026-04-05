@@ -16,99 +16,37 @@
 
 package cn.xjbpm.rule.manager;
 
+import cn.xjbpm.rule.dispatcher.TriggerSubscriptionManager;
+import cn.xjbpm.rule.utils.ReflectUtil;
 import com.dingtalk.open.app.api.OpenDingTalkClient;
+import com.lark.oapi.okhttp.OkHttpClient;
+import com.lark.oapi.ws.Client;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.DeliverCallback;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 /**
  * 负责管理所有缓存资源的连接、断开和刷新
+ * 集成 SharedConnectionManager 实现连接共享和引用计数机制
  *
  * @author 黄川 huchuc@vip.qq.com
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class ResourceCacheManager {
 
-    /**
-     * 资源连接缓存
-     * key: ruleFlowKey
-     * value: ResourceConnectionWrapper
-     */
-    private final Map<String, ResourceConnectionWrapper> resourceConnectionWrapperMap = new ConcurrentHashMap<>();
-
-    /**
-     * 添加RabbitMQ连接到缓存
-     *
-     * @param ruleFlowKey 规则流唯一标识
-     * @param connection  RabbitMQ连接
-     * @param channel     RabbitMQ通道
-     * @param consumerTag 消费者标签
-     */
-    public void addRabbitMQConnection(String ruleFlowKey, Connection connection, Channel channel, String consumerTag) {
-        ResourceConnectionWrapper wrapper = new ResourceConnectionWrapper();
-        wrapper.setType(ResourceType.RABBITMQ);
-        wrapper.setRabbitMQConnection(connection);
-        wrapper.setRabbitMQChannel(channel);
-        wrapper.setRabbitMQConsumerTag(consumerTag);
-        wrapper.setCreateTime(System.currentTimeMillis());
-        resourceConnectionWrapperMap.put(ruleFlowKey, wrapper);
-        log.info("RabbitMQ连接已缓存: ruleFlowKey={}", ruleFlowKey);
-    }
-
-    /**
-     * 添加Kafka消费者到缓存
-     *
-     * @param ruleFlowKey 规则流唯一标识
-     * @param consumer    Kafka消费者
-     */
-    public void addKafkaConnection(String ruleFlowKey, KafkaConsumer<String, String> consumer) {
-        ResourceConnectionWrapper wrapper = new ResourceConnectionWrapper();
-        wrapper.setType(ResourceType.KAFKA);
-        wrapper.setKafkaConsumer(consumer);
-        wrapper.setCreateTime(System.currentTimeMillis());
-        resourceConnectionWrapperMap.put(ruleFlowKey, wrapper);
-        log.info("Kafka连接已缓存: ruleFlowKey={}", ruleFlowKey);
-    }
-
-    /**
-     * 添加MQTT客户端到缓存
-     *
-     * @param ruleFlowKey 规则流唯一标识
-     * @param mqttClient  MQTT客户端
-     */
-    public void addMQTTConnection(String ruleFlowKey, MqttClient mqttClient) {
-        ResourceConnectionWrapper wrapper = new ResourceConnectionWrapper();
-        wrapper.setType(ResourceType.MQTT);
-        wrapper.setMqttClient(mqttClient);
-        wrapper.setCreateTime(System.currentTimeMillis());
-        resourceConnectionWrapperMap.put(ruleFlowKey, wrapper);
-        log.info("MQTT连接已缓存: ruleFlowKey={}", ruleFlowKey);
-    }
-
-    /**
-     * 添加钉钉客户端到缓存
-     *
-     * @param ruleFlowKey    规则流唯一标识
-     * @param dingtalkClient 钉钉客户端
-     */
-    public void addDingtalkConnection(String ruleFlowKey, OpenDingTalkClient dingtalkClient) {
-        ResourceConnectionWrapper wrapper = new ResourceConnectionWrapper();
-        wrapper.setType(ResourceType.DINGTALK);
-        wrapper.setDingtalkClient(dingtalkClient);
-        wrapper.setCreateTime(System.currentTimeMillis());
-        resourceConnectionWrapperMap.put(ruleFlowKey, wrapper);
-        log.info("钉钉连接已缓存: ruleFlowKey={}", ruleFlowKey);
-    }
-
+    private final SharedConnectionManager sharedConnectionManager;
+    private final TriggerSubscriptionManager triggerSubscriptionManager;
 
     /**
      * 检查连接是否存在
@@ -117,45 +55,73 @@ public class ResourceCacheManager {
      * @return 是否存在
      */
     public boolean hasConnection(String ruleFlowKey) {
-        return resourceConnectionWrapperMap.containsKey(ruleFlowKey);
+        return sharedConnectionManager.getConnectionKeyByFlow(ruleFlowKey) != null;
     }
 
     /**
      * 断开并移除指定规则流的资源连接
+     * 使用引用计数机制，只有当最后一个订阅者离开时才真正关闭连接
      *
      * @param ruleFlowKey 规则流唯一标识
      */
     public void disconnect(String ruleFlowKey) {
-        ResourceConnectionWrapper wrapper = resourceConnectionWrapperMap.remove(ruleFlowKey);
-        if (wrapper == null) {
+        String connectionKey = sharedConnectionManager.getConnectionKeyByFlow(ruleFlowKey);
+        if (connectionKey == null) {
             log.debug("未找到需要断开的资源连接: ruleFlowKey={}", ruleFlowKey);
             return;
         }
 
-        try {
-            switch (wrapper.getType()) {
-                case RABBITMQ:
-                    disconnectRabbitMQ(wrapper, ruleFlowKey);
-                    break;
-                case KAFKA:
-                    disconnectKafka(wrapper, ruleFlowKey);
-                    break;
-                case MQTT:
-                    disconnectMQTT(wrapper, ruleFlowKey);
-                    break;
-                case DINGTALK:
-                    disconnectDingtalk(wrapper, ruleFlowKey);
-                    break;
+        triggerSubscriptionManager.removeSubscription(connectionKey, ruleFlowKey);
+
+        boolean needCloseConnection = sharedConnectionManager.unsubscribe(ruleFlowKey);
+
+        if (needCloseConnection) {
+            SharedConnectionManager.SharedConnection sharedConnection = sharedConnectionManager.getSharedConnection(connectionKey);
+            if (sharedConnection != null) {
+                closeConnection(sharedConnection);
+                sharedConnectionManager.removeConnection(connectionKey);
             }
-        } catch (Exception e) {
-            log.error("断开资源连接异常: ruleFlowKey={}, error={}", ruleFlowKey, e.getMessage(), e);
         }
     }
 
     /**
-     * 断开RabbitMQ连接
+     * 根据连接类型关闭连接
+     *
+     * @param wrapper 共享连接对象
      */
-    private void disconnectRabbitMQ(ResourceConnectionWrapper wrapper, String ruleFlowKey) throws IOException {
+    private void closeConnection(SharedConnectionManager.SharedConnection wrapper) {
+        try {
+            switch (wrapper.getType()) {
+                case RABBITMQ:
+                    closeRabbitMQConnection(wrapper);
+                    break;
+                case KAFKA:
+                    closeKafkaConnection(wrapper);
+                    break;
+                case MQTT:
+                    closeMQTTConnection(wrapper);
+                    break;
+                case DINGTALK:
+                    closeDingtalkConnection(wrapper);
+                    break;
+                case FEISHU:
+                    closeFeishuConnection(wrapper);
+                    break;
+                case ROCKETMQ:
+                    closeRocketMQConnection(wrapper);
+                    break;
+            }
+        } catch (Exception e) {
+            log.error("关闭连接异常: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 关闭RabbitMQ连接
+     *
+     * @param wrapper 共享连接对象
+     */
+    private void closeRabbitMQConnection(SharedConnectionManager.SharedConnection wrapper) throws IOException {
         Channel channel = wrapper.getRabbitMQChannel();
         Connection connection = wrapper.getRabbitMQConnection();
 
@@ -164,7 +130,7 @@ public class ResourceCacheManager {
                 String consumerTag = wrapper.getRabbitMQConsumerTag();
                 if (consumerTag != null) {
                     channel.basicCancel(consumerTag);
-                    log.info("RabbitMQ消费者已取消: ruleFlowKey={}, consumerTag={}", ruleFlowKey, consumerTag);
+                    log.info("RabbitMQ消费者已取消: connectionKey={}, consumerTag={}", wrapper.getConnectionKey(), consumerTag);
                 }
                 channel.close();
             } catch (Exception e) {
@@ -175,7 +141,7 @@ public class ResourceCacheManager {
         if (connection != null && connection.isOpen()) {
             try {
                 connection.close();
-                log.info("RabbitMQ连接已断开: ruleFlowKey={}", ruleFlowKey);
+                log.info("RabbitMQ连接已断开: connectionKey={}", wrapper.getConnectionKey());
             } catch (Exception e) {
                 log.warn("关闭RabbitMQ连接异常: {}", e.getMessage());
             }
@@ -183,15 +149,17 @@ public class ResourceCacheManager {
     }
 
     /**
-     * 断开Kafka连接
+     * 关闭Kafka连接
+     *
+     * @param wrapper 共享连接对象
      */
-    private void disconnectKafka(ResourceConnectionWrapper wrapper, String ruleFlowKey) {
+    private void closeKafkaConnection(SharedConnectionManager.SharedConnection wrapper) {
         KafkaConsumer<String, String> consumer = wrapper.getKafkaConsumer();
         if (consumer != null) {
             try {
                 consumer.wakeup();
                 consumer.close();
-                log.info("Kafka消费者已关闭: ruleFlowKey={}", ruleFlowKey);
+                log.info("Kafka消费者已关闭: connectionKey={}", wrapper.getConnectionKey());
             } catch (Exception e) {
                 log.warn("关闭Kafka消费者异常: {}", e.getMessage());
             }
@@ -199,9 +167,11 @@ public class ResourceCacheManager {
     }
 
     /**
-     * 断开MQTT连接
+     * 关闭MQTT连接
+     *
+     * @param wrapper 共享连接对象
      */
-    private void disconnectMQTT(ResourceConnectionWrapper wrapper, String ruleFlowKey) {
+    private void closeMQTTConnection(SharedConnectionManager.SharedConnection wrapper) {
         MqttClient mqttClient = wrapper.getMqttClient();
         if (mqttClient != null) {
             try {
@@ -209,7 +179,7 @@ public class ResourceCacheManager {
                     mqttClient.disconnect();
                 }
                 mqttClient.close();
-                log.info("MQTT客户端已断开: ruleFlowKey={}", ruleFlowKey);
+                log.info("MQTT客户端已断开: connectionKey={}", wrapper.getConnectionKey());
             } catch (Exception e) {
                 log.warn("关闭MQTT客户端异常: {}", e.getMessage());
             }
@@ -217,18 +187,65 @@ public class ResourceCacheManager {
     }
 
     /**
-     * 断开钉钉连接
+     * 关闭钉钉连接
+     *
+     * @param wrapper 共享连接对象
      */
-    private void disconnectDingtalk(ResourceConnectionWrapper wrapper, String ruleFlowKey) {
+    private void closeDingtalkConnection(SharedConnectionManager.SharedConnection wrapper) {
         OpenDingTalkClient dingtalkClient = wrapper.getDingtalkClient();
         if (dingtalkClient != null) {
             try {
-                // 关闭钉钉客户端
                 dingtalkClient.stop();
-                log.info("钉钉客户端已停止: ruleFlowKey={}", ruleFlowKey);
-                log.info("钉钉客户端已断开: ruleFlowKey={}", ruleFlowKey);
+                log.info("钉钉客户端已停止: connectionKey={}", wrapper.getConnectionKey());
             } catch (Exception e) {
                 log.warn("关闭钉钉客户端异常: {}", e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * 关闭飞书连接
+     *
+     * @param wrapper 共享连接对象
+     */
+    private void closeFeishuConnection(SharedConnectionManager.SharedConnection wrapper) {
+        Client feishuClient = wrapper.getFeishuClient();
+        if (feishuClient != null) {
+            try {
+                log.info("开始停止飞书客户端实例: connectionKey={}", wrapper.getConnectionKey());
+                ReflectUtil.reflectSetField(feishuClient, "autoReconnect", false);
+                ExecutorService executor = (ExecutorService) ReflectUtil.reflectGetField(feishuClient, "executor");
+                if (executor != null) {
+                    executor.shutdownNow();
+                    log.debug("已强制关闭 Client 线程池: connectionKey={}", wrapper.getConnectionKey());
+                }
+                ReflectUtil.reflectInvokeMethod(feishuClient, "disconnect");
+                log.info("已通过反射执行 disconnect() 方法: connectionKey={}", wrapper.getConnectionKey());
+                OkHttpClient httpClient = (OkHttpClient) ReflectUtil.reflectGetField(feishuClient, "httpClient");
+                if (httpClient != null) {
+                    httpClient.dispatcher().executorService().shutdown();
+                    httpClient.connectionPool().evictAll();
+                }
+                log.info("飞书客户端实例已安全停止: connectionKey={}", wrapper.getConnectionKey());
+            } catch (Exception e) {
+                log.error("反射停止飞书客户端失败, connectionKey={}: {}", wrapper.getConnectionKey(), e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * 关闭RocketMQ连接
+     *
+     * @param wrapper 共享连接对象
+     */
+    private void closeRocketMQConnection(SharedConnectionManager.SharedConnection wrapper) {
+        DefaultMQPushConsumer consumer = wrapper.getRocketMQConsumer();
+        if (consumer != null) {
+            try {
+                consumer.shutdown();
+                log.info("RocketMQ消费者已关闭: connectionKey={}", wrapper.getConnectionKey());
+            } catch (Exception e) {
+                log.warn("关闭RocketMQ消费者异常: {}", e.getMessage());
             }
         }
     }
@@ -237,8 +254,15 @@ public class ResourceCacheManager {
      * 断开所有资源连接
      */
     public void disconnectAll() {
-        log.info("开始断开所有资源连接, 当前连接数: {}", resourceConnectionWrapperMap.size());
-        resourceConnectionWrapperMap.keySet().forEach(this::disconnect);
+        log.info("开始断开所有资源连接, 当前连接数: {}", sharedConnectionManager.getConnectionCount());
+        sharedConnectionManager.getAllConnectionKeys().forEach(connectionKey -> {
+            SharedConnectionManager.SharedConnection connection = sharedConnectionManager.getSharedConnection(connectionKey);
+            if (connection != null) {
+                closeConnection(connection);
+            }
+        });
+        sharedConnectionManager.clearAll();
+        triggerSubscriptionManager.clear();
         log.info("所有资源连接已断开");
     }
 
@@ -249,22 +273,26 @@ public class ResourceCacheManager {
         RABBITMQ,
         KAFKA,
         MQTT,
-        DINGTALK
+        DINGTALK,
+        FEISHU,
+        ROCKETMQ,
     }
 
     /**
      * 资源连接包装器
      */
-    @lombok.Data
+    @Data
     public static class ResourceConnectionWrapper {
         private ResourceType type;
         private long createTime;
         private Connection rabbitMQConnection;
         private Channel rabbitMQChannel;
         private String rabbitMQConsumerTag;
-        private DeliverCallback deliverCallback;
         private KafkaConsumer<String, String> kafkaConsumer;
         private MqttClient mqttClient;
         private OpenDingTalkClient dingtalkClient;
+        private Client feishuClient;
+        private DefaultMQPushConsumer rocketMQConsumer;
+
     }
 }

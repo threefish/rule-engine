@@ -25,9 +25,14 @@ import java.util.*;
  * @author 黄川 huchuc@vip.qq.com
  */
 public class SensitiveDataUtil {
-
+    /**
+     * 敏感字段（小写）
+     */
     private static final Set<String> SENSITIVE_KEYS = new HashSet<>(Arrays.asList(
-            "password", "passphrase", "privatekey", "secret", "token", "apikey", "credential", "username", "key", "value", "host"
+            "password", "passphrase", "privatekey",
+            "secret", "token", "apikey", "credential",
+            "username", "key", "value", "host",
+            "apiv3key", "accesstoken", "merchantserialnumber"
     ));
 
     private static final String MASK_PATTERN = "******";
@@ -60,7 +65,7 @@ public class SensitiveDataUtil {
      * 判断 Key 是否属于敏感字段
      */
     private static boolean isSensitiveKey(String key) {
-        return SENSITIVE_KEYS.contains(key.toLowerCase().replaceAll("[_-]", ""));
+        return SENSITIVE_KEYS.contains(key.toLowerCase());
     }
 
     /**

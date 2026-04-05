@@ -51,10 +51,10 @@ public class EmailNodeBehavior implements NodeBehavior {
             handleDemoMode(context);
             return;
         }
-        RuleProperties ruleProperties = context.getBeanContextManager().getRuleProperties();
+        RuleProperties ruleProperties = context.getEngineServices().getRuleProperties();
         String baseAttachmentPath = ruleProperties.getAttachmentPath();
 
-        EmailCredential emailCredential = context.getBeanContextManager().getCredentialsManager().getEmailCredential(node.getCredentialId());
+        EmailCredential emailCredential = context.getEngineServices().getCredentialsManager().getEmailCredential(node.getCredentialId());
 
         log.info("执行邮件节点: {}", node.getName());
 
@@ -63,7 +63,7 @@ public class EmailNodeBehavior implements NodeBehavior {
         String result = sendEmail(emailCredential, execContext);
 
         Map<String, Object> resultMap = buildResultMap(result, execContext);
-        context.put(node.getId(), resultMap);
+        context.setNodeOutput(node.getId(), resultMap);
 
         if (context.isDebugModel()) {
             context.addTraceLog(node.getId(), "Email result: {}", new Object[]{result});
@@ -102,7 +102,7 @@ public class EmailNodeBehavior implements NodeBehavior {
         Map<String, Object> data = new HashMap<>();
         data.put("data", "演示模式不允许执行");
         data.put("errorCode", 0);
-        context.put(node.getId(), data);
+        context.setNodeOutput(node.getId(), data);
     }
 
     /**

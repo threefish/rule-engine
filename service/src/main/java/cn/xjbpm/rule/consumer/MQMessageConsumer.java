@@ -18,16 +18,23 @@ package cn.xjbpm.rule.consumer;
 
 import cn.hutool.core.util.IdUtil;
 import cn.xjbpm.rule.common.utils.JsonUtils;
-import cn.xjbpm.rule.engine.runtime.model.credentials.DingtalkCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.KafkaCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.MQTTCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.RabbitMQCredential;
+import cn.xjbpm.rule.dispatcher.MessageDispatcher;
+import cn.xjbpm.rule.dispatcher.SubscriberInfo;
+import cn.xjbpm.rule.dispatcher.TriggerSubscriptionManager;
+import cn.xjbpm.rule.engine.runtime.model.credentials.*;
 import cn.xjbpm.rule.manager.ResourceCacheManager;
+import cn.xjbpm.rule.manager.SharedConnectionManager;
+import cn.xjbpm.rule.node.enums.TriggerMode;
 import cn.xjbpm.rule.repository.entity.StartTriggerEntity;
 import com.dingtalk.open.app.api.OpenDingTalkClient;
 import com.dingtalk.open.app.api.OpenDingTalkStreamClientBuilder;
 import com.dingtalk.open.app.api.security.AuthClientCredential;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.lark.oapi.event.EventDispatcher;
+import com.lark.oapi.service.im.ImService;
+import com.lark.oapi.service.im.v1.model.EventMessage;
+import com.lark.oapi.service.im.v1.model.EventSender;
+import com.lark.oapi.service.im.v1.model.P2MessageReceiveV1;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -39,6 +46,14 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.rocketmq.acl.common.AclClientRPCHook;
+import org.apache.rocketmq.acl.common.SessionCredentials;
+import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
+import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
+import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
+import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
+import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.remoting.protocol.heartbeat.MessageModel;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.stereotype.Component;
@@ -46,9 +61,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -66,6 +79,9 @@ public class MQMessageConsumer {
 
     private final ResourceCacheManager connectionCacheManager;
     private final ProcessMessageHelper processMessageService;
+    private final SharedConnectionManager sharedConnectionManager;
+    private final TriggerSubscriptionManager triggerSubscriptionManager;
+    private final MessageDispatcher messageDispatcher;
 
 
     private final ExecutorService executorService = new ThreadPoolExecutor(
@@ -84,6 +100,22 @@ public class MQMessageConsumer {
      */
     public void startRabbitMQConsumer(String ruleFlowKey, StartTriggerEntity entity, RabbitMQCredential credential) {
         Map<String, String> config = JsonUtils.json2Obj(entity.getContent(), Map.class);
+        String connectionKey = sharedConnectionManager.generateConnectionKey(TriggerMode.RABBIT_MQ, config);
+
+        SubscriberInfo subscriberInfo = new SubscriberInfo(
+                ruleFlowKey,
+                entity.getFilterRule(),
+                entity.getFilterType()
+        );
+        triggerSubscriptionManager.addSubscription(connectionKey, subscriberInfo);
+
+        boolean needCreateConnection = sharedConnectionManager.subscribe(connectionKey, ruleFlowKey, ResourceCacheManager.ResourceType.RABBITMQ);
+
+        if (!needCreateConnection) {
+            log.info("RabbitMQ连接已存在，共享连接: ruleFlowKey={}, connectionKey={}", ruleFlowKey, connectionKey);
+            return;
+        }
+
         String queueName = config.get("queueName");
         boolean autoAck = Boolean.parseBoolean(config.get("autoAck"));
         int prefetchCount = Integer.parseInt(config.getOrDefault("prefetchCount", "1"));
@@ -101,21 +133,23 @@ public class MQMessageConsumer {
 
                 String consumerTag = "rule-flow-consumer-" + ruleFlowKey + "-" + IdUtil.getSnowflakeNextIdStr();
 
+                String finalConnectionKey = connectionKey;
                 DeliverCallback deliverCallback = (consumerTag1, delivery) -> {
                     String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-                    log.info("RabbitMQ收到消息: ruleFlowKey={}, queue={}, message={}", ruleFlowKey, queueName, message);
-                    processMessageService.processMessage(ruleFlowKey, message);
+                    log.info("RabbitMQ收到消息: connectionKey={}, queue={}, message={}", finalConnectionKey, queueName, message);
+                    List<SubscriberInfo> subscribers = triggerSubscriptionManager.getSubscribers(finalConnectionKey);
+                    messageDispatcher.dispatch(finalConnectionKey, message, subscribers);
                 };
 
                 channel.basicConsume(queueName, autoAck, consumerTag, deliverCallback, consumerTag1 -> {
-                    log.info("RabbitMQ消费者被取消: ruleFlowKey={}, consumerTag={}", ruleFlowKey, consumerTag1);
+                    log.info("RabbitMQ消费者被取消: connectionKey={}, consumerTag={}", finalConnectionKey, consumerTag1);
                 });
 
-                connectionCacheManager.addRabbitMQConnection(ruleFlowKey, connection, channel, consumerTag);
-                log.info("RabbitMQ消费者启动成功: ruleFlowKey={}, queue={}", ruleFlowKey, queueName);
+                sharedConnectionManager.setRabbitMQConnection(connectionKey, connection, channel, consumerTag);
+                log.info("RabbitMQ消费者启动成功: ruleFlowKey={}, queue={}, connectionKey={}", ruleFlowKey, queueName, connectionKey);
 
             } catch (IOException | TimeoutException e) {
-                log.error("RabbitMQ消费者启动失败: ruleFlowKey={}, error={}", ruleFlowKey, e.getMessage(), e);
+                log.error("RabbitMQ消费者启动失败: connectionKey={}, error={}", connectionKey, e.getMessage(), e);
                 closeResource(channel, connection);
             }
         });
@@ -130,6 +164,22 @@ public class MQMessageConsumer {
      */
     public void startKafkaConsumer(String ruleFlowKey, StartTriggerEntity entity, KafkaCredential credential) {
         Map<String, String> config = JsonUtils.json2Obj(entity.getContent(), Map.class);
+        String connectionKey = sharedConnectionManager.generateConnectionKey(TriggerMode.KAFKA, config);
+
+        SubscriberInfo subscriberInfo = new SubscriberInfo(
+                ruleFlowKey,
+                entity.getFilterRule(),
+                entity.getFilterType()
+        );
+        triggerSubscriptionManager.addSubscription(connectionKey, subscriberInfo);
+
+        boolean needCreateConnection = sharedConnectionManager.subscribe(connectionKey, ruleFlowKey, ResourceCacheManager.ResourceType.KAFKA);
+
+        if (!needCreateConnection) {
+            log.info("Kafka连接已存在，共享连接: ruleFlowKey={}, connectionKey={}", ruleFlowKey, connectionKey);
+            return;
+        }
+
         String topic = config.get("topic");
         String groupId = config.get("groupId");
         String offsetReset = config.getOrDefault("offsetReset", "EARLIEST");
@@ -143,28 +193,29 @@ public class MQMessageConsumer {
                 KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
                 consumer.subscribe(Collections.singletonList(topic));
 
-                connectionCacheManager.addKafkaConnection(ruleFlowKey, consumer);
-                log.info("Kafka消费者启动成功: ruleFlowKey={}, topic={}, groupId={}", ruleFlowKey, topic, groupId);
+                sharedConnectionManager.setKafkaConnection(connectionKey, consumer);
+                log.info("Kafka消费者启动成功: ruleFlowKey={}, topic={}, groupId={}, connectionKey={}", ruleFlowKey, topic, groupId, connectionKey);
 
-                while (connectionCacheManager.hasConnection(ruleFlowKey)) {
+                while (sharedConnectionManager.hasConnection(connectionKey)) {
                     try {
                         ConsumerRecords<String, String> records = consumer.poll(Duration.ofSeconds(timeout));
                         for (ConsumerRecord<String, String> record : records) {
                             String message = record.value();
-                            log.info("Kafka收到消息: ruleFlowKey={}, topic={}, partition={}, offset={}, message={}", ruleFlowKey, topic, record.partition(), record.offset(), message);
-                            processMessageService.processMessage(ruleFlowKey, message);
+                            log.info("Kafka收到消息: connectionKey={}, topic={}, partition={}, offset={}, message={}", connectionKey, topic, record.partition(), record.offset(), message);
+                            List<SubscriberInfo> subscribers = triggerSubscriptionManager.getSubscribers(connectionKey);
+                            messageDispatcher.dispatch(connectionKey, message, subscribers);
                         }
                     } catch (Exception e) {
                         if (e instanceof org.apache.kafka.common.errors.WakeupException) {
-                            log.info("Kafka消费者收到唤醒信号，准备退出: ruleFlowKey={}", ruleFlowKey);
+                            log.info("Kafka消费者收到唤醒信号，准备退出: connectionKey={}", connectionKey);
                             break;
                         }
-                        log.error("Kafka消费异常: ruleFlowKey={}, error={}", ruleFlowKey, e.getMessage());
+                        log.error("Kafka消费异常: connectionKey={}, error={}", connectionKey, e.getMessage());
                     }
                 }
 
             } catch (Exception e) {
-                log.error("Kafka消费者启动失败: ruleFlowKey={}, error={}", ruleFlowKey, e.getMessage(), e);
+                log.error("Kafka消费者启动失败: connectionKey={}, error={}", connectionKey, e.getMessage(), e);
             }
         });
     }
@@ -178,6 +229,22 @@ public class MQMessageConsumer {
      */
     public void startMQTTConsumer(String ruleFlowKey, StartTriggerEntity entity, MQTTCredential credential) {
         Map<String, String> config = JsonUtils.json2Obj(entity.getContent(), Map.class);
+        String connectionKey = sharedConnectionManager.generateConnectionKey(TriggerMode.MQTT, config);
+
+        SubscriberInfo subscriberInfo = new SubscriberInfo(
+                ruleFlowKey,
+                entity.getFilterRule(),
+                entity.getFilterType()
+        );
+        triggerSubscriptionManager.addSubscription(connectionKey, subscriberInfo);
+
+        boolean needCreateConnection = sharedConnectionManager.subscribe(connectionKey, ruleFlowKey, ResourceCacheManager.ResourceType.MQTT);
+
+        if (!needCreateConnection) {
+            log.info("MQTT连接已存在，共享连接: ruleFlowKey={}, connectionKey={}", ruleFlowKey, connectionKey);
+            return;
+        }
+
         String topic = config.get("topic");
         int qos = Integer.parseInt(config.getOrDefault("qos", "1"));
         boolean cleanSession = Boolean.parseBoolean(config.getOrDefault("cleanSession", "true"));
@@ -187,6 +254,7 @@ public class MQMessageConsumer {
         }
 
         String finalClientId = clientId;
+        String finalConnectionKey = connectionKey;
         executorService.submit(() -> {
             try {
                 String protocol = credential.isSsl() ? "ssl" : "tcp";
@@ -199,15 +267,16 @@ public class MQMessageConsumer {
                 mqttClient.setCallback(new MqttCallback() {
                     @Override
                     public void connectionLost(Throwable cause) {
-                        log.warn("MQTT连接丢失: ruleFlowKey={}, error={}", ruleFlowKey, cause.getMessage());
-                        handleMQTTReconnect(ruleFlowKey, mqttClient, options);
+                        log.warn("MQTT连接丢失: connectionKey={}, error={}", finalConnectionKey, cause.getMessage());
+                        handleMQTTReconnect(finalConnectionKey, mqttClient, options);
                     }
 
                     @Override
                     public void messageArrived(String topic1, MqttMessage message) {
                         String payload = new String(message.getPayload(), StandardCharsets.UTF_8);
-                        log.info("MQTT收到消息: ruleFlowKey={}, topic={}, message={}", ruleFlowKey, topic1, payload);
-                        processMessageService.processMessage(ruleFlowKey, payload);
+                        log.info("MQTT收到消息: connectionKey={}, topic={}, message={}", finalConnectionKey, topic1, payload);
+                        List<SubscriberInfo> subscribers = triggerSubscriptionManager.getSubscribers(finalConnectionKey);
+                        messageDispatcher.dispatch(finalConnectionKey, payload, subscribers);
                     }
 
                     @Override
@@ -216,11 +285,11 @@ public class MQMessageConsumer {
                 });
 
                 mqttClient.subscribe(topic, qos);
-                connectionCacheManager.addMQTTConnection(ruleFlowKey, mqttClient);
-                log.info("MQTT消费者启动成功: ruleFlowKey={}, topic={}, clientId={}", ruleFlowKey, topic, finalClientId);
+                sharedConnectionManager.setMQTTConnection(connectionKey, mqttClient);
+                log.info("MQTT消费者启动成功: ruleFlowKey={}, topic={}, clientId={}, connectionKey={}", ruleFlowKey, topic, finalClientId, connectionKey);
 
             } catch (MqttException e) {
-                log.error("MQTT消费者启动失败: ruleFlowKey={}, error={}", ruleFlowKey, e.getMessage(), e);
+                log.error("MQTT消费者启动失败: connectionKey={}, error={}", connectionKey, e.getMessage(), e);
             }
         });
     }
@@ -233,47 +302,209 @@ public class MQMessageConsumer {
      * @param credential  钉钉凭据
      */
     public void startDingtalkConsumer(String ruleFlowKey, StartTriggerEntity entity, DingtalkCredential credential) {
+        Map<String, String> config = JsonUtils.json2Obj(entity.getContent(), Map.class);
+        String connectionKey = sharedConnectionManager.generateConnectionKey(TriggerMode.DINGTALK, config);
+
+        SubscriberInfo subscriberInfo = new SubscriberInfo(
+                ruleFlowKey,
+                entity.getFilterRule(),
+                entity.getFilterType()
+        );
+        triggerSubscriptionManager.addSubscription(connectionKey, subscriberInfo);
+
+        boolean needCreateConnection = sharedConnectionManager.subscribe(connectionKey, ruleFlowKey, ResourceCacheManager.ResourceType.DINGTALK);
+
+        if (!needCreateConnection) {
+            log.info("钉钉连接已存在，共享连接: ruleFlowKey={}, connectionKey={}", ruleFlowKey, connectionKey);
+            return;
+        }
+
         executorService.submit(() -> {
             try {
-                // 使用钉钉开放平台的Stream Client创建客户端
+                DingtalkMsgCallbackConsumer callbackConsumer = new DingtalkMsgCallbackConsumer(
+                        processMessageService,
+                        connectionKey,
+                        triggerSubscriptionManager,
+                        messageDispatcher
+                );
                 OpenDingTalkClient client = OpenDingTalkStreamClientBuilder
                         .custom()
                         .credential(new AuthClientCredential(credential.getClientId(), credential.getClientSecret()))
-                        .registerCallbackListener("/v1.0/im/bot/messages/get", new DingtalkMsgCallbackConsumer(processMessageService, ruleFlowKey))
+                        .registerCallbackListener("/v1.0/im/bot/messages/get", callbackConsumer)
                         .build();
-                // 启动客户端
                 client.start();
-                // 将客户端添加到缓存
-                connectionCacheManager.addDingtalkConnection(ruleFlowKey, client);
-                log.info("钉钉消费者启动成功: ruleFlowKey={}, clientId={}", ruleFlowKey, credential.getClientId());
+                sharedConnectionManager.setDingtalkConnection(connectionKey, client);
+                log.info("钉钉消费者启动成功: ruleFlowKey={}, clientId={}, connectionKey={}", ruleFlowKey, credential.getClientId(), connectionKey);
             } catch (Exception e) {
-                log.error("钉钉消费者启动失败: ruleFlowKey={}, error={}", ruleFlowKey, e.getMessage(), e);
+                log.error("钉钉消费者启动失败: connectionKey={}, error={}", connectionKey, e.getMessage(), e);
             }
         });
+    }
+
+    /**
+     * 启动飞书消费者
+     *
+     * @param ruleFlowKey 规则流唯一标识
+     * @param entity      MQ配置实体
+     * @param credential  飞书凭据
+     */
+    public void startFishuConsumer(String ruleFlowKey, StartTriggerEntity entity, FeishuCredential credential) {
+        Map<String, String> config = JsonUtils.json2Obj(entity.getContent(), Map.class);
+        String connectionKey = sharedConnectionManager.generateConnectionKey(TriggerMode.FEISHU, config);
+
+        SubscriberInfo subscriberInfo = new SubscriberInfo(
+                ruleFlowKey,
+                entity.getFilterRule(),
+                entity.getFilterType()
+        );
+        triggerSubscriptionManager.addSubscription(connectionKey, subscriberInfo);
+
+        boolean needCreateConnection = sharedConnectionManager.subscribe(connectionKey, ruleFlowKey, ResourceCacheManager.ResourceType.FEISHU);
+
+        if (!needCreateConnection) {
+            log.info("飞书连接已存在，共享连接: ruleFlowKey={}, connectionKey={}", ruleFlowKey, connectionKey);
+            return;
+        }
+
+        executorService.submit(() -> {
+            try {
+                FeishuMsgCallbackConsumer feishuMsgCallbackConsumer = new FeishuMsgCallbackConsumer(
+                        processMessageService,
+                        connectionKey,
+                        triggerSubscriptionManager,
+                        messageDispatcher
+                );
+                EventDispatcher eventDispatcher = EventDispatcher.newBuilder("", "")
+                        .onP2MessageReceiveV1(new ImService.P2MessageReceiveV1Handler() {
+                            @Override
+                            public void handle(P2MessageReceiveV1 event) throws Exception {
+                                EventSender sender = event.getEvent().getSender();
+                                EventMessage message = event.getEvent().getMessage();
+                                Map<String, Object> data = new HashMap<>();
+                                data.put("sender", sender);
+                                data.put("message", message);
+                                feishuMsgCallbackConsumer.handleCallback(data);
+                            }
+                        })
+                        .build();
+                com.lark.oapi.ws.Client wsClient = new com.lark.oapi.ws.Client.Builder(credential.getAppId(), credential.getAppSecret())
+                        .eventHandler(eventDispatcher).build();
+                wsClient.start();
+                sharedConnectionManager.setFeishuConnection(connectionKey, wsClient);
+                log.info("飞书消费者启动成功: ruleFlowKey={}, appId={}, connectionKey={}", ruleFlowKey, credential.getAppId(), connectionKey);
+            } catch (Exception e) {
+                log.error("飞书消费者启动失败: connectionKey={}, error={}", connectionKey, e.getMessage(), e);
+            }
+        });
+    }
+
+    /**
+     * 启动RocketMQ消费者
+     *
+     * @param ruleFlowKey 规则流唯一标识
+     * @param entity      MQ配置实体
+     * @param credential  RocketMQ凭据
+     */
+    public void startRocketMQConsumer(String ruleFlowKey, StartTriggerEntity entity, RocketMQCredential credential) {
+        Map<String, String> config = JsonUtils.json2Obj(entity.getContent(), Map.class);
+        String connectionKey = sharedConnectionManager.generateConnectionKey(TriggerMode.ROCKETMQ, config);
+
+        SubscriberInfo subscriberInfo = new SubscriberInfo(
+                ruleFlowKey,
+                entity.getFilterRule(),
+                entity.getFilterType()
+        );
+        triggerSubscriptionManager.addSubscription(connectionKey, subscriberInfo);
+
+        boolean needCreateConnection = sharedConnectionManager.subscribe(connectionKey, ruleFlowKey, ResourceCacheManager.ResourceType.ROCKETMQ);
+
+        if (!needCreateConnection) {
+            log.info("RocketMQ连接已存在，共享连接: ruleFlowKey={}, connectionKey={}", ruleFlowKey, connectionKey);
+            return;
+        }
+
+        String topic = config.get("topic");
+        String groupId = config.get("groupId");
+        String consumeMode = config.getOrDefault("consumeMode", "CLUSTERING");
+        int consumeThread = Integer.parseInt(config.getOrDefault("consumeThread", "20"));
+
+        executorService.submit(() -> {
+            try {
+                DefaultMQPushConsumer consumer = createRocketMQConsumer(credential, groupId, consumeMode, consumeThread);
+                consumer.subscribe(topic, "*");
+                String finalConnectionKey = connectionKey;
+                consumer.registerMessageListener((MessageListenerConcurrently) (msgs, context) -> {
+                    for (MessageExt msg : msgs) {
+                        String message = new String(msg.getBody(), StandardCharsets.UTF_8);
+                        log.info("RocketMQ收到消息: connectionKey={}, topic={}, tags={}, keys={}, message={}",
+                                finalConnectionKey, msg.getTopic(), msg.getTags(), msg.getKeys(), message);
+                        List<SubscriberInfo> subscribers = triggerSubscriptionManager.getSubscribers(finalConnectionKey);
+                        messageDispatcher.dispatch(finalConnectionKey, message, subscribers);
+                    }
+                    return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+                });
+
+                consumer.start();
+                sharedConnectionManager.setRocketMQConnection(connectionKey, consumer);
+                log.info("RocketMQ消费者启动成功: ruleFlowKey={}, topic={}, groupId={}, connectionKey={}", ruleFlowKey, topic, groupId, connectionKey);
+
+            } catch (Exception e) {
+                log.error("RocketMQ消费者启动失败: connectionKey={}, error={}", connectionKey, e.getMessage(), e);
+            }
+        });
+    }
+
+    /**
+     * 创建RocketMQ消费者
+     */
+    private DefaultMQPushConsumer createRocketMQConsumer(RocketMQCredential credential, String groupId, String consumeMode, int consumeThread) throws Exception {
+        DefaultMQPushConsumer consumer;
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(credential.getAccessKey()) && org.apache.commons.lang3.StringUtils.isNotBlank(credential.getSecretKey())) {
+            SessionCredentials sessionCredentials = new SessionCredentials(credential.getAccessKey(), credential.getSecretKey());
+            AclClientRPCHook aclClientRPCHook = new AclClientRPCHook(sessionCredentials);
+            consumer = new DefaultMQPushConsumer(aclClientRPCHook);
+            consumer.setConsumerGroup(groupId);
+        } else {
+            consumer = new DefaultMQPushConsumer(groupId);
+        }
+        consumer.setNamesrvAddr(credential.getNameServer());
+        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_LAST_OFFSET);
+        consumer.setConsumeThreadMin(consumeThread);
+        consumer.setConsumeThreadMax(consumeThread);
+        if (MessageModel.BROADCASTING.name().equalsIgnoreCase(consumeMode)) {
+            consumer.setMessageModel(MessageModel.BROADCASTING);
+        } else {
+            consumer.setMessageModel(MessageModel.CLUSTERING);
+        }
+        return consumer;
     }
 
 
     /**
      * 处理MQTT重连
+     *
+     * @param connectionKey 连接标识
+     * @param mqttClient    MQTT客户端
+     * @param options       MQTT连接选项
      */
-    private void handleMQTTReconnect(String ruleFlowKey, MqttClient mqttClient, MqttConnectOptions options) {
+    private void handleMQTTReconnect(String connectionKey, MqttClient mqttClient, MqttConnectOptions options) {
         int retryCount = 0;
         int maxRetries = 5;
-        while (retryCount < maxRetries && connectionCacheManager.hasConnection(ruleFlowKey)) {
+        while (retryCount < maxRetries && sharedConnectionManager.hasConnection(connectionKey)) {
             try {
                 Thread.sleep(5000);
                 if (!mqttClient.isConnected()) {
                     mqttClient.connect(options);
-                    log.info("MQTT重连成功: ruleFlowKey={}", ruleFlowKey);
+                    log.info("MQTT重连成功: connectionKey={}", connectionKey);
                     return;
                 }
             } catch (Exception e) {
                 retryCount++;
-                log.warn("MQTT重连失败: ruleFlowKey={}, retry={}/{}, error={}", ruleFlowKey, retryCount, maxRetries, e.getMessage());
+                log.warn("MQTT重连失败: connectionKey={}, retry={}/{}, error={}", connectionKey, retryCount, maxRetries, e.getMessage());
             }
         }
         if (retryCount >= maxRetries) {
-            log.error("MQTT重连失败，已达到最大重试次数: ruleFlowKey={}", ruleFlowKey);
+            log.error("MQTT重连失败，已达到最大重试次数: connectionKey={}", connectionKey);
         }
     }
 

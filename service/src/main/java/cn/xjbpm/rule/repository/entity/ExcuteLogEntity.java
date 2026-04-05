@@ -17,6 +17,7 @@
 package cn.xjbpm.rule.repository.entity;
 
 import cn.xjbpm.rule.dto.RuleFlowStatus;
+import cn.xjbpm.rule.service.storage.StorageProvider;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,8 +35,8 @@ import java.time.LocalDateTime;
 @Table(
         name = "rule_flow_excute_log",
         indexes = {
-                @Index(name = "idx_rule_flow_excute_log_request_id", columnList = "request_id", unique = true),
-                @Index(name = "idx_rule_flow_key", columnList = "rule_flow_key")
+                @Index(columnList = "requestId", unique = true),
+                @Index(columnList = "ruleFlowKey")
         }
 )
 @EntityListeners(AuditingEntityListener.class)
@@ -44,62 +45,56 @@ import java.time.LocalDateTime;
 public class ExcuteLogEntity {
 
     @Id
-    @Column(name = "id")
+    @Column
     private Long id;
 
     /**
      * 规则流编码
      */
-    @Column(name = "rule_flow_key", nullable = false, length = 20)
+    @Column(nullable = false, length = 20)
     private String ruleFlowKey;
 
     /**
      * 唯一标识
      */
-    @Column(name = "request_id", nullable = false, unique = true, length = 20)
+    @Column(nullable = false, unique = true, length = 32)
     private String requestId;
 
     /**
-     * 名称
+     * 耗时
      */
-    @Column(name = "time_consuming", length = 10)
+    @Column(length = 10)
     private Long timeConsuming;
 
-
-    @Column(name = "error_message", length = 100)
+    @Column(length = 100)
     private String errorMessage;
 
+    @Column(length = 100)
+    private String snapshotPath;
+
     /**
-     * 执行记录(大文本字段）
+     * 执行记录(采用文件方式存储与获取）
+     *
+     * @see StorageProvider
      */
-    @Lob
-    @Column(name = "content", columnDefinition = "LONGTEXT")
+    @Transient
     private String content;
 
-    @Column(name = "status")
+    @Column
     private RuleFlowStatus status;
 
     /**
      * 创建时间，自动填充
      */
-    @Column(name = "create_time", nullable = false)
+    @Column(nullable = false)
     @CreatedDate
     private LocalDateTime createTime;
 
     /**
      * 更新时间，自动填充
      */
-    @Column(name = "update_time", nullable = false)
+    @Column(nullable = false)
     @LastModifiedDate
     private LocalDateTime updateTime;
 
-    public ExcuteLogEntity(Long id, String ruleFlowKey, String requestId, Long timeConsuming, RuleFlowStatus status, LocalDateTime createTime, LocalDateTime updateTime) {
-        this.id = id;
-        this.ruleFlowKey = ruleFlowKey;
-        this.requestId = requestId;
-        this.timeConsuming = timeConsuming;
-        this.status = status;
-        this.createTime = createTime;
-        this.updateTime = updateTime;
-    }
 }

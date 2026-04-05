@@ -64,6 +64,15 @@ public enum NodeType {
     KafkaNode(KafkaNode.class, KafkaNodeValidator.class, KafkaNodeBehavior.class),
     MQTTNode(MQTTNode.class, MQTTNodeValidator.class, MQTTNodeBehavior.class),
     DingTalkNode(DingTalkNode.class, DingTalkNodeValidator.class, DingTalkNodeBehavior.class),
+    FeishuNode(FeishuNode.class, FeishuNodeValidator.class, FeishuNodeBehavior.class),
+    WordNode(WordNode.class, WordNodeValidator.class, WordNodeBehavior.class),
+    PdfNode(PdfNode.class, PdfNodeValidator.class, PdfNodeBehavior.class),
+    CryptoNode(CryptoNode.class, CryptoNodeValidator.class, CryptoNodeBehavior.class),
+    OcrNode(OcrNode.class, OcrNodeValidator.class, OcrNodeBehavior.class),
+    RocketMQNode(RocketMQNode.class, RocketMQNodeValidator.class, RocketMQNodeBehavior.class),
+    WxPayNode(WxPayNode.class, WxPayNodeValidator.class, WxPayNodeBehavior.class),
+    GitNode(GitNode.class, GitNodeValidator.class, GitNodeBehavior.class),
+    MavenNode(MavenNode.class, MavenNodeValidator.class, MavenNodeBehavior.class),
     ;
 
     Class<? extends Node> nodeClass;

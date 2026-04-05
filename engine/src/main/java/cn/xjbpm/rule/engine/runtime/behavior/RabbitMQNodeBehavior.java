@@ -46,7 +46,7 @@ public class RabbitMQNodeBehavior implements NodeBehavior {
     @Override
     public void execution(FlowContext context) throws Exception {
 
-        RabbitMQCredential rabbitMQCredential = context.getBeanContextManager()
+        RabbitMQCredential rabbitMQCredential = context.getEngineServices()
                 .getCredentialsManager()
                 .getRabbitMQCredential(node.getCredentialId());
 
@@ -55,7 +55,7 @@ public class RabbitMQNodeBehavior implements NodeBehavior {
         RabbitMQExecutionContext execContext = resolveExpressions(context);
         RabbitMQUtils.RabbitMQResult result = executeRabbitMQ(rabbitMQCredential, execContext);
         Map<String, Object> resultMap = buildResultMap(result, execContext);
-        context.put(node.getId(), resultMap);
+        context.setNodeOutput(node.getId(), resultMap);
 
         if (context.isDebugModel()) {
             context.addTraceLog(node.getId(), "RabbitMQ消息发布操作完成: {}",

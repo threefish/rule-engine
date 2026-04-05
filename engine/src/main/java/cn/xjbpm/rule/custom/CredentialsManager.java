@@ -17,6 +17,7 @@
 package cn.xjbpm.rule.custom;
 
 import cn.xjbpm.rule.engine.runtime.model.credentials.*;
+import cn.xjbpm.rule.engine.runtime.model.credentials.GitCredential;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -45,4 +46,16 @@ public interface CredentialsManager {
     MQTTCredential getMQTTCredential(String credentialId);
 
     DingtalkCredential getDingtalkCredential(String credentialId);
+
+    FeishuCredential getFeishuCredential(String credentialId);
+
+    CryptoCredential getCryptoCredential(String credentialId);
+
+    OcrCredential getOcrCredential(String credentialId);
+
+    RocketMQCredential getRocketMQCredential(String credentialId);
+
+    WxPayCredential getWxPayCredential(String credentialId);
+
+    GitCredential getGitCredential(String credentialId);
 }

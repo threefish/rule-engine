@@ -24,12 +24,13 @@ import lombok.extern.slf4j.Slf4j;
  * date: 2022/9/30
  */
 @Slf4j
-public class LoopNodeBehavior implements NodeBehavior {
+public class LoopNodeBehavior implements NodeBehavior<LoopNode> {
 
     private final LoopNode node;
 
     public LoopNodeBehavior(LoopNode node) {
         this.node = node;
     }
+
 
 }

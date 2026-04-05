@@ -33,12 +33,13 @@ import cn.xjbpm.rule.engine.definition.model.nodes.gateway.ParallelGatewayNode;
 import cn.xjbpm.rule.engine.runtime.model.ExecutStatus;
 import cn.xjbpm.rule.engine.runtime.model.FlowContext;
 import cn.xjbpm.rule.engine.runtime.model.NodeExcution;
-import cn.xjbpm.rule.event.RuleFlowDebugEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
+import scala.concurrent.duration.Duration;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -59,6 +60,12 @@ public class WorkflowInstanceActor extends AbstractActor {
     private final Map<String, Integer> loopActiveChildCount = new HashMap<>();
     // 缓存 LoopNode 实例，以便在循环结束时能找到它触发后续
     private final Map<String, LoopNode> activeLoopNodes = new HashMap<>();
+    // 循环迭代状态：Key: LoopNodeId, Value: 迭代状态
+    private final Map<String, LoopIterationState> loopIterationStates = new HashMap<>();
+    /**
+     * 调试事件发布回调，由 service 层注入，引擎本身不感知 Spring。
+     */
+    private final Consumer<FlowContext> debugPublisher;
     // 跳过时用
     private Set<String> skipNodeIds;
     private FlowContext flowContext;
@@ -66,31 +73,42 @@ public class WorkflowInstanceActor extends AbstractActor {
     // 当前正在执行 (发送给 Worker) 的节点数
     private int runningNodesCount = 0;
 
-    public WorkflowInstanceActor(NodeDependencyBuilder dependencyBuilder, ActorRef globalWorkerRouter) {
+    public WorkflowInstanceActor(NodeDependencyBuilder dependencyBuilder, ActorRef globalWorkerRouter,
+                                 Consumer<FlowContext> debugPublisher) {
         this.nodeNextMap = dependencyBuilder.getNodeNextMap();
         this.convergePendingCount = new ConcurrentHashMap<>(dependencyBuilder.getConvergePendingCount());
         this.workerRouter = globalWorkerRouter;
+        this.debugPublisher = debugPublisher;
     }
 
-    public static Props props(NodeDependencyBuilder dependencyBuilder, ActorRef globalWorkerRouter) {
-        return Props.create(WorkflowInstanceActor.class, () -> new WorkflowInstanceActor(dependencyBuilder, globalWorkerRouter));
+    public static Props props(NodeDependencyBuilder dependencyBuilder, ActorRef globalWorkerRouter,
+                              Consumer<FlowContext> debugPublisher) {
+        return Props.create(WorkflowInstanceActor.class,
+                () -> new WorkflowInstanceActor(dependencyBuilder, globalWorkerRouter, debugPublisher));
     }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(WorkflowProtocol.StartProcess.class, msg -> {
-            try {
-                handleStart(msg);
-            } catch (Throwable e) {
-                handleFatalError(e, null);
-            }
-        }).match(WorkflowProtocol.NodeCompleted.class, msg -> {
-            try {
-                handleNodeCompleted(msg);
-            } catch (Throwable e) {
-                handleFatalError(e, msg.getNodeId());
-            }
-        }).match(WorkflowProtocol.NodeFailed.class, this::handleNodeFailed).build();
+                    try {
+                        handleStart(msg);
+                    } catch (Throwable e) {
+                        handleFatalError(e, null);
+                    }
+                }).match(WorkflowProtocol.NodeCompleted.class, msg -> {
+                    try {
+                        handleNodeCompleted(msg);
+                    } catch (Throwable e) {
+                        handleFatalError(e, msg.getNodeId());
+                    }
+                }).match(WorkflowProtocol.NodeFailed.class, this::handleNodeFailed)
+                .match(WorkflowProtocol.ScheduleNextLoopIteration.class, msg -> {
+                    try {
+                        handleScheduleNextLoopIteration(msg);
+                    } catch (Throwable e) {
+                        handleFatalError(e, msg.getLoopNodeId());
+                    }
+                }).build();
     }
 
     /**
@@ -142,28 +160,55 @@ public class WorkflowInstanceActor extends AbstractActor {
     private void handleChildNodeCompleted(WorkflowProtocol.NodeCompleted msg) {
         WorkflowProtocol.ExecutionScope scope = msg.getScope();
         String loopNodeId = scope.getLoopNodeId();
-        // 1. 减少该 LoopNode 的活跃子任务计数
+
         Integer currentCount = loopActiveChildCount.get(loopNodeId);
         if (currentCount != null) {
             int newCount = currentCount - 1;
             loopActiveChildCount.put(loopNodeId, newCount);
             LoopNode loopNode = activeLoopNodes.get(loopNodeId);
-            // 容错：如果缓存中没有，可能是 LoopNode 已经被意外清理，尝试强制转换 msg.getNode (虽然 msg.getNode 是子节点)
-            // 注意：msg.getNode() 是子节点，不是 LoopNode。所以 activeLoopNodes 缓存很重要。
+
             if (loopNode != null) {
                 List<Node> nextNodes = loopNode.getChildGraph().getNodeNextMap().get(msg.getNodeId());
                 if (nextNodes != null && !nextNodes.isEmpty()) {
-                    // 子流程还有后续节点，继续调度
                     for (Node next : nextNodes) {
                         scheduleNodeExecution(next, scope);
                     }
                 }
-                // 3. 检查循环节点是否彻底完成
-                // 条件：计数归零 且 并没有新的节点被调度（scheduleNodeExecution 会增加计数）
-                // 因为 scheduleNodeExecution 是同步调用的，如果上面 for 循环执行了，newCount 已经变了
-                // 所以我们需要再次获取最新的 count
+
                 if (loopActiveChildCount.get(loopNodeId) <= 0) {
-                    finishLoopNode(loopNode, msg.getStartTime(), System.nanoTime());
+                    LoopIterationState state = loopIterationStates.get(loopNodeId);
+                    if (state != null && state.getCurrentIndex() + 1 < state.getCollection().size()) {
+                        int nextIndex = state.getCurrentIndex() + 1;
+                        Object nextItem = state.getCollection().get(nextIndex);
+
+                        loopIterationStates.put(loopNodeId, new LoopIterationState(
+                                state.getCollection(), nextIndex, state.getStartTime()
+                        ));
+
+                        if (Objects.nonNull(loopNode.getDelayTime()) && loopNode.getDelayTime() > 0) {
+                            log.info("循环节点 [{}] 迭代 {} 完成，延时 {}ms 后开始下一次迭代",
+                                    loopNode.getId(), scope.getIndex() + 1, loopNode.getDelayTime());
+                            flowContext.addTraceLog(loopNode.getId(),
+                                    "迭代 {} 完成，延时 {}ms 后开始下一次迭代",
+                                    scope.getIndex() + 1, loopNode.getDelayTime());
+
+                            getContext().getSystem().scheduler().scheduleOnce(
+                                    Duration.create(loopNode.getDelayTime(), TimeUnit.MILLISECONDS),
+                                    getSelf(),
+                                    new WorkflowProtocol.ScheduleNextLoopIteration(
+                                            loopNodeId, nextIndex, nextItem, state.getStartTime()
+                                    ),
+                                    getContext().getDispatcher(),
+                                    getSelf()
+                            );
+                        } else {
+                            log.info("循环节点 [{}] 迭代 {} 完成，立即开始下一次迭代",
+                                    loopNode.getId(), scope.getIndex());
+                            scheduleLoopIteration(loopNode, nextItem, nextIndex, state.getStartTime());
+                        }
+                    } else {
+                        finishLoopNode(loopNode, state != null ? state.getStartTime() : msg.getStartTime(), System.nanoTime());
+                    }
                 }
             }
         }
@@ -172,19 +217,17 @@ public class WorkflowInstanceActor extends AbstractActor {
     private void finishLoopNode(LoopNode loopNode, Long startTime, Long endTime) {
         log.info("循环节点 [{}] 所有迭代执行完毕", loopNode.getId());
         flowContext.addTraceLog(loopNode.getId(), "循环处理完成");
+        flowContext.removeVariable(loopNode.getId());
 
-        // 清理状态
         loopActiveChildCount.remove(loopNode.getId());
         activeLoopNodes.remove(loopNode.getId());
+        loopIterationStates.remove(loopNode.getId());
 
-        // 标记 LoopNode 自身完成 (RunningNodesCount - 1)
         runningNodesCount--;
         recordVirtualExecution(loopNode, ExecutStatus.SUCCESS, startTime, endTime);
 
-        // 触发 LoopNode 之后的节点
         scheduleNextNodes(loopNode);
 
-        // 检查全局是否结束
         checkGlobalTermination();
     }
 
@@ -277,45 +320,54 @@ public class WorkflowInstanceActor extends AbstractActor {
         }
         long startTime = System.nanoTime();
         recordVirtualExecution(loopNode, ExecutStatus.RUNNING);
-        // 1. 初始化状态
-        runningNodesCount++; // LoopNode 自身算一个
-        // 缓存 LoopNode 对象，供回调使用
+
+        runningNodesCount++;
         activeLoopNodes.put(loopNode.getId(), loopNode);
-        // 初始化计数器：0 (会在 scheduleNodeExecution 中增加)
         loopActiveChildCount.put(loopNode.getId(), 0);
+        loopIterationStates.put(loopNode.getId(), new LoopIterationState(collection, 0, startTime));
 
         log.info("循环节点 [{}] 开始调度，集合大小: {}", loopNode.getId(), collection.size());
 
-        int index = 0;
-        for (Object item : collection) {
-            Map<String, Object> vars = new HashMap<>();
-            if (loopNode.getItemVariableName() != null) {
-                vars.put(loopNode.getItemVariableName(), item);
-            }
-            vars.put("loopIndex", index);
+        scheduleLoopIteration(loopNode, collection.get(0), 0, startTime);
+    }
 
-            WorkflowProtocol.ExecutionScope scope = WorkflowProtocol.ExecutionScope.builder()
-                    .startTime(startTime)
-                    .loopNodeId(loopNode.getId())
-                    .iterationId(loopNode.getId() + "_" + index)
-                    .index(index)
-                    .localVariables(vars)
-                    .build();
-
-            // 调度子图的起始节点
-            if (loopNode.getStartNodes() != null) {
-                for (Node startNode : loopNode.getStartNodes()) {
-                    scheduleNodeExecution(startNode, scope);
-                }
-            }
-            index++;
+    private void scheduleLoopIteration(LoopNode loopNode, Object item, int index, long startTime) {
+        Map<String, Object> vars = new HashMap<>();
+        if (StringUtils.isNotBlank(loopNode.getLoopRowVariableName())) {
+            vars.put(loopNode.getLoopRowVariableName(), item);
+        }
+        if (StringUtils.isNotBlank(loopNode.getLoopRowIndex())) {
+            vars.put(loopNode.getLoopRowIndex(), index);
         }
 
-        // 极值情况检查：如果 loopNode.getStartNodes() 为空，或者调度瞬间完成
-        // 虽然 Actor 模型下单线程执行，这里是安全的，但逻辑上需要保证
-        if (loopActiveChildCount.get(loopNode.getId()) == 0) {
-            finishLoopNode(loopNode, startTime, System.nanoTime());
+        flowContext.setNodeOutput(loopNode.getId(), vars);
+
+        WorkflowProtocol.ExecutionScope scope = WorkflowProtocol.ExecutionScope.builder()
+                .startTime(startTime)
+                .loopNodeId(loopNode.getId())
+                .iterationId(loopNode.getId() + "_" + index)
+                .index(index)
+                .localVariables(vars)
+                .build();
+
+        if (loopNode.getStartNodes() != null) {
+            for (Node startNode : loopNode.getStartNodes()) {
+                scheduleNodeExecution(startNode, scope);
+            }
         }
+    }
+
+    private void handleScheduleNextLoopIteration(WorkflowProtocol.ScheduleNextLoopIteration msg) {
+        LoopNode loopNode = activeLoopNodes.get(msg.getLoopNodeId());
+        if (loopNode == null) {
+            log.warn("收到延时迭代消息，但循环节点 [{}] 已不存在", msg.getLoopNodeId());
+            return;
+        }
+
+        log.info("循环节点 [{}] 延时结束，开始第 {} 次迭代", loopNode.getId(), msg.getNextIndex());
+        flowContext.addTraceLog(loopNode.getId(), "延时结束，开始第 {} 次迭代", msg.getNextIndex());
+
+        scheduleLoopIteration(loopNode, msg.getNextItem(), msg.getNextIndex(), msg.getStartTime());
     }
 
     private void handleExclusiveGateway(ExclusiveGatewayNode gateway) {
@@ -483,12 +535,7 @@ public class WorkflowInstanceActor extends AbstractActor {
             builder.conditionsMeet(condition);
         }
         flowContext.putNodeExcution(node.getId(), builder.build());
-        if (flowContext.isDebugModel()) {
-            ApplicationEventPublisher publishManager = flowContext.getBeanContextManager().getEventPublishManager();
-            if (Objects.nonNull(publishManager)) {
-                publishManager.publishEvent(RuleFlowDebugEvent.create(flowContext));
-            }
-        }
+        debugPublisher.accept(flowContext);
     }
 
     private void scheduleNodeExecution(Node node, WorkflowProtocol.ExecutionScope scope) {
@@ -514,5 +561,15 @@ public class WorkflowInstanceActor extends AbstractActor {
         }
         // 路由池会自动选择一个空闲的 Worker (或者轮询) 来处理
         workerRouter.tell(new WorkflowProtocol.ExecuteNode(node, 0, startTime, flowContext, scope), getSelf());
+    }
+
+    /**
+     * 循环迭代状态
+     */
+    @lombok.Value
+    private static class LoopIterationState {
+        List<?> collection;
+        int currentIndex;
+        long startTime;
     }
 }

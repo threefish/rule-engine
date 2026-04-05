@@ -74,6 +74,14 @@ public interface WorkflowProtocol {
     }
 
     @Value
+    class ScheduleNextLoopIteration {
+        String loopNodeId;
+        int nextIndex;
+        Object nextItem;
+        long startTime;
+    }
+
+    @Value
     @lombok.Builder
     class ExecutionScope implements java.io.Serializable {
         String loopNodeId;      // 循环节点ID

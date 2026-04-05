@@ -58,7 +58,7 @@ public class ExcelWriteNodeBehavior implements NodeBehavior {
         ExcelUtils.ExcelWriteResult result = writeExcel(execContext, data);
 
         Map<String, Object> resultMap = buildResultMap(result, execContext);
-        context.put(node.getId(), resultMap);
+        context.setNodeOutput(node.getId(), resultMap);
 
         if (context.isDebugModel()) {
             context.addTraceLog(node.getId(), "Excel写入完成: {} 行数据", new Object[]{result.getRowCount()});
@@ -70,7 +70,7 @@ public class ExcelWriteNodeBehavior implements NodeBehavior {
      */
     private ExcelWriteExecutionContext resolveExpressions(FlowContext context) {
         Map<String, Object> variable = context.getVariable();
-        RuleProperties ruleProperties = context.getBeanContextManager().getRuleProperties();
+        RuleProperties ruleProperties = context.getEngineServices().getRuleProperties();
         String ruleFlowKey = context.getProcessInstance().getRuleFlowKey();
         String filePath = evaluateString(node.getFilePath(), variable);
         Path path = Paths.get(ruleProperties.getAttachmentPath(), ruleFlowKey, node.getId(), filePath);

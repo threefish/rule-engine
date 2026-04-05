@@ -56,7 +56,7 @@ public class AIImageNodeBehavior implements NodeBehavior {
     @Override
     public void execution(FlowContext context) throws Exception {
 
-        CredentialsManager credentialsManager = context.getBeanContextManager().getCredentialsManager();
+        CredentialsManager credentialsManager = context.getEngineServices().getCredentialsManager();
         ApikeyCredential apikeyCredential = credentialsManager.getApikeyCredential(node.getCredentialId());
 
         AIExcuteStrategy strategy = services.get(apikeyCredential.getType());
@@ -76,7 +76,7 @@ public class AIImageNodeBehavior implements NodeBehavior {
         if (log.isInfoEnabled()) {
             log.info("AIImageNodeBehavior Http Call Result:{}", JsonUtils.obj2Json(httpCallResult));
         }
-        context.put(node.getId(), httpCallResult.toMap());
+        context.setNodeOutput(node.getId(), httpCallResult.toMap());
         httpCallResult.assertSuccess();
     }
 }

@@ -58,7 +58,7 @@ public class AITextNodeBehavior implements NodeBehavior {
 
     @Override
     public void execution(FlowContext context) throws Exception {
-        CredentialsManager credentialsManager = context.getBeanContextManager().getCredentialsManager();
+        CredentialsManager credentialsManager = context.getEngineServices().getCredentialsManager();
         ApikeyCredential apikeyCredential = credentialsManager.getApikeyCredential(node.getCredentialId());
         String type = apikeyCredential.getType();
         AIExcuteStrategy strategy = services.get(type);
@@ -79,7 +79,7 @@ public class AITextNodeBehavior implements NodeBehavior {
         if (log.isInfoEnabled()) {
             log.info("AITextNodeBehavior Http Call Result:{}", JsonUtils.obj2Json(httpCallResult));
         }
-        context.put(node.getId(), httpCallResult.toMap());
+        context.setNodeOutput(node.getId(), httpCallResult.toMap());
         httpCallResult.assertSuccess();
     }
 

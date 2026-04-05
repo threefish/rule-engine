@@ -39,6 +39,7 @@ import java.util.Map;
  * @author 黄川 huchuc@vip.qq.com
  * date: 2022/9/30
  */
+@SuppressWarnings("all")
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = RuleEngineApplication.class)
@@ -57,7 +58,7 @@ public class ProcessRunServiceTest {
 
     @Test
     public void startTestGrsdsjs() {
-        InputStream resourceAsStream = Main.class.getResourceAsStream("/process/个人所得税计算.json");
+        InputStream resourceAsStream = ProcessRunServiceTest.class.getResourceAsStream("/process/个人所得税计算.json");
         String processDefinitionContent = IoUtil.readUtf8(resourceAsStream);
         String requestJson = IoUtil.readUtf8(ProcessRunServiceTest.class.getResourceAsStream("/process/个人所得税计算_request.json"));
         Map map = JsonUtils.json2Obj(requestJson, Map.class);

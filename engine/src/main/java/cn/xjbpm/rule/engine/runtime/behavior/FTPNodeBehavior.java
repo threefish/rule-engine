@@ -54,15 +54,15 @@ public class FTPNodeBehavior implements NodeBehavior {
     @Override
     public void execution(FlowContext context) throws Exception {
 
-        RuleProperties ruleProperties = context.getBeanContextManager().getRuleProperties();
-        FtpCredential ftpCredential = context.getBeanContextManager().getCredentialsManager().getFtpCredential(node.getCredentialId());
+        RuleProperties ruleProperties = context.getEngineServices().getRuleProperties();
+        FtpCredential ftpCredential = context.getEngineServices().getCredentialsManager().getFtpCredential(node.getCredentialId());
 
         log.info("执行FTP节点: {}", node.getName());
 
         FtpExecutionContext execContext = resolveExpressions(context);
 
         Map<String, Object> resultMap = executeFtpOperation(context, ruleProperties, ftpCredential, execContext);
-        context.put(node.getId(), resultMap);
+        context.setNodeOutput(node.getId(), resultMap);
 
         if (context.isDebugModel()) {
             context.addTraceLog(node.getId(), "FTP result: {}", new Object[]{resultMap.get(RESULT)});

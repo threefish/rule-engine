@@ -17,6 +17,7 @@
 package cn.xjbpm.rule.engine.runtime.behavior;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.common.constant.RuleFlowConstant;
 import cn.xjbpm.rule.common.utils.DBUtil;
 import cn.xjbpm.rule.custom.CredentialsManager;
@@ -29,11 +30,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.nutz.dao.Dao;
 import org.nutz.dao.pager.Pager;
 import org.nutz.lang.util.NutMap;
+import org.nutz.trans.Trans;
+import org.springframework.util.Assert;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -52,13 +53,14 @@ public class DBNodeBehavior implements NodeBehavior {
     public void execution(FlowContext context) throws Exception {
         if (RuleFlowConstant.DEMO_MODE) {
             context.addTraceLog(node.getId(), "演示模式不允执行,已跳过");
-            context.put(node.getId(), Collections.singletonMap(RESULT, "演示模式不允执行"));
+            context.setNodeOutput(node.getId(), Collections.singletonMap(RESULT, "演示模式不允执行"));
             return;
         }
-        CredentialsManager credentialsManager = context.getBeanContextManager().getCredentialsManager();
+
+        CredentialsManager credentialsManager = context.getEngineServices().getCredentialsManager();
         DataBaseCredential dataBaseCredential = credentialsManager.getDataBaseCredential(node.getCredentialId());
         Map<String, Object> variable = context.getVariable();
-        String sql = node.getSql();
+        String rawSql = node.getSql();
         Map<String, Object> parameters = new HashMap<>();
         List<DBNode.Param> params = node.getParams();
         if (CollUtil.isNotEmpty(params)) {
@@ -68,21 +70,47 @@ public class DBNodeBehavior implements NodeBehavior {
                         .env(variable)
                         .build();
                 Object value = AviatorExecutor.execute(aviatorContext);
+                if (param.isNullable() == false) {
+                    Assert.notNull(value, String.format("参数[%s]不能为空", param.getField()));
+                    if (value instanceof Collection collection) {
+                        Assert.isTrue(CollUtil.isNotEmpty(collection), String.format("参数[%s]不能为空", param.getField()));
+                    }
+                    if (value instanceof String str) {
+                        Assert.isTrue(StrUtil.isNotBlank(str), String.format("参数[%s]不能为空", param.getField()));
+                    }
+                }
                 parameters.put(param.getField(), value);
+
             }
         }
+        String sql = DBUtil.processDynamicSql(rawSql, parameters);
         Dao dao = dataBaseCredential.getDao();
         if (node.getExecuteType() == DBNode.ExecuteType.UPDATE) {
-            int updateCount = DBUtil.executeSQL(dao, sql, parameters);
-            context.put(node.getId(), new HashMap<>(Map.of(RESULT, updateCount)));
+            // 使用多语句分割（兼容分号）
+            List<String> sqls = StrUtil.split(sql, ";").stream().filter(StrUtil::isNotBlank).toList();
+            int updateCount;
+            if (sqls.size() > 1) {
+                AtomicInteger count = new AtomicInteger();
+                Trans.exec(() -> {
+                    for (String singleSql : sqls) {
+                        count.addAndGet(DBUtil.executeSQL(dao, singleSql.trim(), parameters));
+                    }
+                });
+                updateCount = count.get();
+            } else {
+                updateCount = DBUtil.executeSQL(dao, sql, parameters);
+            }
+            context.setNodeOutput(node.getId(), new HashMap<>(Map.of(RESULT, updateCount)));
         }
         if (node.getExecuteType() == DBNode.ExecuteType.SELECT_ONE) {
             NutMap record = DBUtil.findRecord(dao, sql, parameters);
-            context.put(node.getId(), new HashMap<>(Map.of(RESULT, record)));
+            context.setNodeOutput(node.getId(), new HashMap<>(Map.of(RESULT, record)));
         }
         if (node.getExecuteType() == DBNode.ExecuteType.SELECT_LIST) {
             List<NutMap> nutMaps = DBUtil.queryList(dao, sql, parameters, new Pager(1, node.getMaxResultCount()));
-            context.put(node.getId(), new HashMap<>(Map.of(RESULT, nutMaps)));
+            context.setNodeOutput(node.getId(), new HashMap<>(Map.of(RESULT, nutMaps)));
         }
     }
+
+
 }

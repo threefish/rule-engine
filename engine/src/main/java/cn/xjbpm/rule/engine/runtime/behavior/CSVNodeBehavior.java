@@ -58,7 +58,7 @@ public class CSVNodeBehavior implements NodeBehavior {
             resultMap = writeCsv(context, resolveWriteExpressions(context));
         }
 
-        context.put(node.getId(), resultMap);
+        context.setNodeOutput(node.getId(), resultMap);
 
         if (context.isDebugModel()) {
             context.addTraceLog(node.getId(), "CSV {}完成", new Object[]{node.getOperationType().name()});
@@ -67,7 +67,7 @@ public class CSVNodeBehavior implements NodeBehavior {
 
     private CsvExecutionContext resolveReadExpressions(FlowContext context) {
         Map<String, Object> variable = context.getVariable();
-        RuleProperties ruleProperties = context.getBeanContextManager().getRuleProperties();
+        RuleProperties ruleProperties = context.getEngineServices().getRuleProperties();
         String ruleFlowKey = context.getProcessInstance().getRuleFlowKey();
         String filePath = evaluateString(node.getFilePath(), variable);
         Path path = Paths.get(ruleProperties.getAttachmentPath(), filePath);
@@ -81,7 +81,7 @@ public class CSVNodeBehavior implements NodeBehavior {
      */
     private CsvExecutionContext resolveWriteExpressions(FlowContext context) {
         Map<String, Object> variable = context.getVariable();
-        RuleProperties ruleProperties = context.getBeanContextManager().getRuleProperties();
+        RuleProperties ruleProperties = context.getEngineServices().getRuleProperties();
         String ruleFlowKey = context.getProcessInstance().getRuleFlowKey();
         String filePath = evaluateString(node.getFilePath(), variable);
         Path path = Paths.get(ruleProperties.getAttachmentPath(), ruleFlowKey, node.getId(), filePath);

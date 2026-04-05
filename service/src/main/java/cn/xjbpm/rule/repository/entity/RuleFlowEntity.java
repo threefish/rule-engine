@@ -16,6 +16,7 @@
 
 package cn.xjbpm.rule.repository.entity;
 
+import cn.xjbpm.rule.node.enums.TriggerMode;
 import cn.xjbpm.rule.repository.enums.RuleFlowStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -52,6 +53,10 @@ public class RuleFlowEntity {
      */
     @Column(name = "flow_key", nullable = false, unique = true, length = 20)
     private String key;
+
+    @Column(length = 50)
+    @Enumerated(EnumType.STRING)
+    private TriggerMode triggerMode;
 
     /**
      * 名称

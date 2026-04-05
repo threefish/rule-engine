@@ -39,18 +39,13 @@ public interface ExcuteLogRepository extends JpaRepository<ExcuteLogEntity, Long
      * @param pageable  分页信息
      * @return 分页结果
      */
-    @Query("SELECT " +
-            " new cn.xjbpm.rule.repository.entity.ExcuteLogEntity(l.id, l.ruleFlowKey, l.requestId, l.timeConsuming, l.status, l.createTime, l.updateTime)" +
-            " FROM ExcuteLogEntity l WHERE l.requestId = :requestId")
-    Page<ExcuteLogEntity> findAllByRequestId(@Param("requestId") String requestId, Pageable pageable);
-
-    @Query("SELECT " +
-            " new cn.xjbpm.rule.repository.entity.ExcuteLogEntity(l.id, l.ruleFlowKey, l.requestId, l.timeConsuming, l.status, l.createTime, l.updateTime)" +
-            " FROM ExcuteLogEntity l WHERE l.ruleFlowKey = :key")
-    Page<ExcuteLogEntity> findAllByRuleFlowKey(String key, Pageable pageable);
+    Page<ExcuteLogEntity> findAllByRequestId(String requestId, Pageable pageable);
 
 
-    Optional<ExcuteLogEntity> findByRequestId(@Param("requestId") String requestId);
+    Page<ExcuteLogEntity> findAllByRuleFlowKey(String ruleFlowKey, Pageable pageable);
+
+
+    Optional<ExcuteLogEntity> findByRequestId(String requestId);
 
 
     Integer deleteByRuleFlowKey(String ruleFlowKey);

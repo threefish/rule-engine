@@ -64,9 +64,9 @@ public class AITTSNodeBehavior implements NodeBehavior {
 
     @Override
     public void execution(FlowContext context) throws Exception {
-        RuleProperties ruleProperties = context.getBeanContextManager().getRuleProperties();
+        RuleProperties ruleProperties = context.getEngineServices().getRuleProperties();
 
-        CredentialsManager credentialsManager = context.getBeanContextManager().getCredentialsManager();
+        CredentialsManager credentialsManager = context.getEngineServices().getCredentialsManager();
         ApikeyCredential apikeyCredential = credentialsManager.getApikeyCredential(node.getCredentialId());
 
         AIExcuteStrategy strategy = services.get(apikeyCredential.getType());
@@ -98,7 +98,7 @@ public class AITTSNodeBehavior implements NodeBehavior {
         if (log.isInfoEnabled()) {
             log.info("AITTSNodeBehavior Http Call Result:{}", JsonUtils.obj2Json(httpCallResult));
         }
-        context.put(node.getId(), resultMap);
+        context.setNodeOutput(node.getId(), resultMap);
         httpCallResult.assertSuccess();
     }
 

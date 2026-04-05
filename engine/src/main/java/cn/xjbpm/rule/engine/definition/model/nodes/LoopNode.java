@@ -19,6 +19,7 @@ package cn.xjbpm.rule.engine.definition.model.nodes;
 import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
 import cn.xjbpm.rule.engine.runtime.actor.NodeDependencyBuilder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ import java.util.List;
  * date: 2022/9/28
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class LoopNode extends Node {
 
     /**
@@ -37,7 +39,12 @@ public class LoopNode extends Node {
     /**
      * 遍历时单个元素的变量名 (放入子流程Context中)
      */
-    private String itemVariableName;
+    private String loopRowVariableName;
+    private String loopRowIndex;
+    /**
+     * 循环间隔时间
+     */
+    private Long delayTime;
 
     /**
      * 子流程的依赖关系构建器

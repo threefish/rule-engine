@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -58,17 +59,23 @@ public class RuleProperties {
      * 附件存储路径
      */
     private String attachmentPath = System.getProperty("user.home") + File.separator + akkaSystemName;
+    /**
+     * 执行记录快照数据
+     */
+    private String snapshotStoragePath = System.getProperty("user.home") + File.separator + akkaSystemName + File.separator + "snapshots";
 
     @PostConstruct
     public void init() {
-        try {
-            Path path = Paths.get(attachmentPath);
-            if (Files.notExists(path)) {
-                Files.createDirectories(path);
-                log.info("附件存储目录创建成功: {}", attachmentPath);
+        for (String pathStr : List.of(attachmentPath, snapshotStoragePath)) {
+            try {
+                Path path = Paths.get(pathStr);
+                if (Files.notExists(path)) {
+                    Files.createDirectories(path);
+                    log.info("附件存储目录创建成功: {}", pathStr);
+                }
+            } catch (IOException e) {
+                log.error("初始化存储目录失败: {}", pathStr, e);
             }
-        } catch (IOException e) {
-            log.error("初始化附件存储目录失败,使用IO节点时可能会导致失败: {}", attachmentPath, e);
         }
     }
 }

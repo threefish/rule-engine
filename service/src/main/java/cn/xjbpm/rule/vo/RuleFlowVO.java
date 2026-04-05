@@ -16,6 +16,7 @@
 
 package cn.xjbpm.rule.vo;
 
+import cn.xjbpm.rule.node.enums.TriggerMode;
 import cn.xjbpm.rule.repository.entity.RuleFlowEntity;
 import cn.xjbpm.rule.repository.enums.RuleFlowStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -46,6 +47,8 @@ public class RuleFlowVO {
 
     private String content;
 
+    private TriggerMode triggerMode;
+
     @NotBlank
     private String draftContent;
 
@@ -72,6 +75,7 @@ public class RuleFlowVO {
         vo.setId(entity.getId());
         vo.setKey(entity.getKey());
         vo.setName(entity.getName());
+        vo.setTriggerMode(entity.getTriggerMode());
         vo.setDescription(entity.getDescription());
         vo.setContent(entity.getContent());
         vo.setDraftContent(entity.getDraftContent());
@@ -89,6 +93,7 @@ public class RuleFlowVO {
         RuleFlowVO vo = new RuleFlowVO();
         vo.setId(entity.getId());
         vo.setKey(entity.getKey());
+        vo.setTriggerMode(entity.getTriggerMode());
         vo.setName(entity.getName());
         vo.setDescription(entity.getDescription());
         vo.setStatus(entity.getStatus());

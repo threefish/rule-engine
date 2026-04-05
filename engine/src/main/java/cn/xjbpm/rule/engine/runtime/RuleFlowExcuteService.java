@@ -20,7 +20,7 @@ import akka.actor.ActorSystem;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.common.utils.VariableTranslateUtils;
-import cn.xjbpm.rule.custom.BeanContextManager;
+import cn.xjbpm.rule.custom.EngineServices;
 import cn.xjbpm.rule.custom.RuleFlowModelCacheManager;
 import cn.xjbpm.rule.dto.ExcuteRuleFlow;
 import cn.xjbpm.rule.dto.ExcuteRuleFlowResult;
@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -56,23 +57,30 @@ public class RuleFlowExcuteService implements DisposableBean {
 
     private final RuleFlowModelCacheManager ruleFlowModelCacheManager;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final BeanContextManager beanContextManager;
+    private final EngineServices engineServices;
     private final ActorSystem actorSystem;
 
     private final AkkaRuleFlowScheduler scheduler;
 
     public RuleFlowExcuteService(RuleFlowModelCacheManager ruleFlowModelCacheManager,
                                  ApplicationEventPublisher applicationEventPublisher,
-                                 BeanContextManager beanContextManager,
+                                 EngineServices engineServices,
                                  RuleProperties ruleProperties) {
         this.ruleFlowModelCacheManager = ruleFlowModelCacheManager;
         this.applicationEventPublisher = applicationEventPublisher;
-        this.beanContextManager = beanContextManager;
+        this.engineServices = engineServices;
         this.actorSystem = ActorSystem.create(ruleProperties.getAkkaSystemName());
+        // 调试事件发布回调
+        Consumer<FlowContext> debugPublisher = ctx -> {
+            if (ctx.isDebugModel()) {
+                applicationEventPublisher.publishEvent(RuleFlowDebugEvent.create(ctx));
+            }
+        };
         this.scheduler = new AkkaRuleFlowScheduler(actorSystem,
                 ruleProperties.getAkkaDefaultExecuteTimeoutSeconds(),
                 ruleProperties.getAkkaGlobalWorkerPoolInitSize(),
-                ruleProperties.getAkkaGlobalWorkerPoolMaxSize()
+                ruleProperties.getAkkaGlobalWorkerPoolMaxSize(),
+                debugPublisher
         );
     }
 
@@ -100,7 +108,7 @@ public class RuleFlowExcuteService implements DisposableBean {
         processInstance.setId(IdUtil.getSnowflakeNextId());
         processInstance.setRuleFlowKey(ruleFlowModel.getKey());
         Map<String, Object> runtimeVar = VariableTranslateUtils.translate(ruleFlowModel.getBusinessObjectModels(), false, request.getVariables());
-        FlowContext flowContext = new FlowContext(processInstance, runtimeVar, request.isDebugModel(), this.beanContextManager);
+        FlowContext flowContext = new FlowContext(processInstance, runtimeVar, request.isDebugModel(), this.engineServices);
         long startTime = System.currentTimeMillis();
         if (request.isAsyncExcute()) {
             scheduler.startFlowAsync(ruleFlowModel, flowContext, request.getSkipNodeIds(), failure -> {

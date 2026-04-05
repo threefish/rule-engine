@@ -29,6 +29,7 @@ public class LoopNodeValidator extends BaseNodeValidator<LoopNode> {
     public void check(LoopNode node) {
         super.check(node);
         Assert.isTrue(StringUtils.isNotBlank(node.getCollectionVariableName()), "集合变量名不能为空");
-//        Assert.isTrue(StringUtils.isNotBlank(node.getItemVariableName()), "单个元素的变量名不能为空");
+        Assert.isTrue(StringUtils.isNotBlank(node.getLoopRowVariableName()), "循环变量名不能为空");
+        Assert.isTrue(StringUtils.isNotBlank(node.getLoopRowIndex()), "循环变量索引不能为空");
     }
 }

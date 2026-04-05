@@ -18,6 +18,7 @@ package cn.xjbpm.rule.engine.definition.model.nodes;
 
 import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * MQTT节点（消息发布者）
@@ -25,6 +26,7 @@ import lombok.Data;
  * @author 黄川 huchuc@vip.qq.com
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class MQTTNode extends Node {
 
     private String credentialId;

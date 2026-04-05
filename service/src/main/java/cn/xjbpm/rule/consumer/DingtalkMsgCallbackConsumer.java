@@ -16,34 +16,78 @@
 package cn.xjbpm.rule.consumer;
 
 import cn.xjbpm.rule.common.utils.JsonUtils;
+import cn.xjbpm.rule.dispatcher.MessageDispatcher;
+import cn.xjbpm.rule.dispatcher.SubscriberInfo;
+import cn.xjbpm.rule.dispatcher.TriggerSubscriptionManager;
 import com.dingtalk.open.app.api.callback.OpenDingTalkCallbackListener;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Map;
 
 /**
  * 钉钉消息回调消费者
+ * 支持连接共享机制，将消息分发到所有订阅者
  */
 @Slf4j
 public class DingtalkMsgCallbackConsumer implements OpenDingTalkCallbackListener<Map, Map> {
 
     private final ProcessMessageHelper processMessageService;
-
     private final String ruleFlowKey;
+    private final String connectionKey;
+    private final TriggerSubscriptionManager triggerSubscriptionManager;
+    private final MessageDispatcher messageDispatcher;
+    private final boolean sharedMode;
 
+    /**
+     * 构造函数（兼容旧模式）
+     *
+     * @param processMessageService 消息处理服务
+     * @param ruleFlowKey           规则流标识
+     */
     public DingtalkMsgCallbackConsumer(ProcessMessageHelper processMessageService, String ruleFlowKey) {
         this.processMessageService = processMessageService;
         this.ruleFlowKey = ruleFlowKey;
+        this.connectionKey = null;
+        this.triggerSubscriptionManager = null;
+        this.messageDispatcher = null;
+        this.sharedMode = false;
+    }
+
+    /**
+     * 构造函数（共享连接模式）
+     *
+     * @param processMessageService      消息处理服务
+     * @param connectionKey              连接标识
+     * @param triggerSubscriptionManager 订阅管理器
+     * @param messageDispatcher          消息分发器
+     */
+    public DingtalkMsgCallbackConsumer(ProcessMessageHelper processMessageService,
+                                       String connectionKey,
+                                       TriggerSubscriptionManager triggerSubscriptionManager,
+                                       MessageDispatcher messageDispatcher) {
+        this.processMessageService = processMessageService;
+        this.ruleFlowKey = null;
+        this.connectionKey = connectionKey;
+        this.triggerSubscriptionManager = triggerSubscriptionManager;
+        this.messageDispatcher = messageDispatcher;
+        this.sharedMode = true;
     }
 
     @Override
     public Map execute(Map request) {
         try {
-            log.info("钉钉收到消息: ruleFlowKey={}, message={}", ruleFlowKey, JsonUtils.obj2Json(request));
-            // 处理消息并触发规则流
-            processMessageService.processMessage(ruleFlowKey, JsonUtils.obj2Json(request));
+            String message = JsonUtils.obj2Json(request);
+            if (sharedMode) {
+                log.info("钉钉收到消息: connectionKey={}, message={}", connectionKey, message);
+                List<SubscriberInfo> subscribers = triggerSubscriptionManager.getSubscribers(connectionKey);
+                messageDispatcher.dispatch(connectionKey, message, subscribers);
+            } else {
+                log.info("钉钉收到消息: ruleFlowKey={}, message={}", ruleFlowKey, message);
+                processMessageService.processMessage(ruleFlowKey, message);
+            }
         } catch (Exception e) {
-            log.error("处理钉钉消息失败: ruleFlowKey={}, error={}", ruleFlowKey, e.getMessage(), e);
+            log.error("处理钉钉消息失败: {}, error={}", sharedMode ? "connectionKey=" + connectionKey : "ruleFlowKey=" + ruleFlowKey, e.getMessage(), e);
         }
         return request;
     }

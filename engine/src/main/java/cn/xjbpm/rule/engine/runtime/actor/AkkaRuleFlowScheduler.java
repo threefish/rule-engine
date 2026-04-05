@@ -34,6 +34,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 /**
  * 调度器
@@ -49,19 +50,28 @@ public class AkkaRuleFlowScheduler {
     private final long defaultExecuteTimeoutSeconds;
 
     private final ActorSystem actorSystem;
+
     /**
      * 全局共享路由
      */
     private final ActorRef globalWorkerRouter;
 
-    public AkkaRuleFlowScheduler(ActorSystem actorSystem, long akkaDefaultExecuteTimeoutSeconds, int akkaGlobalWorkerPoolInitSize, int akkaGlobalWorkerPoolMaxSize) {
+    /**
+     * 调试事件发布回调，由 service 层注入，引擎本身不感知 Spring。
+     */
+    private final Consumer<FlowContext> debugPublisher;
+
+    public AkkaRuleFlowScheduler(ActorSystem actorSystem, long akkaDefaultExecuteTimeoutSeconds,
+                                 int akkaGlobalWorkerPoolInitSize, int akkaGlobalWorkerPoolMaxSize,
+                                 Consumer<FlowContext> debugPublisher) {
         this.actorSystem = actorSystem;
         this.defaultExecuteTimeoutSeconds = akkaDefaultExecuteTimeoutSeconds;
-        // 初始化全局路由池
+        this.debugPublisher = debugPublisher;
+        // 初始化全局路由池，将 debugPublisher 注入每个 Worker
         this.globalWorkerRouter = actorSystem.actorOf(
                 new RoundRobinPool(0)
                         .withResizer(new DefaultResizer(akkaGlobalWorkerPoolInitSize, akkaGlobalWorkerPoolMaxSize))
-                        .props(NodeWorkerActor.props()), "akka-global-worker-router");
+                        .props(NodeWorkerActor.props(debugPublisher)), "akka-global-worker-router");
         log.info("AkkaRuleFlowScheduler 初始化完成，全局路由池大小: init:{} max:{}", akkaGlobalWorkerPoolInitSize, akkaGlobalWorkerPoolMaxSize);
     }
 
@@ -74,7 +84,7 @@ public class AkkaRuleFlowScheduler {
 
     public void startFlow(RuleFlowModel ruleModel, FlowContext flowContext, Set<String> skipNodeIds) throws Exception {
         ActorRef masterActor = actorSystem.actorOf(
-                WorkflowInstanceActor.props(new NodeDependencyBuilder(ruleModel.getChildNodes()), globalWorkerRouter)
+                WorkflowInstanceActor.props(new NodeDependencyBuilder(ruleModel.getChildNodes()), globalWorkerRouter, debugPublisher)
         );
         Timeout timeout = calculateTimeout(ruleModel);
         Future<Object> future = Patterns.ask(masterActor, new WorkflowProtocol.StartProcess(ruleModel, flowContext, skipNodeIds), timeout);
@@ -105,11 +115,11 @@ public class AkkaRuleFlowScheduler {
 
     public void startFlowAsync(RuleFlowModel ruleModel, FlowContext flowContext, Set<String> skipNodeIds, FlowOnComplete onCompletion) {
         ActorRef masterActor = actorSystem.actorOf(
-                WorkflowInstanceActor.props(new NodeDependencyBuilder(ruleModel.getChildNodes()), globalWorkerRouter)
+                WorkflowInstanceActor.props(new NodeDependencyBuilder(ruleModel.getChildNodes()), globalWorkerRouter, debugPublisher)
         );
         Timeout timeout = calculateTimeout(ruleModel);
         Future<Object> scalaFuture = Patterns.ask(masterActor, new WorkflowProtocol.StartProcess(ruleModel, flowContext, skipNodeIds), timeout);
-        scalaFuture.onComplete(new OnComplete<Object>() {
+        scalaFuture.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(Throwable failure, Object success) {
                 if (failure != null) {

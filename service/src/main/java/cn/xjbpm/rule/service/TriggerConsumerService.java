@@ -18,12 +18,9 @@ package cn.xjbpm.rule.service;
 
 import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.consumer.MQMessageConsumer;
-import cn.xjbpm.rule.custom.BeanContextManager;
 import cn.xjbpm.rule.custom.CredentialsManager;
-import cn.xjbpm.rule.engine.runtime.model.credentials.DingtalkCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.KafkaCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.MQTTCredential;
-import cn.xjbpm.rule.engine.runtime.model.credentials.RabbitMQCredential;
+import cn.xjbpm.rule.custom.EngineServices;
+import cn.xjbpm.rule.engine.runtime.model.credentials.*;
 import cn.xjbpm.rule.manager.ResourceCacheManager;
 import cn.xjbpm.rule.node.enums.TriggerMode;
 import cn.xjbpm.rule.repository.entity.StartTriggerEntity;
@@ -43,13 +40,13 @@ import java.util.Map;
 @AllArgsConstructor
 public class TriggerConsumerService implements DisposableBean {
 
-    private final BeanContextManager beanContextManager;
+    private final EngineServices engineServices;
     private final ResourceCacheManager resourceCacheManager;
     private final MQMessageConsumer mqMessageConsumer;
 
 
     public void addTriggerConsumers(List<StartTriggerEntity> all) {
-        CredentialsManager credentialsManager = beanContextManager.getCredentialsManager();
+        CredentialsManager credentialsManager = engineServices.getCredentialsManager();
 
         for (StartTriggerEntity ruleFlowMQEntity : all) {
             String ruleFlowKey = ruleFlowMQEntity.getRuleFlowKey();
@@ -82,6 +79,12 @@ public class TriggerConsumerService implements DisposableBean {
                 break;
             case DINGTALK:
                 startDingtalkConsumer(ruleFlowKey, credentialId, credentialsManager, entity);
+                break;
+            case FEISHU:
+                startFeishuConsumer(ruleFlowKey, credentialId, credentialsManager, entity);
+                break;
+            case ROCKETMQ:
+                startRocketMQConsumer(ruleFlowKey, credentialId, credentialsManager, entity);
                 break;
             default:
                 log.warn("未知的类型: ruleFlowKey={}, type={}", ruleFlowKey, type);
@@ -142,6 +145,34 @@ public class TriggerConsumerService implements DisposableBean {
         }
         log.info("启动钉钉消费者: ruleFlowKey={}, clientId={}", ruleFlowKey, credential.getClientId());
         mqMessageConsumer.startDingtalkConsumer(ruleFlowKey, entity, credential);
+    }
+
+    /**
+     * 启动飞书消费者
+     */
+    private void startFeishuConsumer(String ruleFlowKey, String credentialId,
+                                     CredentialsManager credentialsManager, StartTriggerEntity entity) {
+        FeishuCredential credential = credentialsManager.getFeishuCredential(credentialId);
+        if (credential == null) {
+            log.error("飞书凭据不存在: ruleFlowKey={}, credentialId={}", ruleFlowKey, credentialId);
+            return;
+        }
+        log.info("飞书钉钉消费者: ruleFlowKey={}, appId={}", ruleFlowKey, credential.getAppId());
+        mqMessageConsumer.startFishuConsumer(ruleFlowKey, entity, credential);
+    }
+
+    /**
+     * 启动RocketMQ消费者
+     */
+    private void startRocketMQConsumer(String ruleFlowKey, String credentialId,
+                                       CredentialsManager credentialsManager, StartTriggerEntity entity) {
+        RocketMQCredential credential = credentialsManager.getRocketMQCredential(credentialId);
+        if (credential == null) {
+            log.error("RocketMQ凭据不存在: ruleFlowKey={}, credentialId={}", ruleFlowKey, credentialId);
+            return;
+        }
+        log.info("启动RocketMQ消费者: ruleFlowKey={}, nameServer={}", ruleFlowKey, credential.getNameServer());
+        mqMessageConsumer.startRocketMQConsumer(ruleFlowKey, entity, credential);
     }
 
     /**

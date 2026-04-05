@@ -98,7 +98,7 @@ public final class HttpCallUtil {
 
     private static HttpCallResult toResult(ResponseEntity<String> response) {
         return new HttpCallResult(
-                response.getStatusCodeValue(),
+                response.getStatusCode().value(),
                 response.getBody(),
                 Objects.nonNull(response.getHeaders()) ? HttpHeaderUtils.toCamelCaseMap(response.getHeaders()) : Collections.emptyMap()
         );

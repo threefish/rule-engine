@@ -16,6 +16,7 @@
 
 package cn.xjbpm.rule.repository.entity;
 
+import cn.xjbpm.rule.node.enums.FilterType;
 import cn.xjbpm.rule.node.enums.TriggerMode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -82,5 +83,18 @@ public class StartTriggerEntity {
     @LastModifiedDate
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime updateTime;
+
+    /**
+     * 消息过滤规则（可选）
+     */
+    @Column(name = "filter_rule", length = 500)
+    private String filterRule;
+
+    /**
+     * 过滤类型
+     */
+    @Column(name = "filter_type", length = 20)
+    @Enumerated(EnumType.STRING)
+    private FilterType filterType = FilterType.NONE;
 
 }

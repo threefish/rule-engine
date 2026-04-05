@@ -59,6 +59,21 @@ public final class HttpHeaderUtils {
         return result;
     }
 
+
+    public static Map<String, Object> toCamelCaseMap(Map<String,Object> headers) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        if (headers == null || headers.isEmpty()) {
+            return result;
+        }
+
+        headers.forEach((key, values) -> {
+            String camelKey = toCamelCaseHeaderKey(key);
+            result.put(camelKey, values);
+        });
+
+        return result;
+    }
+
     /**
      * Header Key 转 CamelCase
      * Content-Type -> ContentType

@@ -16,6 +16,7 @@
 
 package cn.xjbpm.rule.node;
 
+import cn.xjbpm.rule.node.enums.FilterType;
 import cn.xjbpm.rule.node.enums.TriggerMode;
 import cn.xjbpm.rule.node.model.TriggerRule;
 import lombok.Data;
@@ -131,5 +132,50 @@ public class StartNodeProperties {
      * 链接凭据--TriggerMode.DINGTALK
      */
     private String dingtalkCredentialId;
+
+    /**
+     * 链接凭据--TriggerMode.FEISHU
+     */
+    private String feishuCredentialId;
+
+    /**
+     * 链接凭据--TriggerMode.ROCKETMQ
+     */
+    private String rocketMQCredentialId;
+    /**
+     * Topic--TriggerMode.ROCKETMQ
+     */
+    private String rocketMQTopic;
+    /**
+     * 消费者组--TriggerMode.ROCKETMQ
+     */
+    private String rocketMQGroupId;
+    /**
+     * 消费模式--TriggerMode.ROCKETMQ
+     * {label: '集群消费', value: 'CLUSTERING'}, {label: '广播消费', value: 'BROADCASTING'}
+     */
+    private String rocketMQConsumeMode;
+    /**
+     * 消费线程数--TriggerMode.ROCKETMQ
+     */
+    private int rocketMQConsumeThread;
+    /**
+     * 消费等待超时时间(秒)--TriggerMode.ROCKETMQ
+     */
+    private int rocketMQTimeout;
+    /**
+     * 单次接收的最大消息数--TriggerMode.ROCKETMQ
+     */
+    private int rocketMQMaxMessages;
+
+    /**
+     * 消息过滤规则
+     */
+    private String filterRule;
+
+    /**
+     * 过滤类型
+     */
+    private FilterType filterType = FilterType.NONE;
 
 }

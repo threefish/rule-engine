@@ -18,6 +18,7 @@ package cn.xjbpm.rule.engine.definition.model.nodes.gateway;
 
 import cn.xjbpm.rule.engine.definition.model.enums.NodeType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author 黄川 huchuc@vip.qq.com
@@ -25,6 +26,7 @@ import lombok.Data;
  * 排他网关
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ExclusiveGatewayNode extends GatewayNode {
 
     @Override

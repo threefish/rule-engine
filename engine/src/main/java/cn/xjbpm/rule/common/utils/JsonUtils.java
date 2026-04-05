@@ -36,7 +36,6 @@ import java.util.List;
 /**
  * @author 黄川 huchuc@vip.qq.com
  */
-@UtilityClass
 public class JsonUtils {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new Jdk8Module())

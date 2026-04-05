@@ -27,4 +27,7 @@ public enum TriggerMode {
     RABBIT_MQ,
     MQTT,
     DINGTALK,
+    FEISHU,
+    ROCKETMQ,
+    ;
 }

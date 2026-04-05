@@ -58,7 +58,7 @@ public class DingTalkNodeBehavior implements NodeBehavior {
         DingTalkExecutionContext execContext = resolveExpressions(context);
         String result = sendDingTalkMessage(execContext);
         Map<String, Object> resultMap = buildResultMap(result, execContext);
-        context.put(node.getId(), resultMap);
+        context.setNodeOutput(node.getId(), resultMap);
         if (context.isDebugModel()) {
             context.addTraceLog(node.getId(), "DingTalk result: {}", result);
         }

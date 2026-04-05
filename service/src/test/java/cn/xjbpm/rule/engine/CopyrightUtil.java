@@ -64,6 +64,7 @@ public class CopyrightUtil {
         }
 
         processDirectory(projectDir);
+        System.out.println("处理完成！");
     }
 
     public static void processDirectory(Path rootPath) {

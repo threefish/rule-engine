@@ -16,6 +16,7 @@
 
 package cn.xjbpm.rule.engine.aviator;
 
+import cn.hutool.core.util.StrUtil;
 import cn.xjbpm.rule.common.utils.ClassScanner;
 import cn.xjbpm.rule.common.utils.JsonUtils;
 import cn.xjbpm.rule.engine.aviator.annotation.FunctionNamespace;
@@ -40,8 +41,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AviatorExecutor {
 
-    private static final Pattern FUNCTION_PATTERN = Pattern.compile("\\$\\{(.+?)\\}");
-    private static final Pattern DOUBLE_BRACE_PATTERN = Pattern.compile("\\{\\{(.+?)\\}\\}");
+    /**
+     * 使用 DOTALL 模式允许匹配换行符，增加 trim() 容错
+     */
+    private static final Pattern DOUBLE_BRACE_PATTERN = Pattern.compile("\\{\\{(.+?)\\}\\}", Pattern.DOTALL);
 
     static {
         AviatorEvaluator.setOption(Options.ALWAYS_PARSE_FLOATING_POINT_NUMBER_INTO_DECIMAL, true);
@@ -56,7 +59,6 @@ public class AviatorExecutor {
             }
             return null;
         });
-//        AviatorEvaluator.addOpFunction(OperatorType.INDEX, new AviatorFunction());
         ClassScanner classScanner = new ClassScanner(AviatorExecutor.class.getPackage().getName());
         Set<Class<?>> scans = classScanner.scan();
         scans.stream().filter(clazz -> AviatorFunction.class.isAssignableFrom(clazz)).filter(clazz -> !Modifier.isAbstract(clazz.getModifiers())).filter(clazz -> !Modifier.isInterface(clazz.getModifiers())).forEach(clazz -> {
@@ -136,19 +138,35 @@ public class AviatorExecutor {
      * @return
      */
     public static String evaluateString(AviatorContext context) {
-        StringBuffer sb = new StringBuffer();
-        Matcher matcher = DOUBLE_BRACE_PATTERN.matcher(context.getExpression());
+        String expression = context.getExpression();
+        if (StrUtil.isBlank(expression)) {
+            return expression;
+        }
+
+        // 场景 A: 如果不包含 {{ }}，说明可能只是普通字符串 直接返回原值
+        if (!expression.contains("{{")) {
+            return expression;
+        }
+
+        // 场景 B: 包含 {{ }}，走占位符替换逻辑
+        StringBuilder sb = new StringBuilder();
+        Matcher matcher = DOUBLE_BRACE_PATTERN.matcher(expression);
+        int lastEnd = 0;
         while (matcher.find()) {
-            String content = matcher.group(1);
+            // 添加匹配项之前的普通文本
+            sb.append(expression, lastEnd, matcher.start());
+            String content = matcher.group(1).trim();
             try {
                 Object result = AviatorEvaluator.execute(content, context.getEnv(), context.isCached());
-                matcher.appendReplacement(sb, Matcher.quoteReplacement(String.valueOf(result)));
+                sb.append(result == null ? "" : result);
             } catch (Exception e) {
-                log.error("Execution failed for: {}", content, e);
-                throw new RuntimeException("Expression Error: " + content, e);
+                log.error("Execution failed for placeholder: {}", content, e);
+                // 占位符内执行失败，保留原占位符文本或抛出异常
+                sb.append(matcher.group(0));
             }
+            lastEnd = matcher.end();
         }
-        matcher.appendTail(sb);
+        sb.append(expression.substring(lastEnd));
         return sb.toString();
     }
 }

@@ -76,7 +76,7 @@ public class HttpNodeBehavior implements NodeBehavior {
                 }
             }
         }
-        CredentialsManager credentialsManager = context.getBeanContextManager().getCredentialsManager();
+        CredentialsManager credentialsManager = context.getEngineServices().getCredentialsManager();
         HttpCredential httpCredentials = credentialsManager.getHttpCredential(node.getCredentialId());
         if (httpCredentials.getQuerys() != null) {
             queryParams.putAll(httpCredentials.getQuerys());
@@ -100,7 +100,7 @@ public class HttpNodeBehavior implements NodeBehavior {
             log.info("HttpNode Http Call Result:{}", JsonUtils.obj2Json(httpCallResult));
         }
         Map<String, Object> response = httpCallResult.toMap();
-        context.put(node.getId(), response);
+        context.setNodeOutput(node.getId(), response);
         if (httpCallResult.is2xx()) {
             HttpNode.ResponseCondition responseCondition = node.getResponseCondition();
             if (responseCondition != null && responseCondition.getConditions() != null) {
